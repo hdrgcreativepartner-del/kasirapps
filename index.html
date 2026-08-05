@@ -7,10 +7,6 @@
     <!-- Library Eksternal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <!-- Firebase SDK (Compat) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -129,8 +125,8 @@
             <button id="tabRegisterBtn" onclick="switchAuthTab('register')">Daftar Akun</button>
         </div>
 
-        <input type="email" id="authEmail" placeholder="Email aktif">
-        <input type="password" id="authPassword" placeholder="Password (min 6 karakter)">
+        <input type="text" id="authEmail" placeholder="Username / Email">
+        <input type="password" id="authPassword" placeholder="Password (min 4 karakter)">
         
         <button class="btn btn-primary" style="width:100%; padding:14px;" id="authSubmitBtn" onclick="handleAuth()">Masuk</button>
         <div id="authError" style="color:var(--danger); font-size:0.85rem; margin-top:12px; display:none;"></div>
@@ -377,85 +373,93 @@
 </div>
 
 <script>
-    // ==================== KONFIGURASI FIREBASE ====================
-    const firebaseConfig = {
-        apiKey: "AIzaSyCZxglAMi7_3dz8ISfQvJEPqrFWYBy8Ul4",
-        authDomain: "hdrg-kasir.firebaseapp.com",
-        projectId: "hdrg-kasir",
-        storageBucket: "hdrg-kasir.firebasestorage.app",
-        messagingSenderId: "598139220426",
-        appId: "1:598139220426:web:ffc5fe49dcda1921db5f33",
-        measurementId: "G-J6KFKKLSDK"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
+    // ==================== LOCAL AUTH & MULTI-USER SYSTEM ====================
     let currentUser = null;
     let storePrefix = '';
     let isRegisterMode = false;
 
-    // Toggle Tab Login / Register
+    // Cek sesi login saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+        const activeUser = localStorage.getItem('hdrg_active_session');
+        if(activeUser) {
+            currentUser = activeUser;
+            storePrefix = 'hdrg_user_' + currentUser + '_';
+            checkStoreSetup();
+        } else {
+            showAuthScreen();
+        }
+    });
+
     function switchAuthTab(mode) {
         isRegisterMode = (mode === 'register');
         document.getElementById('tabLoginBtn').classList.toggle('active', !isRegisterMode);
         document.getElementById('tabRegisterBtn').classList.toggle('active', isRegisterMode);
-        document.getElementById('authSubtitle').textContent = isRegisterMode ? 'Daftar akun baru kasir' : 'Silakan masuk ke akun Anda';
+        document.getElementById('authSubtitle').textContent = isRegisterMode ? 'Daftar akun kasir baru' : 'Silakan masuk ke akun Anda';
         document.getElementById('authSubmitBtn').textContent = isRegisterMode ? 'Daftar Akun' : 'Masuk';
         document.getElementById('authError').style.display = 'none';
     }
 
-    // Proses Autentikasi Email & Password
     function handleAuth() {
-        const email = document.getElementById('authEmail').value.trim();
+        const email = document.getElementById('authEmail').value.trim().toLowerCase();
         const password = document.getElementById('authPassword').value.trim();
         const errDiv = document.getElementById('authError');
         
         if(!email || !password) {
             errDiv.style.display = 'block';
-            errDiv.textContent = 'Email dan password wajib diisi!';
+            errDiv.textContent = 'Username/Email dan password wajib diisi!';
             return;
         }
 
+        let usersDB = JSON.parse(localStorage.getItem('hdrg_all_users') || '{}');
+
         if(isRegisterMode) {
-            auth.createUserWithEmailAndPassword(email, password)
-                .catch((error) => {
-                    errDiv.style.display = 'block';
-                    errDiv.textContent = 'Gagal Daftar: ' + error.message;
-                });
+            if(usersDB[email]) {
+                errDiv.style.display = 'block';
+                errDiv.textContent = 'Akun dengan email/username tersebut sudah terdaftar!';
+                return;
+            }
+            if(password.length < 4) {
+                errDiv.style.display = 'block';
+                errDiv.textContent = 'Password minimal 4 karakter!';
+                return;
+            }
+            // Simpan user baru
+            usersDB[email] = password;
+            localStorage.setItem('hdrg_all_users', JSON.stringify(usersDB));
+            
+            // Auto login
+            localStorage.setItem('hdrg_active_session', email);
+            currentUser = email;
+            storePrefix = 'hdrg_user_' + currentUser + '_';
+            checkStoreSetup();
         } else {
-            auth.signInWithEmailAndPassword(email, password)
-                .catch((error) => {
-                    errDiv.style.display = 'block';
-                    errDiv.textContent = 'Gagal Masuk: ' + error.message;
-                });
+            if(!usersDB[email] || usersDB[email] !== password) {
+                errDiv.style.display = 'block';
+                errDiv.textContent = 'Email atau password salah!';
+                return;
+            }
+            localStorage.setItem('hdrg_active_session', email);
+            currentUser = email;
+            storePrefix = 'hdrg_user_' + currentUser + '_';
+            checkStoreSetup();
         }
     }
 
-    // Cek Status Auth Firebase
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            currentUser = user;
-            storePrefix = 'hdrg_' + user.uid + '_';
-            
-            const savedStore = localStorage.getItem(storePrefix + 'store');
-            if(!savedStore) {
-                document.getElementById('authPage').style.display = 'none';
-                document.getElementById('setupStorePage').style.display = 'flex';
-                document.getElementById('mainApp').style.display = 'none';
-            } else {
-                document.getElementById('authPage').style.display = 'none';
-                document.getElementById('setupStorePage').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('headerUserBadge').textContent = '👤 ' + user.email;
-                loadUserData();
-                renderAll();
-            }
-        } else {
-            document.getElementById('authPage').style.display = 'flex';
-            document.getElementById('setupStorePage').style.display = 'none';
+    function checkStoreSetup() {
+        const savedStore = localStorage.getItem(storePrefix + 'store');
+        if(!savedStore) {
+            document.getElementById('authPage').style.display = 'none';
+            document.getElementById('setupStorePage').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
+        } else {
+            document.getElementById('authPage').style.display = 'none';
+            document.getElementById('setupStorePage').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('headerUserBadge').textContent = '👤 ' + currentUser;
+            loadUserData();
+            renderAll();
         }
-    });
+    }
 
     function saveNewStore() {
         const storeName = document.getElementById('newStoreNameInput').value.trim();
@@ -466,16 +470,21 @@
         
         document.getElementById('setupStorePage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
-        document.getElementById('headerUserBadge').textContent = '👤 ' + currentUser.email;
+        document.getElementById('headerUserBadge').textContent = '👤 ' + currentUser;
         loadUserData();
         renderAll();
     }
 
+    function showAuthScreen() {
+        document.getElementById('authPage').style.display = 'flex';
+        document.getElementById('setupStorePage').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'none';
+    }
+
     function logout() {
         if(!confirm('Yakin ingin keluar akun?')) return;
-        auth.signOut().then(() => {
-            location.reload();
-        });
+        localStorage.removeItem('hdrg_active_session');
+        location.reload();
     }
 
     // ==================== STORAGE & LOCAL DB PER AKUN ====================
@@ -929,7 +938,7 @@
             items,
             total,
             method,
-            cashier: currentUser.email
+            cashier: currentUser
         });
         
         cart.forEach(c => {
