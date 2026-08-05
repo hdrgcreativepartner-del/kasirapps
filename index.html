@@ -49,12 +49,15 @@
         .auth-card { background: white; border-radius: 28px; padding: 32px 24px; box-shadow: var(--shadow); max-width: 400px; margin: 0 auto; width: 100%; text-align: center; }
         .auth-card h2 { margin-bottom: 8px; font-size: 1.6rem; color: var(--primary); }
         .auth-card p { color: var(--gray); font-size: 0.9rem; margin-bottom: 20px; }
-        .auth-card input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.95rem; margin-bottom: 12px; outline: none; }
-        .auth-card input:focus { border-color: var(--primary); }
-        
-        .tab-auth { display: flex; margin-bottom: 16px; background: #f1f5f9; border-radius: 10px; padding: 4px; }
-        .tab-auth button { flex: 1; padding: 8px; border: none; background: transparent; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 8px; color: var(--gray); }
-        .tab-auth button.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .auth-card input, .auth-card select { width: 100%; padding: 14px 16px; border: 1px solid #ddd; border-radius: 14px; font-size: 1rem; margin-bottom: 16px; outline: none; transition: 0.2s; }
+        .auth-card input:focus, .auth-card select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,0,0,0.1); }
+        .auth-card button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .auth-card button:active { transform: scale(0.97); }
+        .auth-card .error { color: var(--danger); font-size: 0.85rem; text-align: center; margin-top: 8px; display: none; }
+
+        .tab-auth { display: flex; margin-bottom: 20px; background: #f1f5f9; border-radius: 12px; padding: 4px; }
+        .tab-auth button { flex: 1; padding: 10px; border: none; background: transparent; font-weight: 600; font-size: 0.9rem; cursor: pointer; border-radius: 10px; color: var(--gray); }
+        .tab-auth button.active { background: white; color: var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
 
         /* Theme Picker */
         .theme-selector { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; justify-content: flex-end; }
@@ -84,9 +87,11 @@
         .flex { display: flex; gap: 8px; flex-wrap: wrap; }
         .input-group { display: flex; gap: 8px; align-items: center; }
         .input-group input, .input-group select { flex: 1; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 0.9rem; outline: none; }
+        .input-group input:focus { border-color: var(--primary); }
         
         .btn { padding: 10px 16px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
         .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:active { transform: scale(0.95); }
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-accent { background: var(--accent); color: white; }
@@ -103,8 +108,10 @@
         .empty { text-align: center; padding: 20px; color: var(--gray); font-style: italic; font-size: 0.85rem; }
         .stok-low { color: var(--danger); font-weight: 700; }
 
+        /* Modal styling */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: center; z-index: 999; padding: 16px; }
-        .modal { background: white; border-radius: 24px; max-width: 400px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal { background: white; border-radius: 24px; max-width: 400px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn 0.2s ease; }
+        @keyframes modalIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .modal h3 { margin-top: 0; margin-bottom: 16px; font-size: 1.2rem; }
         .modal .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
         .modal .btn-row button { flex: 1; }
@@ -114,32 +121,32 @@
 </head>
 <body>
 
-<!-- ======== LOGIN & REGISTER SCREEN ======== -->
+<!-- ======== SETUP, LOGIN & REGISTER SCREEN ======== -->
 <div id="authPage" class="auth-page">
-    <div class="auth-card">
+    <div class="auth-card" id="authCardContainer">
         <h2>🏪 HDRG Kasir</h2>
-        <p id="authSubtitle">Silakan masuk ke akun Anda</p>
+        <p id="authSubtitle" style="color:var(--gray); margin-bottom:20px; font-size:0.9rem;">Silakan masuk atau daftar akun</p>
         
         <div class="tab-auth">
-            <button id="tabLoginBtn" class="active" type="button" onclick="switchAuthTab('login')">Masuk</button>
+            <button id="tabLoginBtn" type="button" class="active" onclick="switchAuthTab('login')">Masuk</button>
             <button id="tabRegisterBtn" type="button" onclick="switchAuthTab('register')">Daftar Akun</button>
         </div>
 
-        <input type="text" id="authEmail" placeholder="Username / Email">
+        <input type="text" id="authUsername" placeholder="Username / Email">
         <input type="password" id="authPassword" placeholder="Password (min 4 karakter)">
         
-        <button class="btn btn-primary" style="width:100%; padding:14px;" id="authSubmitBtn" type="button" onclick="handleAuth()">Masuk</button>
-        <div id="authError" style="color:var(--danger); font-size:0.85rem; margin-top:12px; display:none;"></div>
+        <button id="authSubmitBtn" type="button" onclick="handleAuth()">Masuk</button>
+        <div id="authError" class="error">Error</div>
     </div>
 </div>
 
-<!-- ======== SETUP TOKO PERTAMA KALI SCREEN ======== -->
+<!-- ======== SETUP TOKO PERTAMA KALI ======== -->
 <div id="setupStorePage" class="auth-page" style="display:none;">
     <div class="auth-card">
         <h2>🛠️ Buat Toko Anda</h2>
-        <p>Masukkan nama toko atau usaha Anda untuk melanjutkan.</p>
+        <p style="color:var(--gray); margin-bottom:20px; font-size:0.9rem;">Masukkan nama toko untuk melanjutkan</p>
         <input type="text" id="newStoreNameInput" placeholder="Contoh: Toko Berkah Jaya">
-        <button class="btn btn-primary" style="width:100%; padding:14px;" type="button" onclick="saveNewStore()">Mulai Kelola Toko</button>
+        <button type="button" onclick="saveNewStore()">Mulai Kelola Toko</button>
     </div>
 </div>
 
@@ -158,7 +165,7 @@
                 <div class="theme-dot" style="background:#b91c1c;" onclick="setTheme('#b91c1c', '#ef4444')" title="Merah Mewah"></div>
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
-                <span class="user-badge" id="headerUserBadge">👤 User</span>
+                <span class="user-badge" id="headerUserBadge">👤 Owner</span>
                 <button type="button" onclick="logout()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:6px 12px; border-radius:20px; font-size:0.75rem; font-weight:600; cursor:pointer;">Keluar</button>
             </div>
         </div>
@@ -373,12 +380,19 @@
 </div>
 
 <script>
-    // ==================== LOCAL AUTH & MULTI-USER SYSTEM ====================
+    // ==================== AUTH & MULTI-USER SYSTEM ====================
     let currentUser = null;
     let storePrefix = '';
     let isRegisterMode = false;
+    let storeData = { name: '' };
+    let products = [];
+    let sales = [];
+    let purchases = [];
+    let currentTheme = { primary: '#1a5c4a', light: '#2e8b6b' };
+    let cart = [];
+    let salesFilter = 'today', purchaseFilter = 'today', bestFilter = 'today';
+    let html5QrCode = null;
 
-    // Cek sesi login saat halaman dimuat
     document.addEventListener('DOMContentLoaded', () => {
         const activeUser = localStorage.getItem('hdrg_active_session');
         if(activeUser) {
@@ -400,14 +414,14 @@
     }
 
     function handleAuth() {
-        const emailField = document.getElementById('authEmail');
-        const passwordField = document.getElementById('authPassword');
+        const userField = document.getElementById('authUsername');
+        const passField = document.getElementById('authPassword');
         const errDiv = document.getElementById('authError');
         
-        if(!emailField || !passwordField || !errDiv) return;
+        if(!userField || !passField || !errDiv) return;
 
-        const email = emailField.value.trim().toLowerCase();
-        const password = passwordField.value.trim();
+        const email = userField.value.trim().toLowerCase();
+        const password = passField.value.trim();
         
         if(!email || !password) {
             errDiv.style.display = 'block';
@@ -428,11 +442,9 @@
                 errDiv.textContent = 'Password minimal 4 karakter!';
                 return;
             }
-            // Simpan user baru
             usersDB[email] = password;
             localStorage.setItem('hdrg_all_users', JSON.stringify(usersDB));
             
-            // Auto login
             localStorage.setItem('hdrg_active_session', email);
             currentUser = email;
             storePrefix = 'hdrg_user_' + currentUser + '_';
@@ -495,12 +507,10 @@
     }
 
     // ==================== STORAGE & LOCAL DB PER AKUN ====================
-    let storeData = { name: 'Toko Saya' };
-    let products = [];
-    let sales = [];
-    let purchases = [];
-    let currentTheme = { primary: '#1a5c4a', light: '#2e8b6b' };
-    let cart = [];
+    const DB = {
+        get(key, def=null) { try { const v = localStorage.getItem(storePrefix + key); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
+        set(key, val) { localStorage.setItem(storePrefix + key, JSON.stringify(val)); }
+    };
 
     function loadUserData() {
         storeData = DB.get('store', { name: 'Toko Saya' });
@@ -512,11 +522,6 @@
         if(storeNameEl) storeNameEl.textContent = storeData.name;
         applyTheme();
     }
-
-    const DB = {
-        get(key, def=null) { try { const v = localStorage.getItem(storePrefix + key); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
-        set(key, val) { localStorage.setItem(storePrefix + key, JSON.stringify(val)); }
-    };
 
     // ==================== TEMA WARNA ====================
     function setTheme(primary, light) {
@@ -816,7 +821,6 @@
     }
 
     // ==================== TRANSAKSI PENJUALAN (POS) ====================
-    let cart = [];
     function renderPenjualan() { 
         renderCart(); 
         renderRecentSales();
@@ -1041,7 +1045,6 @@
         totalSpan.textContent = `Total: Rp ${formatNumber(total)}`;
     }
 
-    let salesFilter = 'today', purchaseFilter = 'today', bestFilter = 'today';
     function setSalesFilter(f) { salesFilter = f; renderSalesReport(); }
 
     function renderPurchaseReport() {
@@ -1164,7 +1167,6 @@
     }
 
     // ==================== BARCODE SCANNER ====================
-    let html5QrCode = null;
     function startScanner() {
         const scannerModal = document.getElementById('scannerModal');
         if(scannerModal) scannerModal.style.display = 'flex';
