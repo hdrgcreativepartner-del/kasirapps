@@ -51,14 +51,14 @@
         /* Auth Styles */
         .auth-page { display: flex; flex-direction: column; justify-content: center; min-height: 90vh; padding: 20px; }
         .auth-card { background: white; border-radius: 28px; padding: 32px 24px; box-shadow: var(--shadow); max-width: 400px; margin: 0 auto; width: 100%; text-align: center; }
-        .auth-card h2 { margin-bottom: 10px; font-size: 1.6rem; color: var(--primary); }
-        .auth-card p { color: var(--gray); font-size: 0.9rem; margin-bottom: 24px; }
-        .auth-card input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; margin-bottom: 16px; outline: none; }
+        .auth-card h2 { margin-bottom: 8px; font-size: 1.6rem; color: var(--primary); }
+        .auth-card p { color: var(--gray); font-size: 0.9rem; margin-bottom: 20px; }
+        .auth-card input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.95rem; margin-bottom: 12px; outline: none; }
+        .auth-card input:focus { border-color: var(--primary); }
         
-        .btn-google {
-            width: 100%; padding: 14px; background: white; color: #333; border: 1px solid #ddd; border-radius: 14px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .btn-google:hover { background: #f8f9fa; }
+        .tab-auth { display: flex; margin-bottom: 16px; background: #f1f5f9; border-radius: 10px; padding: 4px; }
+        .tab-auth button { flex: 1; padding: 8px; border: none; background: transparent; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 8px; color: var(--gray); }
+        .tab-auth button.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         /* Theme Picker */
         .theme-selector { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; justify-content: flex-end; }
@@ -118,15 +118,21 @@
 </head>
 <body>
 
-<!-- ======== LOGIN GOOGLE SCREEN ======== -->
+<!-- ======== LOGIN & REGISTER SCREEN ======== -->
 <div id="authPage" class="auth-page">
     <div class="auth-card">
         <h2>🏪 HDRG Kasir</h2>
-        <p>Silakan masuk menggunakan akun Google Anda.</p>
-        <button class="btn-google" onclick="loginWithGoogle()">
-            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.63-.05-1.25-.15-1.84H9v3.49h4.84c-.21 1.12-.86 2.07-1.83 2.71v2.25h2.96c1.73-1.59 2.73-3.93 2.73-6.91z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.96-2.25c-.81.54-1.85.86-3 .86-2.31 0-4.27-1.56-4.97-3.65H1.01v2.32C2.55 15.93 5.51 18 9 18z"/><path fill="#FBBC05" d="M4.03 10.78c-.18-.54-.28-1.12-.28-1.78s.1-1.24.28-1.78V4.9H1.01C.37 6.18 0 7.62 0 9.14s.37 2.96 1.01 4.24l3.02-2.32z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59C13.47.89 11.43 0 9 0 5.51 0 2.55 2.07 1.01 4.9l3.02 2.32c.7-2.09 2.66-3.64 4.97-3.64z"/></svg>
-            Masuk / Daftar dengan Google
-        </button>
+        <p id="authSubtitle">Silakan masuk ke akun Anda</p>
+        
+        <div class="tab-auth">
+            <button id="tabLoginBtn" class="active" onclick="switchAuthTab('login')">Masuk</button>
+            <button id="tabRegisterBtn" onclick="switchAuthTab('register')">Daftar Akun</button>
+        </div>
+
+        <input type="email" id="authEmail" placeholder="Email aktif">
+        <input type="password" id="authPassword" placeholder="Password (min 6 karakter)">
+        
+        <button class="btn btn-primary" style="width:100%; padding:14px;" id="authSubmitBtn" onclick="handleAuth()">Masuk</button>
         <div id="authError" style="color:var(--danger); font-size:0.85rem; margin-top:12px; display:none;"></div>
     </div>
 </div>
@@ -386,17 +392,53 @@
 
     let currentUser = null;
     let storePrefix = '';
+    let isRegisterMode = false;
 
-    // Cek Status Login Google
+    // Toggle Tab Login / Register
+    function switchAuthTab(mode) {
+        isRegisterMode = (mode === 'register');
+        document.getElementById('tabLoginBtn').classList.toggle('active', !isRegisterMode);
+        document.getElementById('tabRegisterBtn').classList.toggle('active', isRegisterMode);
+        document.getElementById('authSubtitle').textContent = isRegisterMode ? 'Daftar akun baru kasir' : 'Silakan masuk ke akun Anda';
+        document.getElementById('authSubmitBtn').textContent = isRegisterMode ? 'Daftar Akun' : 'Masuk';
+        document.getElementById('authError').style.display = 'none';
+    }
+
+    // Proses Autentikasi Email & Password
+    function handleAuth() {
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value.trim();
+        const errDiv = document.getElementById('authError');
+        
+        if(!email || !password) {
+            errDiv.style.display = 'block';
+            errDiv.textContent = 'Email dan password wajib diisi!';
+            return;
+        }
+
+        if(isRegisterMode) {
+            auth.createUserWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    errDiv.style.display = 'block';
+                    errDiv.textContent = 'Gagal Daftar: ' + error.message;
+                });
+        } else {
+            auth.signInWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    errDiv.style.display = 'block';
+                    errDiv.textContent = 'Gagal Masuk: ' + error.message;
+                });
+        }
+    }
+
+    // Cek Status Auth Firebase
     auth.onAuthStateChanged((user) => {
         if (user) {
             currentUser = user;
             storePrefix = 'hdrg_' + user.uid + '_';
             
-            // Cek apakah user sudah pernah membuat nama toko
             const savedStore = localStorage.getItem(storePrefix + 'store');
             if(!savedStore) {
-                // Jika belum punya toko, arahkan ke halaman input nama toko
                 document.getElementById('authPage').style.display = 'none';
                 document.getElementById('setupStorePage').style.display = 'flex';
                 document.getElementById('mainApp').style.display = 'none';
@@ -404,7 +446,7 @@
                 document.getElementById('authPage').style.display = 'none';
                 document.getElementById('setupStorePage').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('headerUserBadge').textContent = '👤 ' + (user.displayName || user.email);
+                document.getElementById('headerUserBadge').textContent = '👤 ' + user.email;
                 loadUserData();
                 renderAll();
             }
@@ -415,15 +457,6 @@
         }
     });
 
-    function loginWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch((error) => {
-            const errDiv = document.getElementById('authError');
-            errDiv.style.display = 'block';
-            errDiv.textContent = 'Gagal Login: ' + error.message;
-        });
-    }
-
     function saveNewStore() {
         const storeName = document.getElementById('newStoreNameInput').value.trim();
         if(!storeName) { alert('Nama toko wajib diisi!'); return; }
@@ -433,7 +466,7 @@
         
         document.getElementById('setupStorePage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
-        document.getElementById('headerUserBadge').textContent = '👤 ' + (currentUser.displayName || currentUser.email);
+        document.getElementById('headerUserBadge').textContent = '👤 ' + currentUser.email;
         loadUserData();
         renderAll();
     }
@@ -896,7 +929,7 @@
             items,
             total,
             method,
-            cashier: currentUser.displayName || currentUser.email
+            cashier: currentUser.email
         });
         
         cart.forEach(c => {
