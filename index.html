@@ -121,14 +121,14 @@
         <p id="authSubtitle">Silakan masuk ke akun Anda</p>
         
         <div class="tab-auth">
-            <button id="tabLoginBtn" class="active" onclick="switchAuthTab('login')">Masuk</button>
-            <button id="tabRegisterBtn" onclick="switchAuthTab('register')">Daftar Akun</button>
+            <button id="tabLoginBtn" class="active" type="button" onclick="switchAuthTab('login')">Masuk</button>
+            <button id="tabRegisterBtn" type="button" onclick="switchAuthTab('register')">Daftar Akun</button>
         </div>
 
         <input type="text" id="authEmail" placeholder="Username / Email">
         <input type="password" id="authPassword" placeholder="Password (min 4 karakter)">
         
-        <button class="btn btn-primary" style="width:100%; padding:14px;" id="authSubmitBtn" onclick="handleAuth()">Masuk</button>
+        <button class="btn btn-primary" style="width:100%; padding:14px;" id="authSubmitBtn" type="button" onclick="handleAuth()">Masuk</button>
         <div id="authError" style="color:var(--danger); font-size:0.85rem; margin-top:12px; display:none;"></div>
     </div>
 </div>
@@ -139,7 +139,7 @@
         <h2>🛠️ Buat Toko Anda</h2>
         <p>Masukkan nama toko atau usaha Anda untuk melanjutkan.</p>
         <input type="text" id="newStoreNameInput" placeholder="Contoh: Toko Berkah Jaya">
-        <button class="btn btn-primary" style="width:100%; padding:14px;" onclick="saveNewStore()">Mulai Kelola Toko</button>
+        <button class="btn btn-primary" style="width:100%; padding:14px;" type="button" onclick="saveNewStore()">Mulai Kelola Toko</button>
     </div>
 </div>
 
@@ -159,7 +159,7 @@
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
                 <span class="user-badge" id="headerUserBadge">👤 User</span>
-                <button onclick="logout()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:6px 12px; border-radius:20px; font-size:0.75rem; font-weight:600; cursor:pointer;">Keluar</button>
+                <button type="button" onclick="logout()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:6px 12px; border-radius:20px; font-size:0.75rem; font-weight:600; cursor:pointer;">Keluar</button>
             </div>
         </div>
     </header>
@@ -171,7 +171,7 @@
                 <div class="card-title">🛒 Transaksi Kasir</div>
                 <div class="input-group" style="margin-bottom: 8px;">
                     <input type="text" id="searchProduct" placeholder="Cari nama barang / barcode..." oninput="searchProduct()">
-                    <button class="btn btn-outline btn-sm" onclick="startScanner()">📷 Scan</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="startScanner()">📷 Scan</button>
                 </div>
                 <div style="margin-bottom: 8px;">
                     <select id="productSelect" style="width:100%; padding:10px; border-radius:12px; border:1px solid #ddd; font-size:0.9rem;" onchange="selectProductDropdown()">
@@ -180,15 +180,15 @@
                 </div>
                 <div class="flex">
                     <input type="text" id="qtyInput" value="1" inputmode="numeric" oninput="formatRupiahInput(this)" style="flex:1; padding:10px; border-radius:12px; border:1px solid #ddd;">
-                    <button class="btn btn-primary" onclick="addToCart()">+ Tambah</button>
+                    <button class="btn btn-primary" type="button" onclick="addToCart()">+ Tambah</button>
                 </div>
                 <div style="margin-top:12px; max-height:180px; overflow-y:auto; border:1px solid #eee; border-radius:12px; padding:8px;">
                     <div id="cartItems"><div class="empty">Keranjang masih kosong</div></div>
                 </div>
                 <div style="margin-top:12px; font-weight:700; font-size:1.15rem; text-align:right;" id="cartTotal">Total: Rp 0</div>
                 <div class="flex" style="margin-top:12px;">
-                    <button class="btn btn-accent" style="flex:1;" onclick="pay('cash')">💵 Cash</button>
-                    <button class="btn btn-primary" style="flex:1;" onclick="pay('qris')">📱 QRIS</button>
+                    <button class="btn btn-accent" style="flex:1;" type="button" onclick="pay('cash')">💵 Cash</button>
+                    <button class="btn btn-primary" style="flex:1;" type="button" onclick="pay('qris')">📱 QRIS</button>
                 </div>
             </div>
 
@@ -196,7 +196,7 @@
             <div class="card">
                 <div class="card-title">
                     <span>📋 Riwayat Transaksi Terbaru</span>
-                    <button class="btn btn-outline btn-sm" onclick="toggleRecentSales()" id="toggleSalesBtn">Minimalkan ▲</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="toggleRecentSales()" id="toggleSalesBtn">Minimalkan ▲</button>
                 </div>
                 <div id="recentSalesContainer">
                     <div class="table-wrap">
@@ -222,7 +222,7 @@
         <div id="pageStok" class="page">
             <div class="card">
                 <div class="card-title">📦 Manajemen Produk 
-                    <button class="btn btn-primary btn-sm" onclick="openProductModal()">+ Tambah Produk</button>
+                    <button class="btn btn-primary btn-sm" type="button" onclick="openProductModal()">+ Tambah Produk</button>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -241,8 +241,8 @@
                     <input type="text" id="purchasePrice" placeholder="Harga Beli" inputmode="numeric" oninput="formatRupiahInput(this)" style="flex:1; padding:10px; border-radius:12px; border:1px solid #ddd; font-size:0.85rem;">
                 </div>
                 <div class="flex">
-                    <button class="btn btn-primary" style="flex:1;" id="purchaseSubmitBtn" onclick="addPurchase()">Catat Pembelian Stok</button>
-                    <button class="btn btn-outline" id="purchaseCancelBtn" style="display:none; flex:0.4;" onclick="cancelEditPurchase()">Batal</button>
+                    <button class="btn btn-primary" style="flex:1;" id="purchaseSubmitBtn" type="button" onclick="addPurchase()">Catat Pembelian Stok</button>
+                    <button class="btn btn-outline" id="purchaseCancelBtn" style="display:none; flex:0.4;" type="button" onclick="cancelEditPurchase()">Batal</button>
                 </div>
             </div>
 
@@ -250,7 +250,7 @@
             <div class="card">
                 <div class="card-title">
                     <span>📋 Riwayat Pembelian Terbaru</span>
-                    <button class="btn btn-outline btn-sm" onclick="toggleRecentPurchases()" id="togglePurchasesBtn">Minimalkan ▲</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="toggleRecentPurchases()" id="togglePurchasesBtn">Minimalkan ▲</button>
                 </div>
                 <div id="recentPurchasesContainer">
                     <div class="table-wrap">
@@ -276,11 +276,11 @@
         <!-- 3. HALAMAN LAPORAN -->
         <div id="pageLaporan" class="page">
             <div class="card">
-                <div class="card-title">📊 Laporan Penjualan <button class="btn btn-primary btn-sm" onclick="exportSales()">⬇️ Export Excel</button></div>
+                <div class="card-title">📊 Laporan Penjualan <button class="btn btn-primary btn-sm" type="button" onclick="exportSales()">⬇️ Export Excel</button></div>
                 <div class="flex" style="margin-bottom:10px;">
-                    <button class="btn btn-outline btn-sm" onclick="setSalesFilter('today')">Hari Ini</button>
-                    <button class="btn btn-outline btn-sm" onclick="setSalesFilter('week')">Minggu</button>
-                    <button class="btn btn-outline btn-sm" onclick="setSalesFilter('month')">Bulan</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="setSalesFilter('today')">Hari Ini</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="setSalesFilter('week')">Minggu</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="setSalesFilter('month')">Bulan</button>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -292,11 +292,11 @@
             </div>
 
             <div class="card">
-                <div class="card-title">📦 Laporan Pembelian <button class="btn btn-primary btn-sm" onclick="exportPurchases()">⬇️ Export Excel</button></div>
+                <div class="card-title">📦 Laporan Pembelian <button class="btn btn-primary btn-sm" type="button" onclick="exportPurchases()">⬇️ Export Excel</button></div>
                 <div class="flex" style="margin-bottom:10px;">
-                    <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('today')">Hari Ini</button>
-                    <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('week')">Minggu</button>
-                    <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('month')">Bulan</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="setPurchaseFilter('today')">Hari Ini</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="setPurchaseFilter('week')">Minggu</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="setPurchaseFilter('month')">Bulan</button>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -310,9 +310,9 @@
             <div class="card">
                 <div class="card-title">🏆 Produk Terlaris (Best Seller)</div>
                 <div class="flex" style="margin-bottom:10px;">
-                    <button class="btn btn-outline btn-sm" onclick="setBestFilter('today')">Hari Ini</button>
-                    <button class="btn btn-outline btn-sm" onclick="setBestFilter('week')">Minggu</button>
-                    <button class="btn btn-outline btn-sm" onclick="setBestFilter('month')">Bulan</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="setBestFilter('today')">Hari Ini</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="setBestFilter('week')">Minggu</button>
+                    <button class="btn btn-outline btn-sm" type="button" onclick="setBestFilter('month')">Bulan</button>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -326,9 +326,9 @@
 
     <!-- BOTTOM NAVIGATION -->
     <nav class="bottom-nav">
-        <button class="active" onclick="switchPage('pagePenjualan')"><span class="nav-icon">💰</span>Penjualan</button>
-        <button onclick="switchPage('pageStok')"><span class="nav-icon">📦</span>Stok & Beli</button>
-        <button onclick="switchPage('pageLaporan')"><span class="nav-icon">📊</span>Laporan</button>
+        <button type="button" class="active" onclick="switchPage('pagePenjualan')"><span class="nav-icon">💰</span>Penjualan</button>
+        <button type="button" onclick="switchPage('pageStok')"><span class="nav-icon">📦</span>Stok & Beli</button>
+        <button type="button" onclick="switchPage('pageLaporan')"><span class="nav-icon">📊</span>Laporan</button>
     </nav>
 </div>
 
@@ -342,8 +342,8 @@
         <input type="text" id="modalProductPrice" placeholder="Harga Jual" inputmode="numeric" oninput="formatRupiahInput(this)" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:12px; margin-bottom:8px;">
         <input type="text" id="modalProductStock" placeholder="Stok Awal" inputmode="numeric" oninput="formatRupiahInput(this)" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:12px; margin-bottom:8px;">
         <div class="btn-row">
-            <button class="btn btn-outline" onclick="closeProductModal()">Batal</button>
-            <button class="btn btn-primary" onclick="saveProduct()">Simpan</button>
+            <button class="btn btn-outline" type="button" onclick="closeProductModal()">Batal</button>
+            <button class="btn btn-primary" type="button" onclick="saveProduct()">Simpan</button>
         </div>
     </div>
 </div>
@@ -354,7 +354,7 @@
         <div id="scanner-container"></div>
         <p style="font-size:0.75rem; color:var(--gray); margin-top:8px;">Arahkan kamera ke barcode produk</p>
         <div class="btn-row" style="margin-top:12px;">
-            <button class="btn btn-outline" style="width:100%;" onclick="closeScanner()">Tutup Scanner</button>
+            <button class="btn btn-outline" style="width:100%;" type="button" onclick="closeScanner()">Tutup Scanner</button>
         </div>
     </div>
 </div>
@@ -366,8 +366,8 @@
         <p style="margin:0 0 8px 0; font-weight:600;" id="restockProductName"></p>
         <input type="text" id="restockQty" placeholder="Jumlah tambahan stok" inputmode="numeric" oninput="formatRupiahInput(this)" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:12px; margin-bottom:8px;">
         <div class="btn-row">
-            <button class="btn btn-outline" onclick="closeRestockModal()">Batal</button>
-            <button class="btn btn-primary" onclick="confirmRestock()">Tambah</button>
+            <button class="btn btn-outline" type="button" onclick="closeRestockModal()">Batal</button>
+            <button class="btn btn-primary" type="button" onclick="confirmRestock()">Tambah</button>
         </div>
     </div>
 </div>
@@ -400,9 +400,14 @@
     }
 
     function handleAuth() {
-        const email = document.getElementById('authEmail').value.trim().toLowerCase();
-        const password = document.getElementById('authPassword').value.trim();
+        const emailField = document.getElementById('authEmail');
+        const passwordField = document.getElementById('authPassword');
         const errDiv = document.getElementById('authError');
+        
+        if(!emailField || !passwordField || !errDiv) return;
+
+        const email = emailField.value.trim().toLowerCase();
+        const password = passwordField.value.trim();
         
         if(!email || !password) {
             errDiv.style.display = 'block';
@@ -462,7 +467,9 @@
     }
 
     function saveNewStore() {
-        const storeName = document.getElementById('newStoreNameInput').value.trim();
+        const storeNameInput = document.getElementById('newStoreNameInput');
+        if(!storeNameInput) return;
+        const storeName = storeNameInput.value.trim();
         if(!storeName) { alert('Nama toko wajib diisi!'); return; }
         
         const initialStore = { name: storeName };
@@ -501,7 +508,8 @@
         sales = DB.get('sales', []);
         purchases = DB.get('purchases', []);
         currentTheme = DB.get('theme', { primary: '#1a5c4a', light: '#2e8b6b' });
-        document.getElementById('headerStoreName').textContent = storeData.name;
+        const storeNameEl = document.getElementById('headerStoreName');
+        if(storeNameEl) storeNameEl.textContent = storeData.name;
         applyTheme();
     }
 
@@ -568,6 +576,7 @@
     // ==================== MANAJEMEN PRODUK & STOK ====================
     function renderStok() {
         const tbody = document.getElementById('productTableBody');
+        if(!tbody) return;
         if(products.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4" class="empty">Belum ada produk terdaftar</td></tr>`;
             return;
@@ -580,19 +589,21 @@
                 <td>Rp ${formatNumber(p.price)}</td>
                 <td class="${stokClass}">${p.stok}</td>
                 <td>
-                    <button class="btn btn-sm btn-outline" onclick="openProductModal('${p.id}')">Edit</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')">Hapus</button>
-                    <button class="btn btn-sm btn-accent" onclick="openRestockModal('${p.id}')">+Restock</button>
+                    <button class="btn btn-sm btn-outline" type="button" onclick="openProductModal('${p.id}')">Edit</button>
+                    <button class="btn btn-sm btn-danger" type="button" onclick="deleteProduct('${p.id}')">Hapus</button>
+                    <button class="btn btn-sm btn-accent" type="button" onclick="openRestockModal('${p.id}')">+Restock</button>
                 </td>
             </tr>`;
         });
         tbody.innerHTML = html;
         
         const sel = document.getElementById('productSelect');
-        sel.innerHTML = '<option value="">-- Pilih Produk Cepat --</option>';
-        products.forEach(p => {
-            sel.innerHTML += `<option value="${p.id}">${p.name} (Stok: ${p.stok}) - Rp ${formatNumber(p.price)}</option>`;
-        });
+        if(sel) {
+            sel.innerHTML = '<option value="">-- Pilih Produk Cepat --</option>';
+            products.forEach(p => {
+                sel.innerHTML += `<option value="${p.id}">${p.name} (Stok: ${p.stok}) - Rp ${formatNumber(p.price)}</option>`;
+            });
+        }
     }
 
     function openProductModal(id = null) {
@@ -769,6 +780,7 @@
 
     function renderRecentPurchases() {
         const tbody = document.getElementById('recentPurchasesBody');
+        if(!tbody) return;
         if(purchases.length === 0) {
             tbody.innerHTML = `<tr><td colspan="5" class="empty">Belum ada pembelian</td></tr>`;
             return;
@@ -782,8 +794,8 @@
                 <td>${formatNumber(p.qty)}</td>
                 <td>Rp ${formatNumber(p.total)}</td>
                 <td>
-                    <button class="btn btn-sm btn-outline" onclick="editPurchase('${p.id}')">Edit</button>
-                    <button class="btn btn-sm btn-danger" onclick="deletePurchase('${p.id}')">Hapus</button>
+                    <button class="btn btn-sm btn-outline" type="button" onclick="editPurchase('${p.id}')">Edit</button>
+                    <button class="btn btn-sm btn-danger" type="button" onclick="deletePurchase('${p.id}')">Hapus</button>
                 </td>
             </tr>`;
         });
@@ -793,6 +805,7 @@
     function toggleRecentPurchases() {
         const container = document.getElementById('recentPurchasesContainer');
         const btn = document.getElementById('togglePurchasesBtn');
+        if(!container || !btn) return;
         if(container.style.display === 'none') {
             container.style.display = 'block';
             btn.textContent = 'Minimalkan ▲';
@@ -811,20 +824,30 @@
     }
 
     function searchProduct() {
-        const q = document.getElementById('searchProduct').value.toLowerCase().trim();
+        const searchInput = document.getElementById('searchProduct');
+        if(!searchInput) return;
+        const q = searchInput.value.toLowerCase().trim();
         if(!q) return;
         const found = products.find(p => (p.barcode && p.barcode.toLowerCase() === q) || p.name.toLowerCase().includes(q));
         if(found) {
             addToCartById(found.id);
-            document.getElementById('searchProduct').value = '';
+            searchInput.value = '';
         }
     }
 
     function selectProductDropdown() {
         const sel = document.getElementById('productSelect');
+        if(!sel) return;
         if(sel.value) {
             addToCartById(sel.value);
             sel.value = "";
+        }
+    }
+
+    function addToCart() {
+        const sel = document.getElementById('productSelect');
+        if(sel && sel.value) {
+            addToCartById(sel.value);
         }
     }
 
@@ -833,7 +856,8 @@
         if(!p) return;
         if(p.stok <= 0) { alert('Stok produk ini sudah habis!'); return; }
         
-        const qty = parseCleanNumber(document.getElementById('qtyInput').value) || 1;
+        const qtyInput = document.getElementById('qtyInput');
+        const qty = qtyInput ? parseCleanNumber(qtyInput.value) : 1;
         if(p.stok < qty) { alert(`Stok tidak mencukupi! Sisa: ${p.stok}`); return; }
         
         const existing = cart.find(c => c.productId === id);
@@ -843,7 +867,7 @@
         } else {
             cart.push({ productId: id, name: p.name, price: p.price, qty });
         }
-        document.getElementById('qtyInput').value = '1';
+        if(qtyInput) qtyInput.value = '1';
         renderCart();
     }
 
@@ -855,6 +879,7 @@
     function renderCart() {
         const container = document.getElementById('cartItems');
         const totalSpan = document.getElementById('cartTotal');
+        if(!container || !totalSpan) return;
         if(cart.length === 0) {
             container.innerHTML = '<div class="empty">Keranjang masih kosong</div>';
             totalSpan.textContent = 'Total: Rp 0';
@@ -869,7 +894,7 @@
                 <div><strong>${c.name}</strong><br><small style="color:var(--gray);">Rp ${formatNumber(c.price)} x ${c.qty}</small></div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span>Rp ${formatNumber(subtotal)}</span>
-                    <button class="btn btn-danger btn-sm" onclick="removeCart(${idx})">✕</button>
+                    <button class="btn btn-danger btn-sm" type="button" onclick="removeCart(${idx})">✕</button>
                 </div>
             </div>`;
         });
@@ -879,6 +904,7 @@
 
     function renderRecentSales() {
         const tbody = document.getElementById('recentSalesBody');
+        if(!tbody) return;
         if(sales.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4" class="empty">Belum ada transaksi</td></tr>`;
             return;
@@ -900,6 +926,7 @@
     function toggleRecentSales() {
         const container = document.getElementById('recentSalesContainer');
         const btn = document.getElementById('toggleSalesBtn');
+        if(!container || !btn) return;
         if(container.style.display === 'none') {
             container.style.display = 'block';
             btn.textContent = 'Minimalkan ▲';
@@ -983,6 +1010,7 @@
     function renderSalesReport() {
         const tbody = document.getElementById('salesReportBody');
         const totalSpan = document.getElementById('salesTotalReport');
+        if(!tbody || !totalSpan) return;
         const { start, end } = getDateRange(salesFilter);
         
         let filtered = sales.filter(s => {
@@ -1019,6 +1047,7 @@
     function renderPurchaseReport() {
         const tbody = document.getElementById('purchaseReportBody');
         const totalSpan = document.getElementById('purchaseTotalReport');
+        if(!tbody || !totalSpan) return;
         const { start, end } = getDateRange(purchaseFilter);
         
         let filtered = purchases.filter(p => {
@@ -1051,6 +1080,7 @@
 
     function renderBestSeller() {
         const tbody = document.getElementById('bestSellerBody');
+        if(!tbody) return;
         const { start, end } = getDateRange(bestFilter);
         
         let filteredSales = sales.filter(s => {
@@ -1136,7 +1166,8 @@
     // ==================== BARCODE SCANNER ====================
     let html5QrCode = null;
     function startScanner() {
-        document.getElementById('scannerModal').style.display = 'flex';
+        const scannerModal = document.getElementById('scannerModal');
+        if(scannerModal) scannerModal.style.display = 'flex';
         if(html5QrCode) { html5QrCode.clear().catch(() => {}); html5QrCode = null; }
         
         html5QrCode = new Html5Qrcode("scanner-container");
@@ -1151,7 +1182,8 @@
                 } else {
                     if(confirm(`Barcode "${decodedText}" belum terdaftar. Tambahkan sebagai produk baru?`)) {
                         openProductModal();
-                        document.getElementById('modalProductBarcode').value = decodedText;
+                        const barcodeInput = document.getElementById('modalProductBarcode');
+                        if(barcodeInput) barcodeInput.value = decodedText;
                     }
                 }
             },
@@ -1163,7 +1195,8 @@
     }
 
     function closeScanner() {
-        document.getElementById('scannerModal').style.display = 'none';
+        const scannerModal = document.getElementById('scannerModal');
+        if(scannerModal) scannerModal.style.display = 'none';
         if(html5QrCode) {
             html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(() => { html5QrCode = null; });
         }
