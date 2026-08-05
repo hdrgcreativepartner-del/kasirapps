@@ -7,6 +7,10 @@
     <!-- Library Eksternal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -46,13 +50,15 @@
         
         /* Auth Styles */
         .auth-page { display: flex; flex-direction: column; justify-content: center; min-height: 90vh; padding: 20px; }
-        .auth-card { background: white; border-radius: 28px; padding: 32px 24px; box-shadow: var(--shadow); max-width: 400px; margin: 0 auto; width: 100%; }
-        .auth-card h2 { text-align: center; margin-bottom: 20px; font-size: 1.6rem; color: var(--primary); }
-        .auth-card input, .auth-card select { width: 100%; padding: 14px 16px; border: 1px solid #ddd; border-radius: 14px; font-size: 1rem; margin-bottom: 16px; outline: none; transition: 0.2s; }
-        .auth-card input:focus, .auth-card select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,0,0,0.1); }
-        .auth-card button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; }
-        .auth-card button:active { transform: scale(0.97); }
-        .auth-card .error { color: var(--danger); font-size: 0.85rem; text-align: center; margin-top: 8px; display: none; }
+        .auth-card { background: white; border-radius: 28px; padding: 32px 24px; box-shadow: var(--shadow); max-width: 400px; margin: 0 auto; width: 100%; text-align: center; }
+        .auth-card h2 { margin-bottom: 10px; font-size: 1.6rem; color: var(--primary); }
+        .auth-card p { color: var(--gray); font-size: 0.9rem; margin-bottom: 24px; }
+        .auth-card input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; margin-bottom: 16px; outline: none; }
+        
+        .btn-google {
+            width: 100%; padding: 14px; background: white; color: #333; border: 1px solid #ddd; border-radius: 14px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .btn-google:hover { background: #f8f9fa; }
 
         /* Theme Picker */
         .theme-selector { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; justify-content: flex-end; }
@@ -82,11 +88,9 @@
         .flex { display: flex; gap: 8px; flex-wrap: wrap; }
         .input-group { display: flex; gap: 8px; align-items: center; }
         .input-group input, .input-group select { flex: 1; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 0.9rem; outline: none; }
-        .input-group input:focus { border-color: var(--primary); }
         
         .btn { padding: 10px 16px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:active { transform: scale(0.95); }
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-accent { background: var(--accent); color: white; }
@@ -103,10 +107,8 @@
         .empty { text-align: center; padding: 20px; color: var(--gray); font-style: italic; font-size: 0.85rem; }
         .stok-low { color: var(--danger); font-weight: 700; }
 
-        /* Modal styling */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: center; z-index: 999; padding: 16px; }
-        .modal { background: white; border-radius: 24px; max-width: 400px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn 0.2s ease; }
-        @keyframes modalIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal { background: white; border-radius: 24px; max-width: 400px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .modal h3 { margin-top: 0; margin-bottom: 16px; font-size: 1.2rem; }
         .modal .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
         .modal .btn-row button { flex: 1; }
@@ -116,29 +118,26 @@
 </head>
 <body>
 
-<!-- ======== SETUP & LOGIN SCREEN ======== -->
+<!-- ======== LOGIN GOOGLE SCREEN ======== -->
 <div id="authPage" class="auth-page">
-    <div class="auth-card" id="setupCard" style="display:none;">
+    <div class="auth-card">
         <h2>🏪 HDRG Kasir</h2>
-        <p style="text-align:center; color:var(--gray); margin-bottom:20px; font-size:0.9rem;">Setup awal toko Anda untuk memulai</p>
-        <input type="text" id="storeName" placeholder="Nama Toko / Usaha" required>
-        <input type="password" id="ownerPin" placeholder="PIN Owner (min 4 digit)" maxlength="6" inputmode="numeric" required>
-        <input type="password" id="ownerPinConfirm" placeholder="Konfirmasi PIN Owner" maxlength="6" inputmode="numeric" required>
-        <input type="password" id="employeePin" placeholder="PIN Karyawan (opsional)" maxlength="6" inputmode="numeric">
-        <button id="setupBtn">Simpan & Mulai</button>
-        <div id="authError" class="error">Error</div>
+        <p>Silakan masuk menggunakan akun Google Anda.</p>
+        <button class="btn-google" onclick="loginWithGoogle()">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.63-.05-1.25-.15-1.84H9v3.49h4.84c-.21 1.12-.86 2.07-1.83 2.71v2.25h2.96c1.73-1.59 2.73-3.93 2.73-6.91z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.96-2.25c-.81.54-1.85.86-3 .86-2.31 0-4.27-1.56-4.97-3.65H1.01v2.32C2.55 15.93 5.51 18 9 18z"/><path fill="#FBBC05" d="M4.03 10.78c-.18-.54-.28-1.12-.28-1.78s.1-1.24.28-1.78V4.9H1.01C.37 6.18 0 7.62 0 9.14s.37 2.96 1.01 4.24l3.02-2.32z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59C13.47.89 11.43 0 9 0 5.51 0 2.55 2.07 1.01 4.9l3.02 2.32c.7-2.09 2.66-3.64 4.97-3.64z"/></svg>
+            Masuk / Daftar dengan Google
+        </button>
+        <div id="authError" style="color:var(--danger); font-size:0.85rem; margin-top:12px; display:none;"></div>
     </div>
-    
-    <div class="auth-card" id="loginCard" style="display:none;">
-        <h2>🔐 Masuk Aplikasi</h2>
-        <p style="text-align:center; color:var(--gray); margin-bottom:16px; font-weight:600;" id="loginStoreName"></p>
-        <input type="password" id="loginPin" placeholder="Masukkan PIN Akses" maxlength="6" inputmode="numeric">
-        <select id="loginRole">
-            <option value="owner">Owner</option>
-            <option value="employee">Karyawan</option>
-        </select>
-        <button id="loginBtn">Masuk</button>
-        <div id="loginError" class="error">PIN salah!</div>
+</div>
+
+<!-- ======== SETUP TOKO PERTAMA KALI SCREEN ======== -->
+<div id="setupStorePage" class="auth-page" style="display:none;">
+    <div class="auth-card">
+        <h2>🛠️ Buat Toko Anda</h2>
+        <p>Masukkan nama toko atau usaha Anda untuk melanjutkan.</p>
+        <input type="text" id="newStoreNameInput" placeholder="Contoh: Toko Berkah Jaya">
+        <button class="btn btn-primary" style="width:100%; padding:14px;" onclick="saveNewStore()">Mulai Kelola Toko</button>
     </div>
 </div>
 
@@ -157,7 +156,7 @@
                 <div class="theme-dot" style="background:#b91c1c;" onclick="setTheme('#b91c1c', '#ef4444')" title="Merah Mewah"></div>
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
-                <span class="user-badge" id="headerUserBadge">👤 Owner</span>
+                <span class="user-badge" id="headerUserBadge">👤 User</span>
                 <button onclick="logout()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:6px 12px; border-radius:20px; font-size:0.75rem; font-weight:600; cursor:pointer;">Keluar</button>
             </div>
         </div>
@@ -245,7 +244,7 @@
                 </div>
             </div>
 
-            <!-- RIWAYAT PEMBELIAN TERBARU (DENGAN MINIMIZE, EDIT, & HAPUS) -->
+            <!-- RIWAYAT PEMBELIAN TERBARU -->
             <div class="card">
                 <div class="card-title">
                     <span>📋 Riwayat Pembelian Terbaru</span>
@@ -269,11 +268,6 @@
                         </table>
                     </div>
                 </div>
-            </div>
-
-            <div class="card" id="employeeCard" style="display:none;">
-                <div class="card-title">👥 Kelola Karyawan <button class="btn btn-primary btn-sm" onclick="openEmployeeModal()">+ Karyawan</button></div>
-                <div id="employeeList"><div class="empty">Belum ada karyawan</div></div>
             </div>
         </div>
 
@@ -337,7 +331,6 @@
 </div>
 
 <!-- ======== MODALS ======== -->
-<!-- Modal Tambah/Edit Produk -->
 <div id="productModal" class="modal-overlay">
     <div class="modal">
         <h3 id="modalProductTitle">Tambah Produk</h3>
@@ -353,21 +346,6 @@
     </div>
 </div>
 
-<!-- Modal Karyawan -->
-<div id="employeeModal" class="modal-overlay">
-    <div class="modal">
-        <h3 id="modalEmployeeTitle">Tambah Karyawan</h3>
-        <input type="hidden" id="editEmployeeId">
-        <input type="text" id="modalEmployeeName" placeholder="Nama Karyawan" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:12px; margin-bottom:8px;">
-        <input type="password" id="modalEmployeePin" placeholder="PIN (4-6 digit)" maxlength="6" inputmode="numeric" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:12px; margin-bottom:8px;">
-        <div class="btn-row">
-            <button class="btn btn-outline" onclick="closeEmployeeModal()">Batal</button>
-            <button class="btn btn-primary" onclick="saveEmployee()">Simpan</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Scanner Kamera -->
 <div id="scannerModal" class="modal-overlay">
     <div class="modal" style="max-width:340px; text-align:center;">
         <h3>📷 Scan Barcode Produk</h3>
@@ -379,7 +357,6 @@
     </div>
 </div>
 
-<!-- Modal Restock Cepat -->
 <div id="restockModal" class="modal-overlay">
     <div class="modal">
         <h3>📦 Restock Produk</h3>
@@ -394,25 +371,102 @@
 </div>
 
 <script>
-    // ==================== STORAGE & LOCAL DB ====================
-    const DB = {
-        get(key, def=null) { try { const v = localStorage.getItem('hdrg_'+key); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
-        set(key, val) { localStorage.setItem('hdrg_'+key, JSON.stringify(val)); }
+    // ==================== KONFIGURASI FIREBASE ====================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCZxglAMi7_3dz8ISfQvJEPqrFWYBy8Ul4",
+        authDomain: "hdrg-kasir.firebaseapp.com",
+        projectId: "hdrg-kasir",
+        storageBucket: "hdrg-kasir.firebasestorage.app",
+        messagingSenderId: "598139220426",
+        appId: "1:598139220426:web:ffc5fe49dcda1921db5f33",
+        measurementId: "G-J6KFKKLSDK"
     };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-    let storeData = DB.get('store', { name: '', ownerPin: '' });
-    let products = DB.get('products', []);
-    let sales = DB.get('sales', []);
-    let purchases = DB.get('purchases', []);
-    let employees = DB.get('employees', []);
-    let currentTheme = DB.get('theme', { primary: '#1a5c4a', light: '#2e8b6b' });
+    let currentUser = null;
+    let storePrefix = '';
+
+    // Cek Status Login Google
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            storePrefix = 'hdrg_' + user.uid + '_';
+            
+            // Cek apakah user sudah pernah membuat nama toko
+            const savedStore = localStorage.getItem(storePrefix + 'store');
+            if(!savedStore) {
+                // Jika belum punya toko, arahkan ke halaman input nama toko
+                document.getElementById('authPage').style.display = 'none';
+                document.getElementById('setupStorePage').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
+            } else {
+                document.getElementById('authPage').style.display = 'none';
+                document.getElementById('setupStorePage').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('headerUserBadge').textContent = '👤 ' + (user.displayName || user.email);
+                loadUserData();
+                renderAll();
+            }
+        } else {
+            document.getElementById('authPage').style.display = 'flex';
+            document.getElementById('setupStorePage').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'none';
+        }
+    });
+
+    function loginWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch((error) => {
+            const errDiv = document.getElementById('authError');
+            errDiv.style.display = 'block';
+            errDiv.textContent = 'Gagal Login: ' + error.message;
+        });
+    }
+
+    function saveNewStore() {
+        const storeName = document.getElementById('newStoreNameInput').value.trim();
+        if(!storeName) { alert('Nama toko wajib diisi!'); return; }
+        
+        const initialStore = { name: storeName };
+        localStorage.setItem(storePrefix + 'store', JSON.stringify(initialStore));
+        
+        document.getElementById('setupStorePage').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('headerUserBadge').textContent = '👤 ' + (currentUser.displayName || currentUser.email);
+        loadUserData();
+        renderAll();
+    }
+
+    function logout() {
+        if(!confirm('Yakin ingin keluar akun?')) return;
+        auth.signOut().then(() => {
+            location.reload();
+        });
+    }
+
+    // ==================== STORAGE & LOCAL DB PER AKUN ====================
+    let storeData = { name: 'Toko Saya' };
+    let products = [];
+    let sales = [];
+    let purchases = [];
+    let currentTheme = { primary: '#1a5c4a', light: '#2e8b6b' };
     let cart = [];
 
-    let currentUser = { role: 'owner' };
-    let salesFilter = 'today';
-    let purchaseFilter = 'today';
-    let bestFilter = 'today';
-    let html5QrCode = null;
+    function loadUserData() {
+        storeData = DB.get('store', { name: 'Toko Saya' });
+        products = DB.get('products', []);
+        sales = DB.get('sales', []);
+        purchases = DB.get('purchases', []);
+        currentTheme = DB.get('theme', { primary: '#1a5c4a', light: '#2e8b6b' });
+        document.getElementById('headerStoreName').textContent = storeData.name;
+        applyTheme();
+    }
+
+    const DB = {
+        get(key, def=null) { try { const v = localStorage.getItem(storePrefix + key); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
+        set(key, val) { localStorage.setItem(storePrefix + key, JSON.stringify(val)); }
+    };
 
     // ==================== TEMA WARNA ====================
     function setTheme(primary, light) {
@@ -428,7 +482,7 @@
         if(header) header.style.background = currentTheme.primary;
     }
 
-    // ==================== FORMAT ANGKA OTOMATIS (TITIK RIBUAN) ====================
+    // ==================== FORMAT ANGKA OTOMATIS ====================
     function formatRupiahInput(input) {
         let val = input.value.replace(/[^,\d]/g, '').toString();
         let split = val.split(',');
@@ -448,100 +502,6 @@
     function parseCleanNumber(val) {
         if(!val) return 0;
         return parseInt(val.toString().replace(/\./g, '')) || 0;
-    }
-
-    // ==================== INISIALISASI & AUTH ====================
-    document.addEventListener('DOMContentLoaded', () => {
-        applyTheme();
-        if(storeData.name) {
-            document.getElementById('setupCard').style.display = 'none';
-            document.getElementById('loginCard').style.display = 'block';
-            document.getElementById('loginStoreName').textContent = storeData.name;
-        } else {
-            document.getElementById('setupCard').style.display = 'block';
-            document.getElementById('loginCard').style.display = 'none';
-        }
-    });
-
-    document.getElementById('setupBtn').addEventListener('click', () => {
-        const name = document.getElementById('storeName').value.trim();
-        const ownerPin = document.getElementById('ownerPin').value.trim();
-        const ownerPinConfirm = document.getElementById('ownerPinConfirm').value.trim();
-        const employeePin = document.getElementById('employeePin').value.trim();
-        const err = document.getElementById('authError');
-        
-        if(!name || !ownerPin || ownerPin.length < 4) {
-            err.style.display = 'block';
-            err.textContent = 'Nama toko dan PIN Owner minimal 4 digit wajib diisi!';
-            return;
-        }
-        if(ownerPin !== ownerPinConfirm) {
-            err.style.display = 'block';
-            err.textContent = 'PIN Owner konfirmasi tidak cocok!';
-            return;
-        }
-        storeData = { name, ownerPin };
-        DB.set('store', storeData);
-        
-        if(employeePin && employeePin.length >= 4) {
-            employees.push({ id: Date.now().toString(), name: 'Kasir 1', pin: employeePin });
-            DB.set('employees', employees);
-        }
-
-        err.style.display = 'none';
-        document.getElementById('setupCard').style.display = 'none';
-        document.getElementById('loginCard').style.display = 'block';
-        document.getElementById('loginStoreName').textContent = storeData.name;
-    });
-
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        const pin = document.getElementById('loginPin').value.trim();
-        const role = document.getElementById('loginRole').value;
-        const err = document.getElementById('loginError');
-        
-        if(!pin) { err.style.display = 'block'; err.textContent = 'Masukkan PIN akses!'; return; }
-        
-        if(role === 'owner' && pin === storeData.ownerPin) {
-            currentUser = { role: 'owner', name: 'Owner' };
-            enterApp();
-        } else if(role === 'employee') {
-            const emp = employees.find(e => e.pin === pin);
-            if(emp) {
-                currentUser = { role: 'employee', name: emp.name };
-                enterApp();
-            } else {
-                err.style.display = 'block';
-                err.textContent = 'PIN Karyawan tidak terdaftar!';
-            }
-        } else {
-            err.style.display = 'block';
-            err.textContent = 'PIN salah!';
-        }
-    });
-
-    function enterApp() {
-        document.getElementById('authPage').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        document.getElementById('headerStoreName').textContent = storeData.name;
-        const roleText = currentUser.role === 'owner' ? 'Owner' : 'Karyawan';
-        document.getElementById('headerRole').textContent = roleText;
-        document.getElementById('headerUserBadge').textContent = '👤 ' + currentUser.name;
-        
-        if(currentUser.role === 'owner') {
-            document.getElementById('employeeCard').style.display = 'block';
-            renderEmployees();
-        } else {
-            document.getElementById('employeeCard').style.display = 'none';
-        }
-        renderAll();
-    }
-
-    function logout() {
-        if(!confirm('Yakin ingin keluar aplikasi?')) return;
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('authPage').style.display = 'block';
-        document.getElementById('loginPin').value = '';
-        document.getElementById('loginError').style.display = 'none';
     }
 
     // ==================== NAVIGASI MENU ====================
@@ -571,19 +531,16 @@
             return;
         }
         let html = '';
-        products.forEach((p, idx) => {
+        products.forEach((p) => {
             const stokClass = p.stok <= 0 ? 'stok-low' : '';
-            const canEdit = currentUser.role === 'owner';
             html += `<tr>
                 <td><strong>${p.name}</strong><br><small style="color:var(--gray);">${p.barcode || '-'}</small></td>
                 <td>Rp ${formatNumber(p.price)}</td>
                 <td class="${stokClass}">${p.stok}</td>
                 <td>
-                    ${canEdit ? `
-                        <button class="btn btn-sm btn-outline" onclick="openProductModal('${p.id}')">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')">Hapus</button>
-                        <button class="btn btn-sm btn-accent" onclick="openRestockModal('${p.id}')">+Restock</button>
-                    ` : '-'}
+                    <button class="btn btn-sm btn-outline" onclick="openProductModal('${p.id}')">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')">Hapus</button>
+                    <button class="btn btn-sm btn-accent" onclick="openRestockModal('${p.id}')">+Restock</button>
                 </td>
             </tr>`;
         });
@@ -597,7 +554,6 @@
     }
 
     function openProductModal(id = null) {
-        if(currentUser.role !== 'owner') { alert('Hanya Owner yang dapat mengelola produk.'); return; }
         document.getElementById('editProductId').value = id || '';
         document.getElementById('modalProductTitle').textContent = id ? 'Edit Produk' : 'Tambah Produk Baru';
         
@@ -648,7 +604,6 @@
         renderAll();
     }
 
-    // Restock Cepat
     function openRestockModal(id) {
         const p = products.find(x => x.id === id);
         if(!p) return;
@@ -683,7 +638,7 @@
         alert(`Berhasil menambahkan ${qty} unit ke stok ${p.name}.`);
     }
 
-    // ==================== PEMBELIAN / RESTOCK (DENGAN EDIT, HAPUS & PENYESUAIAN STOK) ====================
+    // ==================== PEMBELIAN / RESTOCK ====================
     function addPurchase() {
         const editId = document.getElementById('editPurchaseId').value;
         const name = document.getElementById('purchaseProduct').value.trim();
@@ -694,13 +649,10 @@
         const total = qty * price;
 
         if(editId) {
-            // Edit mode: kembalikan dulu stok lama, lalu terapkan stok baru
             const oldP = purchases.find(x => x.id === editId);
             if(oldP) {
                 const oldProd = products.find(p => p.name.toLowerCase() === oldP.name.toLowerCase());
-                if(oldProd) {
-                    oldProd.stok -= oldP.qty; // rollback stok lama
-                }
+                if(oldProd) oldProd.stok -= oldP.qty;
             }
 
             const pIndex = purchases.findIndex(x => x.id === editId);
@@ -710,34 +662,19 @@
                 purchases[pIndex].total = total;
             }
 
-            // Terapkan stok baru
             const prod = products.find(p => p.name.toLowerCase() === name.toLowerCase());
-            if(prod) {
-                prod.stok += qty;
-            } else {
-                products.push({ id: Date.now().toString(), name, barcode: '', price: 0, stok: qty });
-            }
+            if(prod) prod.stok += qty;
+            else products.push({ id: Date.now().toString(), name, barcode: '', price: 0, stok: qty });
 
             document.getElementById('editPurchaseId').value = '';
             document.getElementById('purchaseFormTitle').textContent = '📥 Pembelian / Restock Barang';
             document.getElementById('purchaseSubmitBtn').textContent = 'Catat Pembelian Stok';
             document.getElementById('purchaseCancelBtn').style.display = 'none';
         } else {
-            // New purchase
-            purchases.push({
-                id: Date.now().toString(),
-                date: new Date().toISOString(),
-                name,
-                qty,
-                total
-            });
-            // Update stok produk otomatis
+            purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name, qty, total });
             const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
-            if(existing) {
-                existing.stok += qty;
-            } else {
-                products.push({ id: Date.now().toString(), name, barcode: '', price: 0, stok: qty });
-            }
+            if(existing) existing.stok += qty;
+            else products.push({ id: Date.now().toString(), name, barcode: '', price: 0, stok: qty });
         }
 
         DB.set('purchases', purchases);
@@ -747,7 +684,7 @@
         document.getElementById('purchaseQty').value = '';
         document.getElementById('purchasePrice').value = '';
         renderAll();
-        alert('Data pembelian berhasil disimpan dan stok disesuaikan.');
+        alert('Data pembelian berhasil disimpan.');
     }
 
     function editPurchase(id) {
@@ -774,10 +711,9 @@
     }
 
     function deletePurchase(id) {
-        if(!confirm('Hapus riwayat pembelian ini? Stok produk akan dikurangi sesuai jumlah pembelian.')) return;
+        if(!confirm('Hapus riwayat pembelian ini? Stok produk akan dikurangi.')) return;
         const p = purchases.find(x => x.id === id);
         if(p) {
-            // Kurangi stok produk saat pembelian dihapus
             const prod = products.find(prod => prod.name.toLowerCase() === p.name.toLowerCase());
             if(prod) {
                 prod.stok = Math.max(0, prod.stok - p.qty);
@@ -824,52 +760,8 @@
         }
     }
 
-    // ==================== MANAJEMEN KARYAWAN ====================
-    function renderEmployees() {
-        const container = document.getElementById('employeeList');
-        if(employees.length === 0) {
-            container.innerHTML = '<div class="empty">Belum ada karyawan terdaftar</div>';
-            return;
-        }
-        let html = '';
-        employees.forEach((e, idx) => {
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:8px 0; font-size:0.85rem;">
-                <span><strong>${e.name}</strong> <span style="color:var(--gray);">(PIN: ${e.pin})</span></span>
-                <span>
-                    <button class="btn btn-sm btn-danger" onclick="deleteEmployee(${idx})">Hapus</button>
-                </span>
-            </div>`;
-        });
-        container.innerHTML = html;
-    }
-
-    function openEmployeeModal() {
-        document.getElementById('modalEmployeeName').value = '';
-        document.getElementById('modalEmployeePin').value = '';
-        document.getElementById('employeeModal').style.display = 'flex';
-    }
-
-    function closeEmployeeModal() { document.getElementById('employeeModal').style.display = 'none'; }
-
-    function saveEmployee() {
-        const name = document.getElementById('modalEmployeeName').value.trim();
-        const pin = document.getElementById('modalEmployeePin').value.trim();
-        if(!name || pin.length < 4) { alert('Nama dan PIN minimal 4 digit wajib diisi!'); return; }
-        
-        employees.push({ id: Date.now().toString(), name, pin });
-        DB.set('employees', employees);
-        closeEmployeeModal();
-        renderEmployees();
-    }
-
-    function deleteEmployee(idx) {
-        if(!confirm('Hapus akses karyawan ini?')) return;
-        employees.splice(idx, 1);
-        DB.set('employees', employees);
-        renderEmployees();
-    }
-
     // ==================== TRANSAKSI PENJUALAN (POS) ====================
+    let cart = [];
     function renderPenjualan() { 
         renderCart(); 
         renderRecentSales();
@@ -1004,7 +896,7 @@
             items,
             total,
             method,
-            cashier: currentUser.name
+            cashier: currentUser.displayName || currentUser.email
         });
         
         cart.forEach(c => {
@@ -1019,7 +911,7 @@
         alert('Transaksi berhasil disimpan!');
     }
 
-    // ==================== LAPORAN & FILTER WAKTU ====================
+    // ==================== LAPORAN & FILTER ====================
     function getDateRange(filter) {
         const now = new Date();
         let start, end;
@@ -1079,6 +971,7 @@
         totalSpan.textContent = `Total: Rp ${formatNumber(total)}`;
     }
 
+    let salesFilter = 'today', purchaseFilter = 'today', bestFilter = 'today';
     function setSalesFilter(f) { salesFilter = f; renderSalesReport(); }
 
     function renderPurchaseReport() {
@@ -1123,9 +1016,7 @@
             return d >= start && d < end;
         });
         
-        const productCount = {};
-        const productRevenue = {};
-        
+        const productCount = {}, productRevenue = {};
         filteredSales.forEach(s => {
             s.items.forEach(item => {
                 productCount[item.name] = (productCount[item.name] || 0) + item.qty;
@@ -1200,13 +1091,11 @@
         XLSX.writeFile(wb, `Laporan_Pembelian_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
-    // ==================== BARCODE SCANNER KAMERA ====================
+    // ==================== BARCODE SCANNER ====================
+    let html5QrCode = null;
     function startScanner() {
         document.getElementById('scannerModal').style.display = 'flex';
-        if(html5QrCode) {
-            html5QrCode.clear().catch(() => {});
-            html5QrCode = null;
-        }
+        if(html5QrCode) { html5QrCode.clear().catch(() => {}); html5QrCode = null; }
         
         html5QrCode = new Html5Qrcode("scanner-container");
         html5QrCode.start(
@@ -1218,19 +1107,15 @@
                 if(found) {
                     addToCartById(found.id);
                 } else {
-                    if(currentUser.role === 'owner') {
-                        if(confirm(`Barcode "${decodedText}" belum terdaftar. Tambahkan sebagai produk baru?`)) {
-                            openProductModal();
-                            document.getElementById('modalProductBarcode').value = decodedText;
-                        }
-                    } else {
-                        alert(`Barcode "${decodedText}" tidak ditemukan di sistem.`);
+                    if(confirm(`Barcode "${decodedText}" belum terdaftar. Tambahkan sebagai produk baru?`)) {
+                        openProductModal();
+                        document.getElementById('modalProductBarcode').value = decodedText;
                     }
                 }
             },
-            (err) => { /* Ignore scan frame errors */ }
+            (err) => {}
         ).catch(err => {
-            alert("Gagal membuka kamera. Pastikan izin kamera telah diaktifkan.");
+            alert("Gagal membuka kamera. Pastikan izin kamera aktif.");
             closeScanner();
         });
     }
@@ -1238,12 +1123,7 @@
     function closeScanner() {
         document.getElementById('scannerModal').style.display = 'none';
         if(html5QrCode) {
-            html5QrCode.stop().then(() => {
-                html5QrCode.clear();
-                html5QrCode = null;
-            }).catch(() => {
-                html5QrCode = null;
-            });
+            html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(() => { html5QrCode = null; });
         }
     }
 
@@ -1253,9 +1133,6 @@
         const d = new Date(iso);
         return d.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     }
-
-    // Inisialisasi awal
-    renderAll();
 </script>
 </body>
 </html>
