@@ -654,6 +654,60 @@
 </div>
 
 <script>
+    // ==================== DETEKSI CAPACITOR ====================
+    // Fungsi untuk mengecek apakah berjalan di Capacitor
+    function isCapacitorNative() {
+        return !!(window.Capacitor && window.Capacitor.isNativePlatform());
+    }
+
+    // ==================== EXPORT EXCEL HELPER ====================
+    function exportExcel(data, fileName, sheetName = 'Sheet1') {
+        if (!data || data.length === 0) {
+            alert('Tidak ada data untuk diexport.');
+            return;
+        }
+        try {
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([wbout], { type: 'application/octet-stream' });
+
+            if (isCapacitorNative()) {
+                // ===== CAPACITOR MODE =====
+                // Konversi blob ke base64
+                const reader = new FileReader();
+                reader.onload = async function() {
+                    const base64Data = reader.result.split(',')[1]; // ambil bagian base64
+                    try {
+                        // Memuat Capacitor Filesystem jika belum
+                        const { Filesystem } = window.Capacitor.Plugins;
+                        const result = await Filesystem.writeFile({
+                            path: fileName,
+                            data: base64Data,
+                            directory: 'DOCUMENTS', // folder Documents perangkat
+                            encoding: 'base64',
+                            recursive: true
+                        });
+                        alert(`✅ File berhasil disimpan di folder Documents dengan nama:\n${fileName}\n\nLokasi: ${result.uri || 'Documents/' + fileName}`);
+                    } catch (err) {
+                        console.error('Gagal menyimpan file via Capacitor:', err);
+                        alert('❌ Gagal menyimpan file di perangkat. Error: ' + err.message);
+                    }
+                };
+                reader.readAsDataURL(blob);
+            } else {
+                // ===== BROWSER MODE =====
+                // Gunakan XLSX.writeFile untuk browser
+                XLSX.writeFile(wb, fileName);
+                alert(`✅ File ${fileName} berhasil diexport.`);
+            }
+        } catch (err) {
+            console.error('Error export Excel:', err);
+            alert('Terjadi kesalahan saat mengexport Excel: ' + err.message);
+        }
+    }
+
     // ==================== STORAGE & LOCAL DB ====================
     const DB = {
         get(key, def=null) { try { const v = localStorage.getItem('sugoi8_'+key); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
@@ -691,7 +745,6 @@
         document.documentElement.style.setProperty('--primary-light', currentTheme.light);
         const header = document.querySelector('.app-header');
         if(header) header.style.background = currentTheme.primary;
-        // Update active color in bottom nav
         document.querySelectorAll('.bottom-nav button.active').forEach(btn => {
             btn.style.color = currentTheme.primary;
             btn.style.borderTopColor = currentTheme.primary;
@@ -1020,7 +1073,6 @@
     function selectProductSuggestion(name) {
         document.getElementById('purchaseProduct').value = name;
         document.getElementById('productSuggestList').style.display = 'none';
-        // Auto-fill price if available? optional.
     }
 
     // ==================== MANAJEMEN PRODUK & STOK ====================
@@ -1208,11 +1260,9 @@
         if(!q) return;
         const found = products.find(p => (p.barcode && p.barcode.toLowerCase() === q) || p.name.toLowerCase().includes(q));
         if(found) {
-            // Jika barcode cocok, langsung tambahkan dengan jumlah 1
             addToCartById(found.id, 1);
             document.getElementById('searchProduct').value = '';
         } else {
-            // Jika pencarian manual, tampilkan di dropdown
             const sel = document.getElementById('productSelect');
             sel.innerHTML = '<option value="">-- Pilih Produk Cepat --</option>';
             products.forEach(p => {
@@ -1251,7 +1301,6 @@
         } else {
             cart.push({ productId: id, name: p.name, price: p.price, qty });
         }
-        // Reset input setelah tambah
         document.getElementById('qtyInput').value = '1';
         document.getElementById('qtySelect').value = '1';
         renderCart();
@@ -1510,11 +1559,9 @@ Terima kasih telah berbelanja!
         
         if(!name || isNaN(qty) || qty < 1) { alert('Nama barang dan jumlah wajib diisi!'); return; }
         
-        // Jika sellPrice belum diisi, hitung dari margin
         if(sellPrice === 0 && buyPrice > 0 && margin > 0) {
             sellPrice = buyPrice + (buyPrice * margin / 100);
         }
-        // Terapkan diskon
         if(discount > 0 && discount <= 100) {
             sellPrice = sellPrice * (100 - discount) / 100;
         }
@@ -1571,9 +1618,7 @@ Terima kasih telah berbelanja!
         }
     }
 
-    function manualSellPrice() {
-        // Jika user mengetik manual, biarkan saja
-    }
+    function manualSellPrice() {}
 
     function editPurchase(id) {
         const p = purchases.find(x => x.id === id);
@@ -1591,15 +1636,12 @@ Terima kasih telah berbelanja!
             alert('Data tidak valid!');
             return;
         }
-        // Rollback stok lama
         const prod = products.find(prod => prod.name.toLowerCase() === p.name.toLowerCase());
         if(prod) prod.stok -= p.qty;
-        // Update data pembelian
         p.name = name.trim();
         p.qty = parsedQty;
         p.total = parsedQty * parsedPrice;
         p.date = new Date().toISOString();
-        // Tambah stok baru
         const newProd = products.find(prod => prod.name.toLowerCase() === p.name.toLowerCase());
         if(newProd) newProd.stok += parsedQty;
         else products.push({ id: Date.now().toString(), name: p.name, barcode: '', category: '', price: 0, stok: parsedQty });
@@ -1894,7 +1936,9 @@ Terima kasih telah berbelanja!
 
     function setBestFilter(f) { bestFilter = f; renderBestSeller(); }
 
-    // ==================== EXPORT EXCEL ====================
+    // ==================== FUNGSI EXPORT (DIPERBAIKI) ====================
+    // Semua fungsi export sekarang menggunakan helper exportExcel di atas.
+
     function exportSales() {
         const { start, end } = getDateRange(salesFilter);
         let filtered = sales.filter(s => {
@@ -1910,10 +1954,7 @@ Terima kasih telah berbelanja!
             'Metode Pembayaran': s.method,
             'Kasir': s.cashier
         }));
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, 'Laporan Penjualan');
-        XLSX.writeFile(wb, `Laporan_Penjualan_${new Date().toISOString().split('T')[0]}.xlsx`);
+        exportExcel(data, `Laporan_Penjualan_${new Date().toISOString().split('T')[0]}.xlsx`, 'Penjualan');
     }
 
     function exportPurchases() {
@@ -1930,10 +1971,7 @@ Terima kasih telah berbelanja!
             'Jumlah': p.qty,
             'Total Biaya (Rp)': p.total
         }));
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, 'Laporan Pembelian');
-        XLSX.writeFile(wb, `Laporan_Pembelian_${new Date().toISOString().split('T')[0]}.xlsx`);
+        exportExcel(data, `Laporan_Pembelian_${new Date().toISOString().split('T')[0]}.xlsx`, 'Pembelian');
     }
 
     function exportCosts() {
@@ -1950,10 +1988,7 @@ Terima kasih telah berbelanja!
             'Deskripsi': c.description,
             'Jumlah (Rp)': c.amount
         }));
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, 'Laporan Biaya');
-        XLSX.writeFile(wb, `Laporan_Biaya_${new Date().toISOString().split('T')[0]}.xlsx`);
+        exportExcel(data, `Laporan_Biaya_${new Date().toISOString().split('T')[0]}.xlsx`, 'Biaya');
     }
 
     function exportFinancial() {
@@ -1977,10 +2012,7 @@ Terima kasih telah berbelanja!
             { 'Keterangan': 'Total Biaya Operasional', 'Jumlah (Rp)': totalCosts },
             { 'Keterangan': 'Laba Bersih', 'Jumlah (Rp)': netProfit }
         ];
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, 'Laporan Keuangan');
-        XLSX.writeFile(wb, `Laporan_Keuangan_${new Date().toISOString().split('T')[0]}.xlsx`);
+        exportExcel(data, `Laporan_Keuangan_${new Date().toISOString().split('T')[0]}.xlsx`, 'Keuangan');
     }
 
     // Inisialisasi awal
