@@ -3,81 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <!-- Meta untuk PWA / Fullscreen -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>Diskop Kasir Apps by Sugoi 8</title>
+    <title>HDRG Kasir Apps</title>
     <!-- Library Eksternal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ===== FULLSCREEN LAYOUT ===== */
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Inter', Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-        }
-        /* Kontainer utama mengisi penuh layar */
-        #mainApp {
-            display: none;
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        #mainApp.active {
-            display: flex;
-        }
-        .container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px 16px 90px; /* beri ruang untuk bottom nav */
-            max-width: 600px;
-            margin: 0 auto;
-            width: 100%;
-        }
-        /* Header tetap di atas */
-        .app-header {
-            flex-shrink: 0;
-            background: var(--primary);
-            color: white;
-            padding: 16px 20px;
-            border-radius: 0 0 24px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 20px rgba(26,92,74,0.25);
-            flex-wrap: wrap;
-            gap: 8px;
-            position: relative;
-            z-index: 10;
-        }
-        /* Bottom nav tetap di bawah */
-        .bottom-nav {
-            flex-shrink: 0;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: white;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: space-around;
-            padding: 6px 0 12px;
-            z-index: 100;
-            max-width: 600px;
-            margin: 0 auto;
-            left: 0;
-            right: 0;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
-        }
-
-        /* ===== SISANYA STYLE TETAP SAMA ===== */
         :root {
             --primary: #0067f4;
             --primary-light: #4a9aff;
@@ -90,44 +20,216 @@
             --shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            margin: 0; 
-            font-family: 'Inter', Arial, sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
+        body {
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding-bottom: 90px;
         }
         .container { max-width: 600px; margin: 0 auto; padding: 12px 16px; }
-        /* sisanya tetap seperti kode sebelumnya, hanya disisipkan tombol fullscreen dan sedikit perubahan pada header */
-        .app-header .right {
+        .app-header {
+            background: var(--primary);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 0 0 24px 24px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 20px rgba(26,92,74,0.25);
+            flex-wrap: wrap;
             gap: 8px;
         }
-        .fs-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            padding: 4px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .fs-btn:active { transform: scale(0.9); }
+        .app-header .left { display: flex; flex-direction: column; gap: 2px; }
+        .app-header .left .store-name { font-size: 1.3rem; font-weight: 700; }
+        .app-header .left .user-info { font-size: 0.75rem; opacity: 0.85; }
+        .app-header .right { font-size: 0.8rem; text-align: right; opacity: 0.9; }
+        .app-header .right .app-name { font-weight: 600; }
+        
+        /* Auth Styles */
+        .auth-page { display: flex; flex-direction: column; justify-content: center; min-height: 90vh; padding: 20px; }
+        .auth-card { background: white; border-radius: 28px; padding: 32px 24px; box-shadow: var(--shadow); max-width: 400px; margin: 0 auto; width: 100%; }
+        .auth-card h2 { text-align: center; margin-bottom: 20px; font-size: 1.6rem; color: var(--primary); }
+        .auth-card input, .auth-card select { width: 100%; padding: 14px 16px; border: 1px solid #ddd; border-radius: 14px; font-size: 1rem; margin-bottom: 16px; outline: none; transition: 0.2s; }
+        .auth-card input:focus, .auth-card select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,92,74,0.15); }
+        .auth-card button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .auth-card button:active { transform: scale(0.97); }
+        .auth-card .error { color: var(--danger); font-size: 0.85rem; text-align: center; margin-top: 8px; display: none; }
 
-        /* Auth page full screen */
-        .auth-page {
+        /* Theme Picker */
+        .theme-selector { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .theme-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .theme-dot:hover { transform: scale(1.15); }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: white;
+            border-top: 1px solid #eee; display: flex; justify-content: space-around;
+            padding: 6px 0 12px; z-index: 100; max-width: 600px; margin: 0 auto; left: 0; right: 0;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+        }
+        .bottom-nav button {
+            flex: 1; background: transparent; border: none; font-size: 0.7rem; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer;
+            color: var(--gray); transition: 0.2s; padding: 4px 0; border-top: 3px solid transparent;
+        }
+        .bottom-nav button .nav-icon { font-size: 1.3rem; }
+        .bottom-nav button.active { color: var(--primary); border-top-color: var(--primary); }
+        .bottom-nav button#logoutBtn { color: var(--danger); }
+        .bottom-nav button#logoutBtn.active { border-top-color: var(--danger); }
+        
+        .page { display: none; animation: fadeIn 0.25s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card { background: var(--card-bg); border-radius: 20px; padding: 16px; box-shadow: var(--shadow); margin-bottom: 16px; }
+        .card-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+        .flex { display: flex; gap: 8px; flex-wrap: wrap; }
+        .input-group { display: flex; gap: 8px; align-items: center; }
+        .input-group input, .input-group select { flex: 1; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 0.9rem; outline: none; }
+        .input-group input:focus { border-color: var(--primary); }
+        
+        .btn { padding: 10px 16px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:active { transform: scale(0.95); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; }
+        
+        .table-wrap { overflow-x: auto; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #f8f9fa; font-weight: 700; color: #444; }
+        
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 30px; font-size: 0.7rem; font-weight: 600; }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        .badge-yellow { background: #fef3c7; color: #92400e; }
+        .empty { text-align: center; padding: 20px; color: var(--gray); font-style: italic; font-size: 0.85rem; }
+        .stok-low { color: var(--danger); font-weight: 700; }
+
+        /* Modal styling */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: center; z-index: 999; padding: 16px; }
+        .modal { background: white; border-radius: 24px; max-width: 400px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn 0.2s ease; }
+        @keyframes modalIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal h3 { margin-top: 0; margin-bottom: 16px; font-size: 1.2rem; }
+        .modal .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+        .modal .btn-row button { flex: 1; }
+        
+        /* Nota styling */
+        .nota-container {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .nota-header { text-align: center; margin-bottom: 12px; }
+        .nota-header h3 { margin: 0; font-size: 1.2rem; }
+        .nota-header p { margin: 2px 0; font-size: 0.8rem; }
+        .nota-divider { border-top: 1px dashed #000; margin: 8px 0; }
+        .nota-item { display: flex; justify-content: space-between; padding: 2px 0; font-size: 0.8rem; }
+        .nota-total { display: flex; justify-content: space-between; font-weight: 700; margin-top: 8px; }
+        .nota-footer { text-align: center; margin-top: 12px; font-size: 0.75rem; }
+        .nota-actions { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+        .nota-actions button { flex: 1; }
+
+        /* Khusus untuk form */
+        .qty-select-wrapper {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-            background: var(--bg);
+            gap: 8px;
+            align-items: center;
+            flex: 1;
         }
-
-        /* ===== SISANYA STYLE (tidak diubah) ===== */
-        ... (salin semua style dari kode asli mulai dari sini) ...
-        /* Saya akan menyisipkan style yang sama, tapi untuk menghemat ruang, saya tulis ulang seluruh kode di bawah. */
+        .qty-select-wrapper select,
+        .qty-select-wrapper input {
+            flex: 1;
+            min-width: 60px;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .qty-select-wrapper select:focus,
+        .qty-select-wrapper input:focus {
+            border-color: var(--primary);
+        }
+        /* Input dengan format rupiah */
+        .rupiah-input {
+            text-align: right;
+        }
+        .purchase-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
+        }
+        .purchase-history-item:last-child {
+            border-bottom: none;
+        }
+        .purchase-history-item .actions {
+            display: flex;
+            gap: 6px;
+        }
+        .cost-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
+        }
+        .cost-history-item:last-child {
+            border-bottom: none;
+        }
+        .cost-history-item .actions {
+            display: flex;
+            gap: 6px;
+        }
+        .category-chip {
+            display: inline-block;
+            background: #e5e7eb;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin: 2px;
+        }
+        .category-chip .remove {
+            cursor: pointer;
+            color: var(--danger);
+            margin-left: 4px;
+            font-weight: 700;
+        }
+        /* Sugest dropdown */
+        .suggest-container {
+            position: relative;
+        }
+        .suggest-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 12px 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+        }
+        .suggest-list .suggest-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .suggest-list .suggest-item:hover {
+            background: #f0f7ff;
+        }
+        .suggest-container input:focus + .suggest-list {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -135,7 +237,7 @@
 <!-- ======== SETUP & LOGIN SCREEN ======== -->
 <div id="authPage" class="auth-page">
     <div class="auth-card" id="setupCard" style="display:none;">
-        <h2>🏪 Diskop Kasir Apps</h2>
+        <h2>🏪 HDRG Kasir Apps</h2>
         <p style="text-align:center; color:var(--gray); margin-bottom:20px; font-size:0.9rem;">Setup awal toko Anda untuk memulai</p>
         <input type="text" id="storeName" placeholder="Nama Toko / Usaha" required>
         <input type="password" id="ownerPin" placeholder="PIN Owner (min 4 digit)" maxlength="6" inputmode="numeric" required>
@@ -159,15 +261,14 @@
 </div>
 
 <!-- ======== MAIN APP INTERFACE ======== -->
-<div id="mainApp">
+<div id="mainApp" style="display:none;">
     <header class="app-header">
         <div class="left">
-            <div class="store-name" id="headerStoreName">Diskop Kasir Apps</div>
+            <div class="store-name" id="headerStoreName">HDRG Kasir Apps</div>
             <div class="user-info" id="headerUserInfo">👤 Owner</div>
         </div>
         <div class="right">
-            <div class="app-name">Diskop Kasir Apps</div>
-            <button class="fs-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
+            <div class="app-name">HDRG Kasir Apps</div>
         </div>
     </header>
 
@@ -535,10 +636,9 @@
         <div style="margin-bottom:16px;">
             <h4 style="margin:8px 0;">ℹ️ Info Aplikasi</h4>
             <div style="font-size:0.85rem; background:#f8f9fa; padding:12px; border-radius:12px; line-height:1.6;">
-                <strong>Diskop Kasir Apps by Sugoi 8</strong><br>
-                Aplikasi pencatatan keuangan dan kasir digital untuk mendukung kemajuan UMKM.<br><br>
-                <strong>Presented by:</strong><br>
-                Dinas Koperasi, Usaha Kecil dan Menengah dan Perdagangan Kabupaten Jember
+                <strong>HDRG Kasir Apps</strong><br>
+                Aplikasi ini didedikasikan untuk kawan-kawan UMKM yang sedang berjuang dengan usahanya masing-masing. Semoga dapat bermanfaat dan diberikan kesuksesan untuk usaha yang sedang diperjuangkan.<br><br>
+                HDRG Creative Partner x Kopi Sukun @kopisukun.id
             </div>
         </div>
 
@@ -554,51 +654,6 @@
 </div>
 
 <script>
-    // ==================== FULLSCREEN FUNCTIONS ====================
-    function requestFullScreen() {
-        var el = document.documentElement;
-        if (el.requestFullscreen) {
-            el.requestFullscreen().catch(function(err) {
-                // Jika gagal (misal tidak diizinkan), abaikan
-            });
-        } else if (el.webkitRequestFullscreen) {
-            el.webkitRequestFullscreen();
-        } else if (el.msRequestFullscreen) {
-            el.msRequestFullscreen();
-        }
-    }
-
-    function exitFullScreen() {
-        if (document.exitFullscreen) {
-            document.exitFullscreen().catch(function(err) {});
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
-    }
-
-    function toggleFullscreen() {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-            requestFullScreen();
-        } else {
-            exitFullScreen();
-        }
-    }
-
-    // Tombol fullscreen di header
-    document.addEventListener('DOMContentLoaded', function() {
-        var fsBtn = document.getElementById('fullscreenBtn');
-        if (fsBtn) {
-            fsBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                toggleFullscreen();
-            });
-        }
-        // Saat halaman dimuat, coba minta fullscreen (jika diizinkan oleh user gesture nanti)
-        // Tapi kita akan panggil setelah login (di enterApp)
-    });
-
     // ==================== STORAGE & LOCAL DB ====================
     const DB = {
         get(key, def=null) { try { const v = localStorage.getItem('sugoi8_'+key); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
@@ -717,14 +772,11 @@
 
     function enterApp() {
         document.getElementById('authPage').style.display = 'none';
-        document.getElementById('mainApp').classList.add('active');
+        document.getElementById('mainApp').style.display = 'block';
         document.getElementById('headerStoreName').textContent = storeData.name;
         const roleText = currentUser.role === 'owner' ? 'Owner' : 'Karyawan';
         document.getElementById('headerUserInfo').textContent = '👤 ' + roleText + ' (' + currentUser.name + ')';
         
-        // Minta fullscreen setelah login (user gesture dari klik tombol login)
-        requestFullScreen();
-
         const settingsBtn = document.getElementById('settingsBtn');
         const navStok = document.getElementById('navStok');
         const ownerSection = document.getElementById('ownerReportSection');
@@ -759,12 +811,10 @@
 
     function logout() {
         if(!confirm('Yakin ingin keluar aplikasi?')) return;
-        document.getElementById('mainApp').classList.remove('active');
-        document.getElementById('authPage').style.display = 'flex';
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('authPage').style.display = 'block';
         document.getElementById('loginPin').value = '';
         document.getElementById('loginError').style.display = 'none';
-        // Jika dalam fullscreen, keluar dari fullscreen
-        exitFullScreen();
     }
 
     // ==================== PENGATURAN ====================
