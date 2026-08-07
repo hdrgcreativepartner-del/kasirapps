@@ -1,91 +1,129 @@
-# Kasirapps
+# Kasirapps - POS UMKM untuk Kedai Kopi
 
-A Capacitor mobile application built with React and Vite.
+Aplikasi Kasir modern untuk UMKM kedai kopi. Dapat digunakan sebagai **website** atau di-convert menjadi **APK Android**.
 
-## Getting Started
+## 🚀 Quick Links
 
-### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
-- For iOS: Xcode (macOS only)
-- For Android: Android Studio
+- 🌐 **Website**: https://hdrgcreativepartner-del.github.io/kasirapps/
+- 📱 **Jadikan APK**: Baca [PANDUAN_APK.md](./PANDUAN_APK.md)
+- 📖 **Build APK**: Baca [BUILD_APK.md](./BUILD_APK.md)
 
-### Installation
+## ✨ Fitur Utama
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+### ✅ Implemented
+- 📊 Dashboard dengan statistik penjualan
+- 💳 POS (Point of Sale) untuk penjualan
+- 📦 Manajemen Produk (Barang Jadi)
+- 🧪 Manajemen Bahan Baku (Raw Materials)
+- 👨‍🍳 Produksi dari Bahan Baku
 
-2. **Build the web app:**
-   ```bash
-   npm run build
-   ```
+### 🔄 In Progress
+- 📉 Laporan Penjualan
+- 📊 Analytics & Insights
+- 🔔 Stock Alerts
 
-3. **Add platforms:**
-   ```bash
-   npx cap add ios
-   npx cap add android
-   ```
+### 🚧 Planned
+- 👥 User Management
+- 🏪 Multi-outlet Support
+- 💳 Payment Gateway Integration
 
-### Development
+## 🛠️ Tech Stack
 
-1. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
+- **Frontend**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **Mobile**: Capacitor (iOS & Android)
+- **Storage**: LocalStorage (Client-side)
+- **Styling**: CSS3
 
-2. **Sync changes to native platforms:**
-   ```bash
-   npm run sync
-   ```
+## 📱 Tersedia Di
 
-### Building for Production
+- **Web**: https://hdrgcreativepartner-del.github.io/kasirapps/
+- **Android**: APK via Capacitor
+- **iOS**: Via Xcode
 
+## 🎯 Cocok Untuk
+
+- ☕ Kedai Kopi/Kafe
+- 🍜 Restoran Kecil
+- 🥤 Cafe/Juice Bar
+- 🍕 UMKM F&B Lainnya
+
+## 📖 Dokumentasi Lengkap
+
+| File | Deskripsi |
+|------|-----------|
+| **[PANDUAN_APK.md](./PANDUAN_APK.md)** | 📱 **PANDUAN LENGKAP: Website → APK Android** |
+| [BUILD_APK.md](./BUILD_APK.md) | Build APK dengan Capacitor |
+
+## 🚀 Mulai Cepat
+
+### Buka Website
+```
+https://hdrgcreativepartner-del.github.io/kasirapps/
+```
+**Langsung bisa dipakai tanpa install!**
+
+### Jadikan APK Android
+Ikuti panduan di: **[PANDUAN_APK.md](./PANDUAN_APK.md)**
+
+### Development (Setup Lokal)
 ```bash
-npm run build
-npm run sync
+# Clone
+git clone https://github.com/hdrgcreativepartner-del/kasirapps.git
+cd kasirapps
+
+# Install & Dev
+npm install
+npm run dev
+# Buka: http://localhost:3000
 ```
 
-### Opening in IDEs
+## 💡 Cara Kerja
 
-**iOS (Xcode):**
-```bash
-npm run open:ios
-```
+### 1️⃣ Bahan Baku (Raw Materials)
+- Daftar bahan baku (kopi, gula, susu, dll)
+- Catat pembelian bahan dari supplier
+- Stok otomatis terupdate
 
-**Android (Android Studio):**
-```bash
-npm run open:android
-```
+### 2️⃣ Produksi
+- Proses bahan baku → produk siap jual
+- Gunakan resep yang sudah didefinisikan
+- Stok otomatis berubah
 
-## Project Structure
+### 3️⃣ POS (Penjualan)
+- Pilih produk → tentukan jumlah
+- Hitung total + pajak
+- Terima pembayaran (Cash/Debit/QRIS)
+- Stok produk otomatis berkurang
 
-```
-kasirapps/
-├── src/
-│   ├── main.tsx          # React entry point
-│   ├── App.tsx           # Main App component
-│   ├── index.html        # HTML template
-│   ├── index.css         # Global styles
-│   └── App.css           # App component styles
-├── capacitor.config.ts   # Capacitor configuration
-├── vite.config.ts        # Vite configuration
-├── tsconfig.json         # TypeScript configuration
-└── package.json          # Project dependencies
-```
+### 4️⃣ Laporan
+- Dashboard penjualan hari ini
+- Stok barang & bahan baku
+- Produk terlaris
 
-## Scripts
+## ⚡ Prerequisites untuk APK
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run sync` - Sync web app to native platforms
-- `npm run open:ios` - Open iOS project in Xcode
-- `npm run open:android` - Open Android project in Android Studio
+Jika ingin convert ke APK, pastikan punya:
+- ✅ Node.js (v16+)
+- ✅ Android Studio
+- ✅ JDK 11+
+- ✅ Git (optional)
 
-## Documentation
+**Detail lengkap**: [PANDUAN_APK.md](./PANDUAN_APK.md)
 
-- [Capacitor Documentation](https://capacitorjs.com/docs)
-- [Vite Documentation](https://vitejs.dev/)
-- [React Documentation](https://react.dev/)
+## 🐛 Report Bug
+
+Issue? Buat di: https://github.com/hdrgcreativepartner-del/kasirapps/issues
+
+## 📝 Lisensi
+
+Open Source - Bebas dimodifikasi
+
+## 🙏 Credits
+
+Dibuat dengan ❤️ untuk UMKM Indonesia
+
+---
+
+**v1.0.0** | Status: 🟢 Development  
+**Last Updated**: Aug 2026
