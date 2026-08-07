@@ -42,11 +42,14 @@
         }
         #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         #splashScreen .logo {
-            font-size: 2.8rem; font-weight: 800; color: white; letter-spacing: -1px;
+            font-size: 2.6rem; font-weight: 800; color: white; letter-spacing: -1px;
             text-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
         #splashScreen .logo span { color: #f5d742; }
-        #splashScreen .sub { color: rgba(255,255,255,0.85); font-size: 1rem; margin-top: 8px; font-weight: 300; letter-spacing: 2px; }
+        #splashScreen .sub {
+            color: rgba(255,255,255,0.9); font-size: 1rem; margin-top: 6px;
+            font-weight: 300; letter-spacing: 1px; text-align: center;
+        }
         #splashScreen .loader {
             margin-top: 30px; width: 40px; height: 40px;
             border: 4px solid rgba(255,255,255,0.2); border-top-color: white;
@@ -158,7 +161,7 @@
         .btn-danger:hover { background: #c0392b; }
         .btn-accent { background: var(--accent); color: white; }
         .btn-accent:hover { background: #d4951a; }
-        .btn-sm { padding: 6px 12px; font-size: 0.75rem; border-radius: 10px; }
+        .btn-sm { padding: 4px 10px; font-size: 0.7rem; border-radius: 8px; }
         .btn-block { width: 100%; justify-content: center; }
 
         /* ===== TABLE ===== */
@@ -261,15 +264,17 @@
         .settings-section.open .body { display: block; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ===== EMPLOYEE LIST IN SETTINGS ===== */
+        /* ===== EMPLOYEE LIST IN SETTINGS (fixed) ===== */
         .employee-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 0; border-bottom: 1px solid #f0f0f0;
+            gap: 8px; flex-wrap: wrap;
         }
         .employee-item:last-child { border-bottom: none; }
-        .employee-item .info { font-size: 0.9rem; }
+        .employee-item .info { font-size: 0.9rem; flex: 1; }
         .employee-item .info .name { font-weight: 600; }
         .employee-item .info .pin { color: var(--gray); font-size: 0.8rem; margin-left: 8px; }
+        .employee-item .btn { flex-shrink: 0; }
 
         /* ===== EXPORT BUTTON ===== */
         .btn-export {
@@ -292,10 +297,10 @@
 </head>
 <body>
 
-<!-- ========== SPLASH ========== -->
+<!-- ========== SPLASH SCREEN ========== -->
 <div id="splashScreen">
-    <div class="logo">HDRG <span>Creative</span> Partner</div>
-    <div class="sub">Kasir Digital • UMKM Maju</div>
+    <div class="logo">HDRG <span>Kasir Apps</span></div>
+    <div class="sub">by HDRG Creative Partner x Kopi Sukun</div>
     <div class="loader"></div>
 </div>
 
@@ -665,9 +670,9 @@
                 <span class="arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             <div class="body">
-                <div style="display:flex; gap:8px; margin-bottom:12px;">
-                    <input type="text" id="modalEmployeeName" placeholder="Nama" style="flex:2; padding:10px; border:2px solid #e8edf2; border-radius:12px; font-size:0.85rem;">
-                    <input type="password" id="modalEmployeePin" placeholder="PIN" maxlength="6" inputmode="numeric" style="flex:1; padding:10px; border:2px solid #e8edf2; border-radius:12px; font-size:0.85rem;">
+                <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+                    <input type="text" id="modalEmployeeName" placeholder="Nama" style="flex:2; min-width:120px; padding:10px; border:2px solid #e8edf2; border-radius:12px; font-size:0.85rem;">
+                    <input type="password" id="modalEmployeePin" placeholder="PIN" maxlength="6" inputmode="numeric" style="flex:1; min-width:80px; padding:10px; border:2px solid #e8edf2; border-radius:12px; font-size:0.85rem;">
                     <button class="btn btn-primary btn-sm" onclick="saveEmployee()"><i class="fas fa-user-plus"></i> Tambah</button>
                 </div>
                 <div id="employeeList"><div class="empty">Belum ada karyawan</div></div>
@@ -750,7 +755,7 @@
         renderPurchaseHistoryList();
         renderCostHistoryList();
         setupToggle();
-        renderEmployees(); // for settings
+        renderEmployees();
     }
 
     // ============================================================
@@ -1130,7 +1135,7 @@
     }
 
     // ============================================================
-    // EMPLOYEE (pindah ke settings)
+    // EMPLOYEE (pindah ke settings) - FIXED LAYOUT
     // ============================================================
     function renderEmployees() {
         const container = document.getElementById('employeeList');
@@ -1142,7 +1147,7 @@
                     <span class="name">${e.name}</span>
                     <span class="pin">PIN: ${e.pin}</span>
                 </div>
-                <button class="btn btn-sm btn-danger" onclick="deleteEmployee(${idx})"><i class="fas fa-user-minus"></i> Hapus</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteEmployee(${idx})"><i class="fas fa-user-minus"></i> Hapus</button>
             </div>`;
         });
         container.innerHTML = html;
@@ -1626,11 +1631,9 @@
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet(data);
             if (addTotal && data.length > 0) {
-                // Tambah baris total di bagian bawah
                 const totalRow = {};
                 const keys = Object.keys(data[0]);
                 keys.forEach(key => {
-                    // Cari kolom numerik
                     const values = data.map(row => parseFloat(row[key]) || 0);
                     if (values.some(v => v > 0)) {
                         totalRow[key] = { f: `SUM(${XLSX.utils.encode_cell({ c: keys.indexOf(key), r: 1 })}:${XLSX.utils.encode_cell({ c: keys.indexOf(key), r: data.length })})`, t: 'n' };
@@ -1719,7 +1722,7 @@
         document.getElementById('settingsPhone').value = profile.phone || '';
         document.getElementById('settingsSocial').value = profile.social || '';
         document.getElementById('settingsModal').style.display = 'flex';
-        renderEmployees(); // refresh
+        renderEmployees();
     }
 
     function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
