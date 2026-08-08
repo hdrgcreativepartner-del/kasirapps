@@ -373,9 +373,7 @@
                 <div class="card-title">
                     <span><i class="fas fa-boxes"></i> Manajemen Produk</span>
                     <div style="display:flex; gap:6px; align-items:center;">
-                        <button class="btn-minimize" onclick="toggleProductTable()" id="minimizeBtn" title="Minimalkan tabel">
-                            <i class="fas fa-chevron-up"></i>
-                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="toggleProductTable()" id="toggleProductTableBtn">Minimalkan ▲</button>
                         <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i> Tambah</button>
                     </div>
                 </div>
@@ -385,23 +383,25 @@
                     <button data-type="finished"><i class="fas fa-box"></i> Produk Jadi</button>
                     <button data-type="processed"><i class="fas fa-utensils"></i> Produk Olahan</button>
                 </div>
-                <div class="table-wrap table-collapsible" id="productTableWrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="min-width: 130px;">Nama</th>
-                                <th>Jenis</th>
-                                <th>Kategori</th>
-                                <th>Satuan</th>
-                                <th>Harga</th>
-                                <th>Stok</th>
-                                <th style="text-align: center; min-width: 110px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productTableBody"><tr><td colspan="7" class="empty">Belum ada produk</td></tr></tbody>
-                    </table>
+                <div id="productTableContainer">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 130px;">Nama</th>
+                                    <th>Jenis</th>
+                                    <th>Kategori</th>
+                                    <th>Satuan</th>
+                                    <th>Harga</th>
+                                    <th>Stok</th>
+                                    <th style="text-align: center; min-width: 110px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody"><tr><td colspan="7" class="empty">Belum ada produk</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
                 </div>
-                <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
             </div>
 
             <div class="card" id="purchaseCard">
@@ -489,7 +489,7 @@
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Metode</th><th>Kasir</th><th>Nota</th></tr></thead>
+                        <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Metode</th><th>Nota</th></tr></thead>
                         <tbody id="salesReportBody"><tr><td colspan="6" class="empty">Belum ada transaksi</td></tr></tbody>
                     </table>
                 </div>
@@ -1573,6 +1573,18 @@
         if (container.style.display === 'none') { container.style.display = 'block'; btn.textContent = 'Minimalkan ▲'; } else { container.style.display = 'none'; btn.textContent = 'Tampilkan ▼'; }
     }
 
+    function toggleProductTable() {
+        const container = document.getElementById('productTableContainer');
+        const btn = document.getElementById('toggleProductTableBtn');
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            btn.textContent = 'Minimalkan ▲';
+        } else {
+            container.style.display = 'none';
+            btn.textContent = 'Tampilkan ▼';
+        }
+    }
+
     async function pay(method) {
         if (cart.length === 0) { alert('Keranjang kosong!'); return; }
         const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
@@ -2182,20 +2194,6 @@
                 location.reload();
             }
         } else alert('PIN salah!');
-    }
-
-    function toggleProductTable() {
-        const wrapper = document.getElementById('productTableWrapper');
-        const btn = document.getElementById('minimizeBtn');
-        if (productTableCollapsed) {
-            wrapper.classList.remove('collapsed');
-            btn.innerHTML = '<i class="fas fa-chevron-up"></i>';
-            productTableCollapsed = false;
-        } else {
-            wrapper.classList.add('collapsed');
-            btn.innerHTML = '<i class="fas fa-chevron-down"></i>';
-            productTableCollapsed = true;
-        }
     }
 
     function renderAll() {
