@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -44,6 +45,7 @@
         #splashScreen .logo {
             font-size: 2.6rem; font-weight: 800; color: white; letter-spacing: -1px;
             text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            text-align: center;
         }
         #splashScreen .logo span { color: #f5d742; }
         #splashScreen .sub {
@@ -62,19 +64,16 @@
             background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
             color: white; padding: 16px 20px; border-radius: 0 0 28px 28px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 8px 25px rgba(26,92,74,0.2);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             flex-wrap: wrap; gap: 8px; position: sticky; top: 0; z-index: 100;
         }
         .app-header .left { display: flex; flex-direction: column; gap: 2px; }
         .app-header .left .store-name { font-size: 1.2rem; font-weight: 700; }
         .app-header .left .user-info { font-size: 0.7rem; opacity: 0.85; display: flex; align-items: center; gap: 4px; }
-        .app-header .right { display: flex; align-items: center; gap: 8px; }
         .app-header .right .app-name {
             font-size: 0.8rem; font-weight: 600; background: rgba(255,255,255,0.15);
-            padding: 4px 14px; border-radius: 30px; letter-spacing: 0.5px;
-            display: flex; align-items: center; gap: 6px;
+            padding: 4px 14px; border-radius: 30px; display: flex; align-items: center; gap: 6px;
         }
-        .app-header .right .app-name i { font-size: 0.9rem; }
 
         /* ===== AUTH ===== */
         .auth-page {
@@ -134,6 +133,7 @@
         .card-title {
             font-weight: 700; font-size: 1.05rem; margin-bottom: 14px;
             display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 8px;
         }
         .card-title i { margin-right: 8px; color: var(--primary); }
 
@@ -161,6 +161,8 @@
         .btn-danger:hover { background: #c0392b; }
         .btn-accent { background: var(--accent); color: white; }
         .btn-accent:hover { background: #d4951a; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
         .btn-sm { padding: 4px 10px; font-size: 0.7rem; border-radius: 8px; }
         .btn-block { width: 100%; justify-content: center; }
 
@@ -179,12 +181,13 @@
         .badge-yellow { background: #fef3c7; color: #92400e; }
         .badge-blue { background: #dbeafe; color: #1e40af; }
         .badge-purple { background: #ede9fe; color: #5b21b6; }
+        .badge-red { background: #fecaca; color: #991b1b; }
         .empty { text-align: center; padding: 30px 10px; color: var(--gray); font-style: italic; font-size: 0.85rem; }
 
-        /* ===== TOGGLE JENIS ===== */
+        /* ===== TOGGLE ===== */
         .toggle-group {
             display: flex; background: #f1f5f9; border-radius: 14px; padding: 4px;
-            width: 100%; max-width: 300px; margin-bottom: 10px;
+            width: 100%; max-width: 100%; margin-bottom: 10px;
         }
         .toggle-group button {
             flex: 1; padding: 8px 12px; border: none; border-radius: 12px; font-weight: 600;
@@ -202,7 +205,7 @@
         .cart-item:last-child { border-bottom: none; }
         .cart-item .info { flex: 1; }
         .cart-item .info .name { font-weight: 600; }
-        .cart-item .info .meta { font-size: 0.7rem; color: var(--gray); display: flex; gap: 8px; margin-top: 2px; }
+        .cart-item .info .meta { font-size: 0.7rem; color: var(--gray); display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
 
         /* ===== QTY ===== */
         .qty-select-wrapper {
@@ -223,8 +226,9 @@
             z-index: 999; padding: 16px;
         }
         .modal {
-            background: white; border-radius: 28px; max-width: 440px; width: 100%; padding: 28px 24px;
+            background: white; border-radius: 28px; max-width: 480px; width: 100%; padding: 28px 24px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.2); animation: modalIn 0.25s ease;
+            max-height: 90vh; overflow-y: auto;
         }
         @keyframes modalIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .modal h3 { margin-top: 0; margin-bottom: 18px; font-size: 1.2rem; font-weight: 700; }
@@ -258,13 +262,11 @@
         .settings-section .header i { margin-right: 10px; color: var(--primary); }
         .settings-section .header .arrow { transition: transform 0.3s ease; }
         .settings-section.open .header .arrow { transform: rotate(180deg); }
-        .settings-section .body {
-            padding: 0 18px 18px; display: none; animation: slideDown 0.3s ease;
-        }
+        .settings-section .body { padding: 0 18px 18px; display: none; animation: slideDown 0.3s ease; }
         .settings-section.open .body { display: block; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ===== EMPLOYEE LIST IN SETTINGS (fixed) ===== */
+        /* ===== EMPLOYEE ITEM ===== */
         .employee-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 0; border-bottom: 1px solid #f0f0f0;
@@ -276,15 +278,15 @@
         .employee-item .info .pin { color: var(--gray); font-size: 0.8rem; margin-left: 8px; }
         .employee-item .btn { flex-shrink: 0; }
 
-        /* ===== EXPORT BUTTON ===== */
-        .btn-export {
-            background: #28a745; color: white; border: none; padding: 8px 16px;
-            border-radius: 30px; font-weight: 600; font-size: 0.8rem;
-            display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
-            transition: var(--transition);
+        /* ===== RECIPE ITEM ===== */
+        .recipe-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px solid #f0f0f0;
         }
-        .btn-export:hover { background: #218838; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(40,167,69,0.3); }
-        .btn-export i { font-size: 1rem; }
+        .recipe-item:last-child { border-bottom: none; }
+        .recipe-item .info { font-size: 0.85rem; }
+        .recipe-item .info .raw-name { font-weight: 600; }
+        .recipe-item .info .qty { color: var(--gray); font-size: 0.8rem; }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
@@ -292,12 +294,13 @@
             .app-header .right .app-name { font-size: 0.7rem; padding: 2px 10px; }
             .card { padding: 14px 12px; }
             .auth-card { padding: 24px 16px; }
+            .modal { padding: 20px 16px; }
         }
     </style>
 </head>
 <body>
 
-<!-- ========== SPLASH SCREEN ========== -->
+<!-- ========== SPLASH ========== -->
 <div id="splashScreen">
     <div class="logo">HDRG <span>Kasir Apps</span></div>
     <div class="sub">by HDRG Creative Partner x Kopi Sukun</div>
@@ -423,7 +426,7 @@
                 <div style="margin-bottom:8px;">
                     <div class="suggest-container">
                         <input type="text" id="purchaseProduct" placeholder="Nama barang" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.85rem;" oninput="suggestProduct(this.value)">
-                        <div class="suggest-list" id="productSuggestList"></div>
+                        <div class="suggest-list" id="productSuggestList" style="display:none; background:white; border:1px solid #ddd; border-radius:0 0 12px 12px; max-height:150px; overflow-y:auto; position:absolute; width:100%; z-index:10;"></div>
                     </div>
                 </div>
                 <div class="flex" style="margin-bottom:8px;">
@@ -473,7 +476,7 @@
         <div id="pageLaporan" class="page">
             <div class="card">
                 <div class="card-title"><i class="fas fa-chart-bar"></i> Laporan Penjualan
-                    <button class="btn-export" onclick="exportSales()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                    <button class="btn btn-success btn-sm" onclick="exportSales()"><i class="fas fa-file-excel"></i> Export Excel</button>
                 </div>
                 <div class="flex" style="margin-bottom:10px;">
                     <button class="btn btn-outline btn-sm" onclick="setSalesFilter('today')">Hari Ini</button>
@@ -492,7 +495,7 @@
             <div id="ownerReportSection" style="display:none;">
                 <div class="card">
                     <div class="card-title"><i class="fas fa-shopping-cart"></i> Laporan Pembelian
-                        <button class="btn-export" onclick="exportPurchases()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                        <button class="btn btn-success btn-sm" onclick="exportPurchases()"><i class="fas fa-file-excel"></i> Export Excel</button>
                     </div>
                     <div class="flex" style="margin-bottom:10px;">
                         <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('today')">Hari Ini</button>
@@ -510,7 +513,7 @@
 
                 <div class="card">
                     <div class="card-title"><i class="fas fa-wallet"></i> Laporan Keuangan
-                        <button class="btn-export" onclick="exportFinancial()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                        <button class="btn btn-success btn-sm" onclick="exportFinancial()"><i class="fas fa-file-excel"></i> Export Excel</button>
                     </div>
                     <div class="flex" style="margin-bottom:10px;">
                         <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('today')">Hari Ini</button>
@@ -533,7 +536,7 @@
 
                 <div class="card">
                     <div class="card-title"><i class="fas fa-file-invoice-dollar"></i> Laporan Biaya
-                        <button class="btn-export" onclick="exportCosts()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                        <button class="btn btn-success btn-sm" onclick="exportCosts()"><i class="fas fa-file-excel"></i> Export Excel</button>
                     </div>
                     <div class="flex" style="margin-bottom:10px;">
                         <button class="btn btn-outline btn-sm" onclick="setCostFilter('today')">Hari Ini</button>
@@ -578,6 +581,7 @@
 </div>
 
 <!-- ===== MODALS ===== -->
+
 <!-- Produk -->
 <div id="productModal" class="modal-overlay">
     <div class="modal">
@@ -597,6 +601,32 @@
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeProductModal()">Batal</button>
             <button class="btn btn-primary" onclick="saveProduct()"><i class="fas fa-save"></i> Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Resep -->
+<div id="recipeModal" class="modal-overlay">
+    <div class="modal">
+        <h3><i class="fas fa-utensils"></i> Atur Resep: <span id="recipeProductName"></span></h3>
+        <input type="hidden" id="recipeProductId">
+        <div style="margin-bottom:12px;">
+            <div style="font-size:0.85rem; color:var(--gray); margin-bottom:8px;">Komposisi bahan baku yang digunakan:</div>
+            <div id="recipeList" style="min-height:50px;">
+                <div class="empty">Belum ada bahan baku</div>
+            </div>
+        </div>
+        <div class="flex" style="margin-bottom:8px;">
+            <select id="recipeIngredientSelect" style="flex:2; padding:10px; border:2px solid #e8edf2; border-radius:12px; font-size:0.85rem;">
+                <option value="">-- Pilih Bahan Baku --</option>
+            </select>
+            <input type="number" id="recipeQty" placeholder="Jumlah" min="1" value="1" style="flex:1; padding:10px; border:2px solid #e8edf2; border-radius:12px; font-size:0.85rem;">
+            <button class="btn btn-primary btn-sm" onclick="addRecipeIngredient()"><i class="fas fa-plus"></i></button>
+        </div>
+        <div style="font-size:0.7rem; color:var(--gray); margin-bottom:8px;">* Satuan sesuai stok bahan baku (gram, ml, pcs, dll)</div>
+        <div class="btn-row">
+            <button class="btn btn-outline" onclick="closeRecipeModal()">Tutup</button>
+            <button class="btn btn-primary" onclick="saveRecipe()"><i class="fas fa-save"></i> Simpan Resep</button>
         </div>
     </div>
 </div>
@@ -643,12 +673,11 @@
     </div>
 </div>
 
-<!-- ===== SETTINGS MODAL ===== -->
+<!-- ===== SETTINGS ===== -->
 <div id="settingsModal" class="modal-overlay">
     <div class="modal" style="max-width:480px; max-height:90vh; overflow-y:auto;">
         <h3><i class="fas fa-cog"></i> Pengaturan</h3>
 
-        <!-- Accordion: Profil -->
         <div class="settings-section open">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-building"></i> Profil Usaha</span>
@@ -663,7 +692,6 @@
             </div>
         </div>
 
-        <!-- Accordion: Karyawan -->
         <div class="settings-section">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-users"></i> Kelola Karyawan</span>
@@ -679,7 +707,6 @@
             </div>
         </div>
 
-        <!-- Accordion: Tema -->
         <div class="settings-section">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-palette"></i> Tema Warna</span>
@@ -696,7 +723,6 @@
             </div>
         </div>
 
-        <!-- Accordion: Info -->
         <div class="settings-section">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-info-circle"></i> Info Aplikasi</span>
@@ -705,13 +731,12 @@
             <div class="body">
                 <div style="font-size:0.9rem; background:#f8f9fa; padding:16px; border-radius:14px; line-height:1.8;">
                     <strong>HDRG Kasir Apps</strong><br>
-                    Aplikasi ini didedikasikan untuk UMKM.<br>
+                    Aplikasi kasir digital untuk UMKM<br>
                     <em>HDRG Creative Partner x Kopi Sukun</em>
                 </div>
             </div>
         </div>
 
-        <!-- Accordion: Reset -->
         <div class="settings-section">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-trash-alt" style="color:var(--danger);"></i> Reset Aplikasi</span>
@@ -756,6 +781,10 @@
         renderCostHistoryList();
         setupToggle();
         renderEmployees();
+        populateProductSelect();
+        renderStok();
+        renderPenjualan();
+        renderLaporan();
     }
 
     // ============================================================
@@ -785,6 +814,26 @@
     let currentTheme = DB.get('theme', { primary: '#1e3a5f', light: '#3a6b8f' });
     let currentNotaSale = null;
     let currentTypeFilter = 'all';
+    let editingRecipeProductId = null;
+    let tempRecipe = [];
+
+    // ============================================================
+    // THEME
+    // ============================================================
+    function setTheme(primary, light) {
+        currentTheme = { primary, light };
+        DB.set('theme', currentTheme);
+        applyTheme();
+    }
+
+    function applyTheme() {
+        document.documentElement.style.setProperty('--primary', currentTheme.primary);
+        document.documentElement.style.setProperty('--primary-light', currentTheme.light);
+        const header = document.querySelector('.app-header');
+        if (header) header.style.background = `linear-gradient(135deg, ${currentTheme.primary}, ${currentTheme.light})`;
+        const splash = document.getElementById('splashScreen');
+        if (splash) splash.style.background = `linear-gradient(135deg, ${currentTheme.primary}, ${currentTheme.light})`;
+    }
 
     // ============================================================
     // TOGGLE & NAV
@@ -812,24 +861,6 @@
         if (pageId === 'pagePenjualan') { renderPenjualan(); populateProductSelect(); }
         else if (pageId === 'pageStok') renderStok();
         else if (pageId === 'pageLaporan') renderLaporan();
-    }
-
-    // ============================================================
-    // THEME
-    // ============================================================
-    function setTheme(primary, light) {
-        currentTheme = { primary, light };
-        DB.set('theme', currentTheme);
-        applyTheme();
-    }
-
-    function applyTheme() {
-        document.documentElement.style.setProperty('--primary', currentTheme.primary);
-        document.documentElement.style.setProperty('--primary-light', currentTheme.light);
-        const header = document.querySelector('.app-header');
-        if (header) header.style.background = `linear-gradient(135deg, ${currentTheme.primary}, ${currentTheme.light})`;
-        const splash = document.getElementById('splashScreen');
-        if (splash) splash.style.background = `linear-gradient(135deg, ${currentTheme.primary}, ${currentTheme.light})`;
     }
 
     // ============================================================
@@ -929,9 +960,7 @@
     }
 
     function parseCleanNumber(val) { if (!val) return 0; return parseInt(val.toString().replace(/\./g, '')) || 0; }
-
     function formatNumber(n) { return new Intl.NumberFormat('id-ID').format(n); }
-
     function formatDate(iso) { const d = new Date(iso); return d.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
 
     // ============================================================
@@ -942,7 +971,6 @@
         const input = document.getElementById('qtyInput');
         if (select.value === 'manual') { input.value = ''; input.focus(); } else { input.value = select.value; }
     }
-
     function syncQtyDropdown() {
         const select = document.getElementById('qtySelect');
         const input = document.getElementById('qtyInput');
@@ -956,10 +984,7 @@
     // CATEGORY
     // ============================================================
     function loadCategoryDropdowns() {
-        const selects = [
-            document.getElementById('purchaseCategory'),
-            document.getElementById('modalProductCategory')
-        ];
+        const selects = [document.getElementById('purchaseCategory'), document.getElementById('modalProductCategory')];
         selects.forEach(sel => {
             if (!sel) return;
             const currentVal = sel.value;
@@ -982,7 +1007,6 @@
     }
 
     function openCategoryModal() { document.getElementById('newCategoryInput').value = ''; renderCategoryList(); document.getElementById('categoryModal').style.display = 'flex'; }
-
     function closeCategoryModal() { document.getElementById('categoryModal').style.display = 'none'; }
 
     function addCategory() {
@@ -1030,14 +1054,16 @@
         filtered.forEach((p) => {
             const stokClass = p.stok <= 0 ? 'stok-low' : '';
             const typeLabel = p.type === 'finished' ? '<span class="badge badge-green">Produk Jadi</span>' : '<span class="badge badge-purple">Bahan Baku</span>';
+            const hasRecipe = p.recipe && p.recipe.length > 0 ? '<span class="badge badge-blue"><i class="fas fa-utensils"></i> Resep</span>' : '';
             html += `<tr>
                 <td><strong>${p.name}</strong><br><small style="color:var(--gray);">${p.barcode || '-'}</small></td>
                 <td>${typeLabel}</td>
-                <td><span style="display:inline-block; background:#e5e7eb; padding:2px 10px; border-radius:12px; font-size:0.7rem;">${p.category || '-'}</span></td>
+                <td><span style="display:inline-block; background:#e5e7eb; padding:2px 10px; border-radius:12px; font-size:0.7rem;">${p.category || '-'}</span> ${hasRecipe}</td>
                 <td>Rp ${formatNumber(p.price)}</td>
                 <td class="${stokClass}">${p.stok}</td>
                 <td>
                     <button class="btn btn-sm btn-outline" onclick="openProductModal('${p.id}')"><i class="fas fa-edit"></i></button>
+                    ${p.type === 'finished' ? `<button class="btn btn-sm btn-primary" onclick="openRecipeModal('${p.id}')"><i class="fas fa-utensils"></i></button>` : ''}
                     <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
                     <button class="btn btn-sm btn-accent" onclick="openRestockModal('${p.id}')"><i class="fas fa-plus"></i></button>
                 </td>
@@ -1091,7 +1117,7 @@
             if (idx !== -1) products[idx] = { ...products[idx], name, barcode, category, type, price, stok };
         } else {
             const newId = Date.now().toString();
-            products.push({ id: newId, name, barcode, category, type, price, stok });
+            products.push({ id: newId, name, barcode, category, type, price, stok, recipe: [] });
         }
         DB.set('products', products);
         closeProductModal();
@@ -1135,7 +1161,97 @@
     }
 
     // ============================================================
-    // EMPLOYEE (pindah ke settings) - FIXED LAYOUT
+    // RECIPE (BOM) SYSTEM
+    // ============================================================
+    function openRecipeModal(productId) {
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+        if (product.type !== 'finished') {
+            alert('Resep hanya untuk produk jadi!');
+            return;
+        }
+        editingRecipeProductId = productId;
+        tempRecipe = product.recipe ? JSON.parse(JSON.stringify(product.recipe)) : [];
+        document.getElementById('recipeProductName').textContent = product.name;
+        document.getElementById('recipeProductId').value = productId;
+        renderRecipeList();
+        populateIngredientSelect();
+        document.getElementById('recipeModal').style.display = 'flex';
+    }
+
+    function renderRecipeList() {
+        const container = document.getElementById('recipeList');
+        if (tempRecipe.length === 0) {
+            container.innerHTML = '<div class="empty">Belum ada bahan baku dalam resep</div>';
+            return;
+        }
+        let html = '';
+        tempRecipe.forEach((item, idx) => {
+            const raw = products.find(p => p.id === item.productId);
+            const name = raw ? raw.name : '(bahan baku dihapus)';
+            html += `<div class="recipe-item">
+                <div class="info">
+                    <span class="raw-name">${name}</span>
+                    <span class="qty">— ${item.qty} unit</span>
+                </div>
+                <button class="btn btn-sm btn-danger" onclick="removeRecipeIngredient(${idx})"><i class="fas fa-times"></i></button>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function populateIngredientSelect() {
+        const sel = document.getElementById('recipeIngredientSelect');
+        sel.innerHTML = '<option value="">-- Pilih Bahan Baku --</option>';
+        products.filter(p => p.type === 'raw').forEach(p => {
+            sel.innerHTML += `<option value="${p.id}">${p.name} (Stok: ${p.stok})</option>`;
+        });
+    }
+
+    function addRecipeIngredient() {
+        const sel = document.getElementById('recipeIngredientSelect');
+        const qty = parseInt(document.getElementById('recipeQty').value);
+        if (!sel.value || isNaN(qty) || qty < 1) {
+            alert('Pilih bahan baku dan jumlah yang valid!');
+            return;
+        }
+        if (tempRecipe.find(r => r.productId === sel.value)) {
+            alert('Bahan baku sudah ada di resep!');
+            return;
+        }
+        tempRecipe.push({ productId: sel.value, qty: qty });
+        renderRecipeList();
+        document.getElementById('recipeQty').value = '1';
+        document.getElementById('recipeIngredientSelect').value = '';
+    }
+
+    function removeRecipeIngredient(idx) {
+        tempRecipe.splice(idx, 1);
+        renderRecipeList();
+    }
+
+    function saveRecipe() {
+        if (tempRecipe.length === 0) {
+            if (!confirm('Resep kosong. Produk ini akan dijual tanpa mengurangi bahan baku. Lanjutkan?')) return;
+        }
+        const product = products.find(p => p.id === editingRecipeProductId);
+        if (product) {
+            product.recipe = tempRecipe;
+            DB.set('products', products);
+            renderStok();
+            alert('Resep berhasil disimpan!');
+            closeRecipeModal();
+        }
+    }
+
+    function closeRecipeModal() {
+        document.getElementById('recipeModal').style.display = 'none';
+        tempRecipe = [];
+        editingRecipeProductId = null;
+    }
+
+    // ============================================================
+    // EMPLOYEE
     // ============================================================
     function renderEmployees() {
         const container = document.getElementById('employeeList');
@@ -1143,10 +1259,7 @@
         let html = '';
         employees.forEach((e, idx) => {
             html += `<div class="employee-item">
-                <div class="info">
-                    <span class="name">${e.name}</span>
-                    <span class="pin">PIN: ${e.pin}</span>
-                </div>
+                <div class="info"><span class="name">${e.name}</span><span class="pin">PIN: ${e.pin}</span></div>
                 <button class="btn btn-danger btn-sm" onclick="deleteEmployee(${idx})"><i class="fas fa-user-minus"></i> Hapus</button>
             </div>`;
         });
@@ -1173,28 +1286,49 @@
     }
 
     // ============================================================
-    // PENJUALAN
+    // SEARCH PRODUCT (FIXED)
     // ============================================================
-    function renderPenjualan() { renderCart(); renderRecentSales(); }
-
     function searchProduct() {
         const q = document.getElementById('searchProduct').value.toLowerCase().trim();
-        if (!q) return;
-        const found = products.find(p => (p.barcode && p.barcode.toLowerCase() === q) || p.name.toLowerCase().includes(q));
-        if (found) { addToCartById(found.id, 1); document.getElementById('searchProduct').value = ''; } else {
+        if (!q) {
+            populateProductSelect();
+            return;
+        }
+
+        let filtered = products;
+        if (currentTypeFilter === 'finished') filtered = products.filter(p => p.type === 'finished');
+        else if (currentTypeFilter === 'raw') filtered = products.filter(p => p.type === 'raw');
+
+        const found = filtered.find(p =>
+            (p.barcode && p.barcode.toLowerCase() === q) ||
+            p.name.toLowerCase().includes(q)
+        );
+
+        if (found) {
+            addToCartById(found.id, 1);
+            document.getElementById('searchProduct').value = '';
+            populateProductSelect();
+        } else {
             const sel = document.getElementById('productSelect');
-            sel.innerHTML = '<option value="">-- Pilih Produk --</option>';
-            let filtered = products;
-            if (currentTypeFilter === 'finished') filtered = products.filter(p => p.type === 'finished');
-            else if (currentTypeFilter === 'raw') filtered = products.filter(p => p.type === 'raw');
+            sel.innerHTML = '<option value="">-- Hasil Pencarian --</option>';
+            let foundAny = false;
             filtered.forEach(p => {
                 if (p.name.toLowerCase().includes(q) || (p.barcode && p.barcode.toLowerCase().includes(q))) {
                     const label = p.type === 'finished' ? '📦' : '🌱';
                     sel.innerHTML += `<option value="${p.id}">${label} ${p.name} (Stok: ${p.stok}) - Rp ${formatNumber(p.price)}</option>`;
+                    foundAny = true;
                 }
             });
+            if (!foundAny) {
+                sel.innerHTML = '<option value="">-- Produk tidak ditemukan --</option>';
+            }
         }
     }
+
+    // ============================================================
+    // PENJUALAN
+    // ============================================================
+    function renderPenjualan() { renderCart(); renderRecentSales(); }
 
     function addToCart() {
         const sel = document.getElementById('productSelect');
@@ -1215,7 +1349,7 @@
             if (p.stok < existing.qty + qty) { alert('Stok tidak cukup!'); return; }
             existing.qty += qty;
         } else {
-            cart.push({ productId: id, name: p.name, price: p.price, qty, type: p.type || 'finished' });
+            cart.push({ productId: id, name: p.name, price: p.price, qty, type: p.type || 'finished', recipe: p.recipe || [] });
         }
         document.getElementById('qtyInput').value = '1';
         document.getElementById('qtySelect').value = '1';
@@ -1234,10 +1368,11 @@
             const subtotal = c.price * c.qty;
             total += subtotal;
             const typeLabel = c.type === 'finished' ? '<span class="badge badge-green">Jadi</span>' : '<span class="badge badge-purple">Baku</span>';
+            const recipeLabel = c.recipe && c.recipe.length > 0 ? '<span class="badge badge-blue"><i class="fas fa-utensils"></i> Resep</span>' : '';
             html += `<div class="cart-item">
                 <div class="info">
                     <div class="name">${c.name}</div>
-                    <div class="meta">${typeLabel} Rp ${formatNumber(c.price)} x ${c.qty}</div>
+                    <div class="meta">${typeLabel} ${recipeLabel} Rp ${formatNumber(c.price)} x ${c.qty}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <span style="font-weight:600;">Rp ${formatNumber(subtotal)}</span>
@@ -1289,13 +1424,60 @@
     }
 
     function processSale(method) {
+        // 1. Cek stok cukup untuk semua item dan bahan baku
+        for (const c of cart) {
+            const product = products.find(p => p.id === c.productId);
+            if (!product) { alert(`Produk ${c.name} tidak ditemukan!`); return; }
+            // Cek stok produk itu sendiri
+            if (product.stok < c.qty) { alert(`Stok ${product.name} tidak cukup! Sisa: ${product.stok}`); return; }
+            // Jika produk punya resep, cek stok bahan baku
+            if (product.recipe && product.recipe.length > 0) {
+                for (const ing of product.recipe) {
+                    const raw = products.find(p => p.id === ing.productId);
+                    if (!raw) { alert(`Bahan baku untuk ${product.name} tidak ditemukan!`); return; }
+                    const needed = ing.qty * c.qty;
+                    if (raw.stok < needed) {
+                        alert(`Stok ${raw.name} tidak cukup untuk ${product.name}! Butuh: ${needed}, tersisa: ${raw.stok}`);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // 2. Proses pengurangan stok
         const items = cart.map(c => ({ name: c.name, qty: c.qty, price: c.price, type: c.type || 'finished' }));
         const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
+
+        for (const c of cart) {
+            const product = products.find(p => p.id === c.productId);
+            if (!product) continue;
+
+            // Jika produk punya resep, kurangi bahan baku, bukan produk itu sendiri
+            if (product.recipe && product.recipe.length > 0) {
+                for (const ing of product.recipe) {
+                    const raw = products.find(p => p.id === ing.productId);
+                    if (raw) {
+                        raw.stok -= ing.qty * c.qty;
+                        if (raw.stok < 0) raw.stok = 0;
+                    }
+                }
+                // Produk jadi stoknya tetap berkurang sebagai jumlah unit yang terjual
+                // (opsional: stok produk jadi juga berkurang)
+                product.stok -= c.qty;
+                if (product.stok < 0) product.stok = 0;
+            } else {
+                // Produk tanpa resep: kurangi stok produk itu sendiri
+                product.stok -= c.qty;
+                if (product.stok < 0) product.stok = 0;
+            }
+        }
+
+        // 3. Simpan transaksi
         const sale = { id: Date.now().toString(), date: new Date().toISOString(), items, total, method, cashier: currentUser.name };
         sales.push(sale);
-        cart.forEach(c => { const p = products.find(x => x.id === c.productId); if (p) p.stok -= c.qty; });
-        DB.set('sales', sales);
+
         DB.set('products', products);
+        DB.set('sales', sales);
         cart = [];
         renderAll();
         populateProductSelect();
@@ -1359,7 +1541,7 @@
         let html = '';
         recent.forEach(p => {
             const typeLabel = p.type === 'finished' ? '<span class="badge badge-green">Jadi</span>' : '<span class="badge badge-purple">Baku</span>';
-            html += `<div class="purchase-history-item" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:0.85rem;">
+            html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:0.85rem;">
                 <div><strong>${p.name}</strong> ${typeLabel}<br><small style="color:var(--gray);">${formatDate(p.date)} • ${formatNumber(p.qty)} pcs • Rp ${formatNumber(p.total)}</small></div>
                 <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-outline" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i></button></div>
             </div>`;
@@ -1373,7 +1555,9 @@
         const matches = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
         if (matches.length === 0) { list.style.display = 'none'; return; }
         let html = '';
-        matches.forEach(p => { html += `<div class="suggest-item" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;" onclick="selectProductSuggestion('${p.name}')">${p.name}</div>`; });
+        matches.forEach(p => {
+            html += `<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;" onclick="selectProductSuggestion('${p.name}')">${p.name}</div>`;
+        });
         list.innerHTML = html;
         list.style.display = 'block';
     }
@@ -1395,8 +1579,13 @@
         if (discount > 0 && discount <= 100) sellPrice = sellPrice * (100 - discount) / 100;
         sellPrice = Math.round(sellPrice);
         const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
-        if (existing) { existing.stok += qty; existing.price = sellPrice > 0 ? sellPrice : existing.price; existing.category = category || existing.category; existing.type = type || existing.type; } else {
-            products.push({ id: Date.now().toString(), name, barcode: '', category, type, price: sellPrice > 0 ? sellPrice : 0, stok: qty });
+        if (existing) {
+            existing.stok += qty;
+            existing.price = sellPrice > 0 ? sellPrice : existing.price;
+            existing.category = category || existing.category;
+            existing.type = type || existing.type;
+        } else {
+            products.push({ id: Date.now().toString(), name, barcode: '', category, type, price: sellPrice > 0 ? sellPrice : 0, stok: qty, recipe: [] });
         }
         purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name, type, qty, total: qty * buyPrice });
         DB.set('products', products);
@@ -1444,7 +1633,7 @@
         p.date = new Date().toISOString();
         const newProd = products.find(prod => prod.name.toLowerCase() === p.name.toLowerCase());
         if (newProd) newProd.stok += parsedQty;
-        else products.push({ id: Date.now().toString(), name: p.name, barcode: '', category: '', type: 'finished', price: 0, stok: parsedQty });
+        else products.push({ id: Date.now().toString(), name: p.name, barcode: '', category: '', type: 'finished', price: 0, stok: parsedQty, recipe: [] });
         DB.set('products', products);
         DB.set('purchases', purchases);
         renderAll();
@@ -1623,7 +1812,7 @@
     function setBestFilter(f) { bestFilter = f; renderBestSeller(); }
 
     // ============================================================
-    // EXPORT EXCEL (dengan rumus dan total)
+    // EXPORT EXCEL
     // ============================================================
     function exportExcel(data, fileName, sheetName = 'Sheet1', addTotal = true) {
         if (!data || data.length === 0) { alert('Tidak ada data!'); return; }
@@ -1742,7 +1931,8 @@
         if (pin === null) return;
         if (pin === storeData.ownerPin) {
             if (confirm('Hapus semua data?')) {
-                for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith('hdrg_')) localStorage.removeItem(key); }
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => { if (key.startsWith('hdrg_')) localStorage.removeItem(key); });
                 location.reload();
             }
         } else alert('PIN salah!');
@@ -1759,3 +1949,4 @@
 </script>
 </body>
 </html>
+```
