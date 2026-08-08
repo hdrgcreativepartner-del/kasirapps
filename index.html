@@ -1540,17 +1540,27 @@
     }
 
     function exportSales() {
-        const ws = XLSX.utils.json_to_sheet(sales.map(s => ({ Tanggal: formatDate(s.date), Total: s.total, Metode: s.method, Kasir: s.cashier })));
+        const dataToExport = sales.map(s => ({ Tanggal: formatDate(s.date), Total: s.total, Metode: s.method, Kasir: s.cashier }));
+        const ws = XLSX.utils.json_to_sheet(dataToExport);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Penjualan');
-        XLSX.writeFile(wb, 'Laporan_Penjualan.xlsx');
+        
+        // Perbaikan agar file tersimpan sempurna di mobile sebagai .xlsx tanpa korup (.bin)
+        XLSX.writeFile(wb, 'Laporan_Penjualan.xlsx', { bookType: 'xlsx', type: 'binary' });
     }
+
     function exportFinancial() {
-        const data = [{ Keterangan: 'Penjualan', Total: sales.reduce((a,b)=>a+b.total,0) }, { Keterangan: 'Pembelian', Total: purchases.reduce((a,b)=>a+b.total,0) }];
+        const data = [
+            { Keterangan: 'Penjualan', Total: sales.reduce((a,b)=>a+b.total,0) }, 
+            { Keterangan: 'Pembelian', Total: purchases.reduce((a,b)=>a+b.total,0) },
+            { Keterangan: 'Biaya Operasional', Total: costs.reduce((a,b)=>a+b.amount,0) }
+        ];
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Keuangan');
-        XLSX.writeFile(wb, 'Laporan_Keuangan.xlsx');
+        
+        // Perbaikan agar file tersimpan sempurna di mobile sebagai .xlsx tanpa korup (.bin)
+        XLSX.writeFile(wb, 'Laporan_Keuangan.xlsx', { bookType: 'xlsx', type: 'binary' });
     }
 
     function renderEmployees() {
@@ -1616,7 +1626,7 @@
             name: document.getElementById('settingsStoreName').value.trim(),
             address: document.getElementById('settingsAddress').value.trim(),
             phone: document.getElementById('settingsPhone').value.trim(),
-            social: document.getElementById('settingsSocial').value.trim()
+            social: document.getElementById('settingsSocial'.value || '').trim()
         };
         DB.set('profile', profile);
         if (profile.name) { storeData.name = profile.name; DB.set('store', storeData); document.getElementById('headerStoreName').textContent = storeData.name; }
