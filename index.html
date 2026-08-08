@@ -152,6 +152,38 @@
             margin-top: 6px;
             font-style: italic;
         }
+        /* ===== SCROLLBAR KHUSUS TABEL STOK ===== */
+        .stock-scrollbar {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 14px;
+            margin-top: 4px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            -webkit-overflow-scrolling: touch;
+        }
+        .stock-scrollbar-inner {
+            height: 1px;
+            min-width: 760px;
+        }
+        .stock-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+        .stock-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        .stock-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 10px;
+        }
+        .stock-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        .stock-scrollbar {
+            scrollbar-width: auto;
+            scrollbar-color: var(--primary-light) #f1f5f9;
+        }
         @media (max-width: 768px) {
             .scroll-hint {
                 display: block;
@@ -241,6 +273,9 @@
         .autocomplete-list .item .price { color: var(--gray); font-weight: 600; }
 
         /* ===== COLLAPSE ===== */
+        .report-collapsible > .report-body { overflow: hidden; transition: max-height 0.25s ease, opacity 0.2s ease; }
+        .report-collapsible.collapsed > .report-body { max-height: 0 !important; opacity: 0; }
+        .report-minimize { flex: 0 0 auto; }
         .table-collapsible { transition: max-height 0.3s ease; overflow: hidden; }
         .table-collapsible.collapsed { max-height: 0 !important; padding: 0 !important; margin: 0 !important; border: none !important; }
         .btn-minimize {
@@ -373,7 +408,9 @@
                 <div class="card-title">
                     <span><i class="fas fa-boxes"></i> Manajemen Produk</span>
                     <div style="display:flex; gap:6px; align-items:center;">
-                        <button class="btn btn-outline btn-sm" onclick="toggleProductTable()" id="toggleProductTableBtn">Minimalkan ▲</button>
+                        <button class="btn-minimize" onclick="toggleProductTable()" id="minimizeBtn" title="Minimalkan tabel">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
                         <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i> Tambah</button>
                     </div>
                 </div>
@@ -383,25 +420,26 @@
                     <button data-type="finished"><i class="fas fa-box"></i> Produk Jadi</button>
                     <button data-type="processed"><i class="fas fa-utensils"></i> Produk Olahan</button>
                 </div>
-                <div id="productTableContainer">
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="min-width: 130px;">Nama</th>
-                                    <th>Jenis</th>
-                                    <th>Kategori</th>
-                                    <th>Satuan</th>
-                                    <th>Harga</th>
-                                    <th>Stok</th>
-                                    <th style="text-align: center; min-width: 110px;">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productTableBody"><tr><td colspan="7" class="empty">Belum ada produk</td></tr></tbody>
-                        </table>
-                    </div>
-                    <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
+                <div class="table-wrap table-collapsible" id="productTableWrapper">
+                    <table id="stockProductTable">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 130px;">Nama</th>
+                                <th>Jenis</th>
+                                <th>Kategori</th>
+                                <th>Satuan</th>
+                                <th>Harga</th>
+                                <th>Stok</th>
+                                <th style="text-align: center; min-width: 110px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody"><tr><td colspan="7" class="empty">Belum ada produk</td></tr></tbody>
+                    </table>
                 </div>
+                <div class="stock-scrollbar" id="stockScrollbar" aria-label="Geser tabel stok ke samping">
+                    <div class="stock-scrollbar-inner" id="stockScrollbarInner"></div>
+                </div>
+                <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
             </div>
 
             <div class="card" id="purchaseCard">
@@ -478,10 +516,11 @@
 
         <!-- ===== LAPORAN ===== -->
         <div id="pageLaporan" class="page">
-            <div class="card">
-                <div class="card-title"><i class="fas fa-chart-bar"></i> Laporan Penjualan
-                    <button class="btn btn-success btn-sm" onclick="exportSales()"><i class="fas fa-file-excel"></i> Export Excel</button>
+            <div class="card report-collapsible" id="reportSalesCard">
+                <div class="card-title"><span><i class="fas fa-chart-bar"></i> Laporan Penjualan</span>
+                    <div style="display:flex; gap:6px; align-items:center;"><button class="btn-minimize report-minimize" onclick="toggleReportCard('reportSalesCard', this)" title="Minimalkan laporan"><i class="fas fa-chevron-up"></i></button><button class="btn btn-success btn-sm" onclick="exportSales()"><i class="fas fa-file-excel"></i> Export Excel</button></div>
                 </div>
+                <div class="report-body">
                 <div class="flex" style="margin-bottom:10px;">
                     <button class="btn btn-outline btn-sm" onclick="setSalesFilter('today')">Hari Ini</button>
                     <button class="btn btn-outline btn-sm" onclick="setSalesFilter('week')">Minggu</button>
@@ -489,18 +528,20 @@
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Metode</th><th>Nota</th></tr></thead>
+                        <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Metode</th><th>Kasir</th><th>Nota</th></tr></thead>
                         <tbody id="salesReportBody"><tr><td colspan="6" class="empty">Belum ada transaksi</td></tr></tbody>
                     </table>
                 </div>
                 <div style="font-weight:700; text-align:right; margin-top:8px; font-size:0.95rem;" id="salesTotalReport">Total: Rp 0</div>
+                </div>
             </div>
 
             <div id="ownerReportSection" style="display:none;">
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-shopping-cart"></i> Laporan Pembelian
-                        <button class="btn btn-success btn-sm" onclick="exportPurchases()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                <div class="card report-collapsible" id="reportPurchaseCard">
+                    <div class="card-title"><span><i class="fas fa-shopping-cart"></i> Laporan Pembelian</span>
+                        <div style="display:flex; gap:6px; align-items:center;"><button class="btn-minimize report-minimize" onclick="toggleReportCard('reportPurchaseCard', this)" title="Minimalkan laporan"><i class="fas fa-chevron-up"></i></button><button class="btn btn-success btn-sm" onclick="exportPurchases()"><i class="fas fa-file-excel"></i> Export Excel</button></div>
                     </div>
+                    <div class="report-body">
                     <div class="flex" style="margin-bottom:10px;">
                         <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('today')">Hari Ini</button>
                         <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('week')">Minggu</button>
@@ -513,12 +554,14 @@
                         </table>
                     </div>
                     <div style="font-weight:700; text-align:right; margin-top:8px;" id="purchaseTotalReport">Total: Rp 0</div>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-wallet"></i> Laporan Keuangan
-                        <button class="btn btn-success btn-sm" onclick="exportFinancial()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                <div class="card report-collapsible" id="reportFinancialCard">
+                    <div class="card-title"><span><i class="fas fa-wallet"></i> Laporan Keuangan</span>
+                        <div style="display:flex; gap:6px; align-items:center;"><button class="btn-minimize report-minimize" onclick="toggleReportCard('reportFinancialCard', this)" title="Minimalkan laporan"><i class="fas fa-chevron-up"></i></button><button class="btn btn-success btn-sm" onclick="exportFinancial()"><i class="fas fa-file-excel"></i> Export Excel</button></div>
                     </div>
+                    <div class="report-body">
                     <div class="flex" style="margin-bottom:10px;">
                         <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('today')">Hari Ini</button>
                         <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('week')">Minggu</button>
@@ -534,14 +577,16 @@
                         <span>Total Biaya</span> <span id="financialCosts">Rp 0</span>
                     </div>
                     <div style="display:flex; justify-content:space-between; padding:8px 0; font-weight:700; font-size:1.1rem;">
-                        <span>Laba Bersih</span> <span id="financialNet">Rp 0</span>
+                        <span>Arus Kas Bersih</span> <span id="financialNet">Rp 0</span>
+                    </div>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-file-invoice-dollar"></i> Laporan Biaya
-                        <button class="btn btn-success btn-sm" onclick="exportCosts()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                <div class="card report-collapsible" id="reportCostCard">
+                    <div class="card-title"><span><i class="fas fa-file-invoice-dollar"></i> Laporan Biaya</span>
+                        <div style="display:flex; gap:6px; align-items:center;"><button class="btn-minimize report-minimize" onclick="toggleReportCard('reportCostCard', this)" title="Minimalkan laporan"><i class="fas fa-chevron-up"></i></button><button class="btn btn-success btn-sm" onclick="exportCosts()"><i class="fas fa-file-excel"></i> Export Excel</button></div>
                     </div>
+                    <div class="report-body">
                     <div class="flex" style="margin-bottom:10px;">
                         <button class="btn btn-outline btn-sm" onclick="setCostFilter('today')">Hari Ini</button>
                         <button class="btn btn-outline btn-sm" onclick="setCostFilter('week')">Minggu</button>
@@ -554,10 +599,12 @@
                         </table>
                     </div>
                     <div style="font-weight:700; text-align:right; margin-top:8px;" id="costTotalReport">Total: Rp 0</div>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-trophy"></i> Best Seller</div>
+                <div class="card report-collapsible" id="reportBestCard">
+                    <div class="card-title"><span><i class="fas fa-trophy"></i> Best Seller</span><button class="btn-minimize report-minimize" onclick="toggleReportCard('reportBestCard', this)" title="Minimalkan laporan"><i class="fas fa-chevron-up"></i></button></div>
+                    <div class="report-body">
                     <div class="flex" style="margin-bottom:10px;">
                         <button class="btn btn-outline btn-sm" onclick="setBestFilter('today')">Hari Ini</button>
                         <button class="btn btn-outline btn-sm" onclick="setBestFilter('week')">Minggu</button>
@@ -568,6 +615,7 @@
                             <thead><tr><th>#</th><th>Nama</th><th>Jenis</th><th>Terjual</th><th>Omset</th></tr></thead>
                             <tbody id="bestSellerBody"><tr><td colspan="5" class="empty">Belum ada data</td></tr></tbody>
                         </table>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -681,7 +729,7 @@
 
 <div id="recipeModal" class="modal-overlay">
     <div class="modal">
-        <h3><i class="fas fa-utensils"></i> Atur Resep: <span id="recipeProductName"></span></h3>
+        <h3><i class="fas fa-utensils"></i> Atur Komposisi: <span id="recipeProductName"></span></h3>
         <input type="hidden" id="recipeProductId">
         <div style="margin-bottom:12px;">
             <div style="font-size:0.85rem; color:var(--gray); margin-bottom:8px;">Komposisi bahan baku yang dibutuhkan:</div>
@@ -699,7 +747,7 @@
         <div style="font-size:0.7rem; color:var(--gray); margin-bottom:8px;">* Satuan mengikuti satuan bahan baku yang dipilih.</div>
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeRecipeModal()">Tutup</button>
-            <button class="btn btn-primary" onclick="saveRecipe()"><i class="fas fa-save"></i> Simpan Resep</button>
+            <button class="btn btn-primary" onclick="saveRecipe()"><i class="fas fa-save"></i> Simpan Komposisi</button>
         </div>
     </div>
 </div>
@@ -803,9 +851,37 @@
 
 <script>
     const DB = {
-        get(key, def = null) { try { const v = localStorage.getItem('hdrg_' + key); return v ? JSON.parse(v) : def; } catch (e) { return def; } },
-        set(key, val) { localStorage.setItem('hdrg_' + key, JSON.stringify(val)); }
+        get(key, def = null) {
+            try {
+                const v = localStorage.getItem('hdrg_' + key);
+                return v === null ? def : JSON.parse(v);
+            } catch (e) {
+                console.error('DB.get failed:', key, e);
+                return def;
+            }
+        },
+        set(key, val) {
+            try {
+                localStorage.setItem('hdrg_' + key, JSON.stringify(val));
+                return true;
+            } catch (e) {
+                console.error('DB.set failed:', key, e);
+                alert('Penyimpanan penuh atau tidak tersedia. Silakan backup data.');
+                return false;
+            }
+        },
+        remove(key) { localStorage.removeItem('hdrg_' + key); }
     };
+
+    function generateId(prefix = 'id') {
+        return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function escapeHTML(value) {
+        return String(value ?? '').replace(/[&<>"']/g, ch => ({
+            '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+        }[ch]));
+    }
 
     let storeData = DB.get('store', { name: '', ownerPin: '' });
     let products = DB.get('products', []);
@@ -852,7 +928,7 @@
             document.getElementById('splashScreen').classList.add('hidden');
             document.getElementById('authPage').style.display = 'flex';
             initApp();
-        }, 2500);
+        }, 700);
     });
 
     function initApp() {
@@ -872,6 +948,7 @@
         renderEmployees();
         populateProductSelect();
         renderStok();
+        setupStockScrollbar();
         renderPenjualan();
         renderLaporan();
         document.getElementById('purchaseUnit').addEventListener('change', togglePurchaseUnitCustom);
@@ -930,7 +1007,7 @@
         storeData = { name, ownerPin };
         DB.set('store', storeData);
         if (employeePin && employeePin.length >= 4) {
-            employees.push({ id: Date.now().toString(), name: 'Kasir 1', pin: employeePin });
+            employees.push({ id: generateId(), name: 'Kasir 1', pin: employeePin });
             DB.set('employees', employees);
         }
         err.style.display = 'none';
@@ -1121,7 +1198,7 @@
         const sel = document.getElementById('modalRecipeIngredient');
         const qty = parseInt(document.getElementById('modalRecipeQty').value);
         if (!sel.value || isNaN(qty) || qty < 1) { alert('Pilih bahan baku dan jumlah yang valid!'); return; }
-        if (modalTempRecipe.find(r => r.productId === sel.value)) { alert('Bahan baku sudah ada di resep!'); return; }
+        if (modalTempRecipe.find(r => r.productId === sel.value)) { alert('Bahan baku sudah ada di komposisi!'); return; }
         modalTempRecipe.push({ productId: sel.value, qty: qty });
         renderModalRecipeList();
         document.getElementById('modalRecipeQty').value = '1';
@@ -1161,6 +1238,40 @@
         });
     }
 
+    function setupStockScrollbar() {
+        const wrapper = document.getElementById('productTableWrapper');
+        const table = document.getElementById('stockProductTable');
+        const scrollbar = document.getElementById('stockScrollbar');
+        const inner = document.getElementById('stockScrollbarInner');
+        if (!wrapper || !table || !scrollbar || !inner) return;
+        if (wrapper.dataset.stockScrollbarReady === '1') {
+            inner.style.width = Math.max(table.scrollWidth, wrapper.clientWidth) + 'px';
+            scrollbar.scrollLeft = wrapper.scrollLeft;
+            return;
+        }
+        wrapper.dataset.stockScrollbarReady = '1';
+
+        const syncSize = () => {
+            inner.style.width = Math.max(table.scrollWidth, wrapper.clientWidth) + 'px';
+            scrollbar.scrollLeft = wrapper.scrollLeft;
+        };
+
+        wrapper.addEventListener('scroll', () => {
+            if (Math.abs(scrollbar.scrollLeft - wrapper.scrollLeft) > 1) {
+                scrollbar.scrollLeft = wrapper.scrollLeft;
+            }
+        });
+        scrollbar.addEventListener('scroll', () => {
+            if (Math.abs(wrapper.scrollLeft - scrollbar.scrollLeft) > 1) {
+                wrapper.scrollLeft = scrollbar.scrollLeft;
+            }
+        });
+
+        syncSize();
+        requestAnimationFrame(syncSize);
+        window.addEventListener('resize', syncSize);
+    }
+
     function renderStok() {
         if (currentUser.role !== 'owner') return;
         const tbody = document.getElementById('productTableBody');
@@ -1198,7 +1309,7 @@
                 <td class="${stokClass}">${stokDisplay}</td>
                 <td style="text-align: center; white-space: nowrap;">
                     <button class="btn btn-sm btn-outline" title="Edit" onclick="openProductModal('${p.id}')"><i class="fas fa-edit"></i></button>
-                    ${(p.type === 'processed' || p.type === 'finished') ? `<button class="btn btn-sm btn-primary" title="Resep" onclick="openRecipeModal('${p.id}')"><i class="fas fa-utensils"></i></button>` : ''}
+                    ${p.type === 'processed' ? `<button class="btn btn-sm btn-primary" title="Komposisi Bahan" onclick="openRecipeModal('${p.id}')"><i class="fas fa-utensils"></i></button>` : ''}
                     <button class="btn btn-sm btn-danger" title="Hapus" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
                     ${p.type !== 'processed' ? `<button class="btn btn-sm btn-accent" title="Restock" onclick="openRestockModal('${p.id}')"><i class="fas fa-plus"></i></button>` : ''}
                 </td>
@@ -1206,6 +1317,7 @@
         });
         tbody.innerHTML = html;
         populateProductSelect();
+        setupStockScrollbar();
     }
 
     function openProductModal(id = null) {
@@ -1267,12 +1379,13 @@
         let stok = parseCleanNumber(document.getElementById('modalProductStock').value);
         if (type === 'processed') stok = 0;
         if (!name || isNaN(price) || price < 0) { alert('Nama dan harga wajib!'); return; }
-        const recipe = (type === 'processed') ? modalTempRecipe : (modalTempRecipe.length > 0 ? modalTempRecipe : []);
+        if (type === 'processed' && modalTempRecipe.length === 0) { alert('Produk Olahan wajib memiliki minimal 1 bahan baku.'); return; }
+        const recipe = type === 'processed' ? modalTempRecipe : [];
         if (id) {
             const idx = products.findIndex(p => p.id === id);
             if (idx !== -1) products[idx] = { ...products[idx], name, barcode, category, type, unit, price, stok, recipe };
         } else {
-            const newId = Date.now().toString();
+            const newId = generateId();
             products.push({ id: newId, name, barcode, category, type, unit, price, stok, recipe });
         }
         DB.set('products', products);
@@ -1308,7 +1421,7 @@
         const p = products.find(x => x.id === id);
         if (!p) return;
         p.stok += qty;
-        purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name: p.name, type: p.type || 'raw', qty, total: 0 });
+        purchases.push({ id: generateId(), date: new Date().toISOString(), name: p.name, type: p.type || 'raw', qty, total: 0 });
         DB.set('products', products);
         DB.set('purchases', purchases);
         closeRestockModal();
@@ -1320,7 +1433,7 @@
     function openRecipeModal(productId) {
         const product = products.find(p => p.id === productId);
         if (!product) return;
-        if (product.type === 'raw') { alert('Resep hanya untuk produk jadi atau olahan!'); return; }
+        if (product.type !== 'processed') { alert('Komposisi hanya untuk Produk Olahan.'); return; }
         editingRecipeProductId = productId;
         tempRecipe = product.recipe ? JSON.parse(JSON.stringify(product.recipe)) : [];
         document.getElementById('recipeProductName').textContent = product.name;
@@ -1332,7 +1445,7 @@
 
     function renderRecipeList() {
         const container = document.getElementById('recipeList');
-        if (tempRecipe.length === 0) { container.innerHTML = '<div class="empty">Belum ada bahan baku dalam resep</div>'; return; }
+        if (tempRecipe.length === 0) { container.innerHTML = '<div class="empty">Belum ada bahan baku dalam komposisi</div>'; return; }
         let html = '';
         tempRecipe.forEach((item, idx) => {
             const raw = products.find(p => p.id === item.productId);
@@ -1358,7 +1471,7 @@
         const sel = document.getElementById('recipeIngredientSelect');
         const qty = parseInt(document.getElementById('recipeQty').value);
         if (!sel.value || isNaN(qty) || qty < 1) { alert('Pilih bahan baku dan jumlah yang valid!'); return; }
-        if (tempRecipe.find(r => r.productId === sel.value)) { alert('Bahan baku sudah ada di resep!'); return; }
+        if (tempRecipe.find(r => r.productId === sel.value)) { alert('Bahan baku sudah ada di komposisi!'); return; }
         tempRecipe.push({ productId: sel.value, qty: qty });
         renderRecipeList();
         document.getElementById('recipeQty').value = '1';
@@ -1372,14 +1485,14 @@
 
     function saveRecipe() {
         if (tempRecipe.length === 0) {
-            if (!confirm('Resep kosong. Produk ini akan dijual tanpa mengurangi bahan baku. Lanjutkan?')) return;
+            if (!confirm('Komposisi kosong. Produk ini akan dijual tanpa mengurangi bahan baku. Lanjutkan?')) return;
         }
         const product = products.find(p => p.id === editingRecipeProductId);
         if (product) {
             product.recipe = tempRecipe;
             DB.set('products', products);
             renderStok();
-            alert('Resep berhasil disimpan!');
+            alert('Komposisi berhasil disimpan!');
             closeRecipeModal();
         }
     }
@@ -1407,7 +1520,7 @@
         const name = document.getElementById('modalEmployeeName').value.trim();
         const pin = document.getElementById('modalEmployeePin').value.trim();
         if (!name || pin.length < 4) { alert('Nama dan PIN 4 digit!'); return; }
-        employees.push({ id: Date.now().toString(), name, pin });
+        employees.push({ id: generateId(), name, pin });
         DB.set('employees', employees);
         document.getElementById('modalEmployeeName').value = '';
         document.getElementById('modalEmployeePin').value = '';
@@ -1475,44 +1588,67 @@
         addToCartById(sel.value, qty);
     }
 
+    function validateCartStock(candidateCart = cart) {
+        const requirements = new Map();
+
+        candidateCart.forEach(item => {
+            const product = products.find(p => p.id === item.productId);
+            if (!product) throw new Error(`Produk ${item.name || ''} tidak ditemukan.`);
+
+            if (product.type === 'processed') {
+                if (!Array.isArray(product.recipe) || product.recipe.length === 0) {
+                    throw new Error(`Komposisi bahan untuk ${product.name} belum diatur.`);
+                }
+                product.recipe.forEach(ing => {
+                    const needed = Number(ing.qty) * Number(item.qty);
+                    requirements.set(ing.productId, (requirements.get(ing.productId) || 0) + needed);
+                });
+            } else {
+                requirements.set(product.id, (requirements.get(product.id) || 0) + Number(item.qty));
+            }
+        });
+
+        for (const [productId, required] of requirements) {
+            const p = products.find(x => x.id === productId);
+            if (!p) throw new Error('Bahan/produk pada keranjang tidak ditemukan.');
+            if (Number(p.stok) < required) {
+                throw new Error(`Stok ${p.name} tidak cukup. Butuh ${required} ${p.unit || ''}, tersisa ${p.stok}.`);
+            }
+        }
+        return true;
+    }
+
     function addToCartById(id, qty) {
         const p = products.find(x => x.id === id);
         if (!p) return;
-        if (p.type === 'processed') {
-            if (p.recipe && p.recipe.length > 0) {
-                for (const ing of p.recipe) {
-                    const raw = products.find(r => r.id === ing.productId);
-                    if (!raw) { alert(`Bahan baku untuk ${p.name} tidak ditemukan!`); return; }
-                    const needed = ing.qty * qty;
-                    if (raw.stok < needed) {
-                        alert(`Stok ${raw.name} tidak cukup untuk ${p.name}! Butuh: ${needed}, tersisa: ${raw.stok}`);
-                        return;
-                    }
-                }
-            }
-        } else {
-            if (p.stok <= 0) { alert('Stok habis!'); return; }
-            if (p.stok < qty) { alert(`Stok tidak cukup! Sisa: ${p.stok}`); return; }
+
+        qty = Number(qty);
+        if (!Number.isFinite(qty) || qty < 1) {
+            alert('Jumlah tidak valid!');
+            return;
         }
-        const existing = cart.find(c => c.productId === id);
-        if (existing) {
-            if (p.type === 'processed') {
-                if (p.recipe) {
-                    for (const ing of p.recipe) {
-                        const raw = products.find(r => r.id === ing.productId);
-                        if (raw) {
-                            const needed = ing.qty * (existing.qty + qty);
-                            if (raw.stok < needed) { alert(`Stok ${raw.name} tidak cukup!`); return; }
-                        }
-                    }
-                }
-            } else {
-                if (p.stok < existing.qty + qty) { alert('Stok tidak cukup!'); return; }
-            }
-            existing.qty += qty;
-        } else {
-            cart.push({ productId: id, name: p.name, price: p.price, qty, type: p.type || 'raw', recipe: p.recipe || [], unit: p.unit || '' });
+
+        const nextCart = cart.map(item => ({ ...item }));
+        const existing = nextCart.find(c => c.productId === id);
+        if (existing) existing.qty += qty;
+        else nextCart.push({
+            productId: id,
+            name: p.name,
+            price: Number(p.price) || 0,
+            qty,
+            type: p.type || 'raw',
+            recipe: p.recipe || [],
+            unit: p.unit || ''
+        });
+
+        try {
+            validateCartStock(nextCart);
+        } catch (err) {
+            alert(err.message);
+            return;
         }
+
+        cart = nextCart;
         document.getElementById('qtyInput').value = '1';
         document.getElementById('qtySelect').value = '1';
         renderCart();
@@ -1533,7 +1669,7 @@
             if (c.type === 'raw') typeLabel = '<span class="badge badge-purple">Baku</span>';
             else if (c.type === 'finished') typeLabel = '<span class="badge badge-green">Jadi</span>';
             else if (c.type === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
-            const recipeLabel = c.recipe && c.recipe.length > 0 ? '<span class="badge badge-blue"><i class="fas fa-utensils"></i> Resep</span>' : '';
+            const recipeLabel = c.recipe && c.recipe.length > 0 ? '<span class="badge badge-blue"><i class="fas fa-utensils"></i> Komposisi</span>' : '';
             html += `<div class="cart-item">
                 <div class="info">
                     <div class="name">${c.name}</div>
@@ -1573,18 +1709,6 @@
         if (container.style.display === 'none') { container.style.display = 'block'; btn.textContent = 'Minimalkan ▲'; } else { container.style.display = 'none'; btn.textContent = 'Tampilkan ▼'; }
     }
 
-    function toggleProductTable() {
-        const container = document.getElementById('productTableContainer');
-        const btn = document.getElementById('toggleProductTableBtn');
-        if (container.style.display === 'none') {
-            container.style.display = 'block';
-            btn.textContent = 'Minimalkan ▲';
-        } else {
-            container.style.display = 'none';
-            btn.textContent = 'Tampilkan ▼';
-        }
-    }
-
     async function pay(method) {
         if (cart.length === 0) { alert('Keranjang kosong!'); return; }
         const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
@@ -1601,60 +1725,66 @@
     }
 
     function processSale(method) {
-        for (const c of cart) {
-            const product = products.find(p => p.id === c.productId);
-            if (!product) { alert(`Produk ${c.name} tidak ditemukan!`); return; }
-            if (product.type === 'processed') {
-                if (product.recipe && product.recipe.length > 0) {
-                    for (const ing of product.recipe) {
-                        const raw = products.find(p => p.id === ing.productId);
-                        if (!raw) { alert(`Bahan baku untuk ${product.name} tidak ditemukan!`); return; }
-                        const needed = ing.qty * c.qty;
-                        if (raw.stok < needed) {
-                            alert(`Stok ${raw.name} tidak cukup untuk ${product.name}! Butuh: ${needed}, tersisa: ${raw.stok}`);
-                            return;
-                        }
-                    }
-                }
-            } else {
-                if (product.stok < c.qty) {
-                    alert(`Stok ${product.name} tidak cukup! Sisa: ${product.stok}`);
-                    return;
-                }
-            }
+        if (!cart.length) {
+            alert('Keranjang kosong!');
+            return;
         }
 
-        const items = cart.map(c => ({ name: c.name, qty: c.qty, price: c.price, type: c.type || 'raw' }));
-        const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
-
-        for (const c of cart) {
-            const product = products.find(p => p.id === c.productId);
-            if (!product) continue;
-            if (product.type === 'processed') {
-                if (product.recipe) {
-                    for (const ing of product.recipe) {
-                        const raw = products.find(p => p.id === ing.productId);
-                        if (raw) {
-                            raw.stok -= ing.qty * c.qty;
-                            if (raw.stok < 0) raw.stok = 0;
-                        }
-                    }
-                }
-            } else {
-                product.stok -= c.qty;
-                if (product.stok < 0) product.stok = 0;
-            }
+        try {
+            validateCartStock(cart);
+        } catch (err) {
+            alert(err.message);
+            return;
         }
 
-        const sale = { id: Date.now().toString(), date: new Date().toISOString(), items, total, method, cashier: currentUser.name };
+        const items = cart.map(c => ({
+            productId: c.productId,
+            name: c.name,
+            qty: Number(c.qty),
+            price: Number(c.price) || 0,
+            type: c.type || 'raw',
+            unit: c.unit || ''
+        }));
+        const total = items.reduce((sum, c) => sum + (c.price * c.qty), 0);
+
+        const requirements = new Map();
+        cart.forEach(c => {
+            const product = products.find(p => p.id === c.productId);
+            if (product.type === 'processed') {
+                product.recipe.forEach(ing => {
+                    requirements.set(ing.productId, (requirements.get(ing.productId) || 0) + (Number(ing.qty) * Number(c.qty)));
+                });
+            } else {
+                requirements.set(product.id, (requirements.get(product.id) || 0) + Number(c.qty));
+            }
+        });
+
+        for (const [productId, required] of requirements) {
+            const product = products.find(p => p.id === productId);
+            if (product) product.stok = Math.max(0, Number(product.stok) - required);
+        }
+
+        const sale = {
+            id: generateId('sale'),
+            date: new Date().toISOString(),
+            items,
+            total,
+            method,
+            cashier: currentUser.name
+        };
+
         sales.push(sale);
 
-        DB.set('products', products);
-        DB.set('sales', sales);
+        if (!DB.set('products', products) || !DB.set('sales', sales)) {
+            alert('Transaksi gagal disimpan. Data tidak diubah.');
+            return;
+        }
+
         cart = [];
+        currentNotaSale = sale;
         renderAll();
         populateProductSelect();
-        alert('Transaksi berhasil!');
+        openNota(sale.id);
     }
 
     function openNota(saleId) {
@@ -1780,7 +1910,7 @@
         } else {
             const newStok = (type === 'processed') ? 0 : qty;
             const newProduct = {
-                id: Date.now().toString(),
+                id: generateId(),
                 name, barcode: '', category, type, unit,
                 price: sellPrice > 0 ? sellPrice : 0,
                 stok: newStok, recipe: []
@@ -1788,7 +1918,7 @@
             products.push(newProduct);
         }
 
-        purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name, type, qty, total: qty * buyPrice });
+        purchases.push({ id: generateId(), date: new Date().toISOString(), name, type, qty, total: qty * buyPrice });
         DB.set('products', products);
         DB.set('purchases', purchases);
 
@@ -1839,7 +1969,7 @@
         p.date = new Date().toISOString();
         const newProd = products.find(prod => prod.name.toLowerCase() === p.name.toLowerCase());
         if (newProd && newProd.type !== 'processed') newProd.stok += parsedQty;
-        else if (!newProd) products.push({ id: Date.now().toString(), name: p.name, barcode: '', category: '', type: 'raw', unit: '', price: 0, stok: parsedQty, recipe: [] });
+        else if (!newProd) products.push({ id: generateId(), name: p.name, barcode: '', category: '', type: 'raw', unit: '', price: 0, stok: parsedQty, recipe: [] });
         DB.set('products', products);
         DB.set('purchases', purchases);
         renderAll();
@@ -1878,7 +2008,7 @@
         const description = document.getElementById('costDescriptionInput').value.trim();
         const amount = parseCleanNumber(document.getElementById('costAmountInput').value);
         if (!category || !description || isNaN(amount) || amount <= 0) { alert('Data biaya tidak lengkap!'); return; }
-        costs.push({ id: Date.now().toString(), date: new Date().toISOString(), category, description, amount });
+        costs.push({ id: generateId(), date: new Date().toISOString(), category, description, amount });
         DB.set('costs', costs);
         document.getElementById('costCategoryInput').value = '';
         document.getElementById('costDescriptionInput').value = '';
@@ -1916,10 +2046,22 @@
 
     function getDateRange(filter) {
         const now = new Date();
-        let start, end;
-        if (filter === 'today') { start = new Date(now.getFullYear(), now.getMonth(), now.getDate()); end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1); }
-        else if (filter === 'week') { const day = now.getDay(); const diff = now.getDate() - day + (day === 0 ? -6 : 1); start = new Date(now.setDate(diff)); start.setHours(0, 0, 0, 0); end = new Date(start); end.setDate(end.getDate() + 7); }
-        else if (filter === 'month') { start = new Date(now.getFullYear(), now.getMonth(), 1); end = new Date(now.getFullYear(), now.getMonth() + 1, 1); }
+        let start;
+        if (filter === 'month') {
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+        } else if (filter === 'week') {
+            const day = now.getDay();
+            const daysFromMonday = day === 0 ? 6 : day - 1;
+            start = new Date(now);
+            start.setDate(now.getDate() - daysFromMonday);
+            start.setHours(0, 0, 0, 0);
+        } else {
+            start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        }
+        const end = new Date(start);
+        if (filter === 'month') end.setMonth(end.getMonth() + 1);
+        else if (filter === 'week') end.setDate(end.getDate() + 7);
+        else end.setDate(end.getDate() + 1);
         return { start, end };
     }
 
@@ -2109,7 +2251,7 @@
             { 'Keterangan': 'Total Penjualan', 'Jumlah (Rp)': totalSales },
             { 'Keterangan': 'Total Pembelian', 'Jumlah (Rp)': totalPurchases },
             { 'Keterangan': 'Total Biaya', 'Jumlah (Rp)': totalCosts },
-            { 'Keterangan': 'Laba Bersih', 'Jumlah (Rp)': net }
+            { 'Keterangan': 'Arus Kas Bersih', 'Jumlah (Rp)': net }
         ];
         exportExcel(data, `Laporan_Keuangan_${new Date().toISOString().split('T')[0]}.xlsx`, 'Keuangan', false);
     }
@@ -2134,25 +2276,38 @@
     }
 
     function restoreData() {
+        if (currentUser.role !== 'owner') {
+            alert('Hanya Owner yang dapat melakukan restore.');
+            return;
+        }
         const input = document.getElementById('restoreFileInput');
         if (!input.files || !input.files[0]) { alert('Pilih file backup terlebih dahulu!'); return; }
+
         const file = input.files[0];
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File backup terlalu besar (maks. 10 MB).');
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
                 const data = JSON.parse(e.target.result);
-                let count = 0;
-                for (const key in data) {
-                    if (key.startsWith('hdrg_')) {
-                        localStorage.setItem(key, data[key]);
-                        count++;
-                    }
-                }
-                if (count === 0) { alert('File backup tidak valid.'); return; }
-                alert(`✅ Restore berhasil! ${count} data dipulihkan.`);
+                const keys = Object.keys(data).filter(key => key.startsWith('hdrg_'));
+                if (!keys.length) { alert('File backup tidak valid.'); return; }
+
+                if (!confirm(`Restore ${keys.length} data? Data lokal saat ini akan diganti.`)) return;
+
+                keys.forEach(key => {
+                    const raw = data[key];
+                    JSON.parse(raw);
+                });
+
+                keys.forEach(key => localStorage.setItem(key, data[key]));
+                alert(`✅ Restore berhasil! ${keys.length} data dipulihkan.`);
                 location.reload();
             } catch (err) {
-                alert('❌ Gagal membaca file: ' + err.message);
+                alert('❌ Restore dibatalkan: ' + err.message);
             }
         };
         reader.readAsText(file);
@@ -2190,10 +2345,38 @@
         if (pin === storeData.ownerPin) {
             if (confirm('Hapus semua data?')) {
                 const keys = Object.keys(localStorage);
+                keys.keys?.forEach?.(k => {});
                 keys.forEach(key => { if (key.startsWith('hdrg_')) localStorage.removeItem(key); });
                 location.reload();
             }
         } else alert('PIN salah!');
+    }
+
+    const reportCollapsedState = {};
+
+    function toggleReportCard(cardId, btn) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+        const collapsed = card.classList.toggle('collapsed');
+        reportCollapsedState[cardId] = collapsed;
+        if (btn) {
+            btn.innerHTML = collapsed ? '<i class="fas fa-chevron-down"></i>' : '<i class="fas fa-chevron-up"></i>';
+            btn.title = collapsed ? 'Buka laporan' : 'Minimalkan laporan';
+        }
+    }
+
+    function toggleProductTable() {
+        const wrapper = document.getElementById('productTableWrapper');
+        const btn = document.getElementById('minimizeBtn');
+        if (productTableCollapsed) {
+            wrapper.classList.remove('collapsed');
+            btn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+            productTableCollapsed = false;
+        } else {
+            wrapper.classList.add('collapsed');
+            btn.innerHTML = '<i class="fas fa-chevron-down"></i>';
+            productTableCollapsed = true;
+        }
     }
 
     function renderAll() {
@@ -2201,6 +2384,18 @@
         renderStok();
         renderLaporan();
     }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter') return;
+        const active = document.activeElement;
+        if (active && ['loginPin','storeName','ownerPin','ownerPinConfirm','employeePin'].includes(active.id)) {
+            const btn = active.id === 'storeName' || active.id === 'ownerPin' || active.id === 'ownerPinConfirm' || active.id === 'employeePin'
+                ? document.getElementById('setupBtn')
+                : document.getElementById('loginBtn');
+            if (btn && btn.offsetParent !== null) btn.click();
+        }
+    });
+
 </script>
 </body>
 </html>
