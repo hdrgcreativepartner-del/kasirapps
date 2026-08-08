@@ -34,7 +34,7 @@
         }
         .container { max-width: 600px; margin: 0 auto; padding: 12px 16px; }
 
-        /* ===== SPLASH (FUNDAMENTAL - TIDAK DIUBAH) ===== */
+        /* ===== SPLASH ===== */
         #splashScreen {
             position: fixed; inset: 0; background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -122,9 +122,7 @@
         .btn-sm { padding: 6px 10px; font-size: 0.75rem; border-radius: 10px; }
         .btn-block { width: 100%; justify-content: center; }
 
-        /* =========================================================
-           REVOLUSI TABEL RESPONSIF (TANPA HORIZONTAL SCROLL DI MOBILE)
-           ========================================================= */
+        /* ===== TABLE WRAP ===== */
         .table-wrap {
             width: 100%;
             margin-top: 6px;
@@ -157,7 +155,6 @@
         tr:last-child td { border-bottom: none; }
         .table-wrap table th:last-child, .table-wrap table td:last-child { text-align: right; }
 
-        /* Mobile Hybrid View: Tabel berubah menjadi Clean Card Layout agar tanpa horizontal scroll */
         @media (max-width: 768px) {
             .table-wrap {
                 border: none;
@@ -199,7 +196,6 @@
                 margin-right: 12px;
             }
             .table-wrap tbody td:last-child::before { display: none; }
-            .stock-scrollbar, .scroll-hint { display: none !important; }
         }
 
         /* ===== BADGE & UTILITAS ===== */
@@ -287,7 +283,7 @@
 </head>
 <body>
 
-<!-- ========== SPLASH SCREEN (FUNDAMENTAL) ========== -->
+<!-- ========== SPLASH SCREEN ========== -->
 <div id="splashScreen">
     <div class="logo">HDRG <span>Kasir Apps</span></div>
     <div class="sub">by HDRG Creative Partner x Kopi Sukun</div>
@@ -465,10 +461,16 @@
                     <input type="text" id="purchaseUnitCustom" placeholder="Custom" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem; display:none;">
                 </div>
                 <button class="btn btn-primary btn-block" onclick="addPurchase()"><i class="fas fa-save"></i> Catat Pembelian</button>
+                
                 <div style="margin-top:14px;">
-                    <div style="font-weight:600; font-size:0.9rem; margin-bottom:8px;">📋 Riwayat Pembelian</div>
-                    <div id="purchaseHistoryList" style="max-height:180px; overflow-y:auto; border:1px solid #e8edf2; border-radius:14px; padding:8px;">
-                        <div class="empty">Belum ada pembelian</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div style="font-weight:600; font-size:0.9rem;">📋 Riwayat Pembelian</div>
+                        <button class="btn btn-outline btn-sm" onclick="toggleRecentPurchases()" id="togglePurchasesBtn">Minimalkan ▲</button>
+                    </div>
+                    <div id="purchaseHistoryContainer">
+                        <div id="purchaseHistoryList" style="max-height:180px; overflow-y:auto; border:1px solid #e8edf2; border-radius:14px; padding:8px;">
+                            <div class="empty">Belum ada pembelian</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -481,10 +483,16 @@
                     <input type="text" id="costAmountInput" placeholder="Jumlah" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
                 </div>
                 <button class="btn btn-primary btn-block" onclick="addCost()"><i class="fas fa-plus-circle"></i> Catat Pengeluaran</button>
+                
                 <div style="margin-top:14px;">
-                    <div style="font-weight:600; font-size:0.9rem; margin-bottom:8px;">📋 Riwayat Pengeluaran</div>
-                    <div id="costHistoryList" style="max-height:180px; overflow-y:auto; border:1px solid #e8edf2; border-radius:14px; padding:8px;">
-                        <div class="empty">Belum ada pengeluaran</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div style="font-weight:600; font-size:0.9rem;">📋 Riwayat Pengeluaran</div>
+                        <button class="btn btn-outline btn-sm" onclick="toggleRecentCosts()" id="toggleCostsBtn">Minimalkan ▲</button>
+                    </div>
+                    <div id="costHistoryContainer">
+                        <div id="costHistoryList" style="max-height:180px; overflow-y:auto; border:1px solid #e8edf2; border-radius:14px; padding:8px;">
+                            <div class="empty">Belum ada pengeluaran</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1328,6 +1336,22 @@
     function toggleRecentSales() {
         const container = document.getElementById('recentSalesContainer');
         const btn = document.getElementById('toggleSalesBtn');
+        const hidden = container.style.display === 'none';
+        container.style.display = hidden ? 'block' : 'none';
+        btn.textContent = hidden ? 'Minimalkan ▲' : 'Tampilkan ▼';
+    }
+
+    function toggleRecentPurchases() {
+        const container = document.getElementById('purchaseHistoryContainer');
+        const btn = document.getElementById('togglePurchasesBtn');
+        const hidden = container.style.display === 'none';
+        container.style.display = hidden ? 'block' : 'none';
+        btn.textContent = hidden ? 'Minimalkan ▲' : 'Tampilkan ▼';
+    }
+
+    function toggleRecentCosts() {
+        const container = document.getElementById('costHistoryContainer');
+        const btn = document.getElementById('toggleCostsBtn');
         const hidden = container.style.display === 'none';
         container.style.display = hidden ? 'block' : 'none';
         btn.textContent = hidden ? 'Minimalkan ▲' : 'Tampilkan ▼';
