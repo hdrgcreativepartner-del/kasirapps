@@ -120,32 +120,48 @@
         .btn-sm { padding: 4px 8px; font-size: 0.7rem; border-radius: 8px; }
         .btn-block { width: 100%; justify-content: center; }
 
-        /* ===== TABLE - SCROLL HORIZONTAL ===== */
+        /* ===== TABEL SCROLL PROFESIONAL ===== */
         .table-wrap {
+            position: relative;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             margin-top: 6px;
             border-radius: 14px;
-            border: 1px solid #f0f0f0;
-            padding: 4px 0;
+            border: 1px solid #e8edf2;
+            background: #ffffff;
         }
-        /* Indikator scroll */
-        .table-wrap::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 20px;
-            background: linear-gradient(to right, transparent, rgba(0,0,0,0.03));
-            pointer-events: none;
-            border-radius: 0 14px 14px 0;
+        .table-wrap::-webkit-scrollbar {
+            height: 6px;
         }
+        .table-wrap::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 0 0 14px 14px;
+        }
+        .table-wrap::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 10px;
+        }
+        .table-wrap::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        .scroll-hint {
+            display: none;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--gray);
+            margin-top: 6px;
+            font-style: italic;
+        }
+        @media (max-width: 768px) {
+            .scroll-hint {
+                display: block;
+            }
+        }
+
         table { width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 580px; }
-        th, td { padding: 8px 6px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; vertical-align: middle; }
+        th, td { padding: 8px 8px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; vertical-align: middle; }
         th { background: #f8fafc; font-weight: 700; color: #444; }
-        td .btn-sm { padding: 2px 6px; font-size: 0.65rem; min-width: 28px; }
-        td .btn-sm i { font-size: 0.7rem; }
+        td .btn-sm { padding: 3px 6px; font-size: 0.7rem; min-width: 28px; }
 
         /* ===== BADGE ===== */
         .badge { display: inline-block; padding: 2px 8px; border-radius: 30px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; }
@@ -237,21 +253,6 @@
             transition: var(--transition);
         }
         .btn-minimize:hover { color: var(--text); }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 480px) {
-            .app-header .left .store-name { font-size: 1rem; }
-            .app-header .right .app-name { font-size: 0.7rem; padding: 2px 10px; }
-            .card { padding: 14px 12px; }
-            .auth-card { padding: 24px 16px; }
-            .modal { padding: 20px 16px; }
-            .toggle-group button { font-size: 0.65rem; padding: 6px 6px; }
-            .table-wrap { border-radius: 10px; }
-            table { font-size: 0.65rem; min-width: 500px; }
-            th, td { padding: 4px 4px; }
-            td .btn-sm { padding: 1px 4px; font-size: 0.55rem; min-width: 22px; }
-            td .btn-sm i { font-size: 0.6rem; }
-        }
 
         .stok-low { color: var(--danger); font-weight: 700; }
         .stok-na { color: var(--gray); font-style: italic; }
@@ -356,7 +357,7 @@
                     <button class="btn btn-outline btn-sm" onclick="toggleRecentSales()" id="toggleSalesBtn">Minimalkan ▲</button>
                 </div>
                 <div id="recentSalesContainer">
-                    <div class="table-wrap" style="position:relative;">
+                    <div class="table-wrap">
                         <table>
                             <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Metode</th><th>Nota</th></tr></thead>
                             <tbody id="recentSalesBody"><tr><td colspan="5" class="empty">Belum ada transaksi</td></tr></tbody>
@@ -384,12 +385,23 @@
                     <button data-type="finished"><i class="fas fa-box"></i> Produk Jadi</button>
                     <button data-type="processed"><i class="fas fa-utensils"></i> Produk Olahan</button>
                 </div>
-                <div class="table-wrap table-collapsible" id="productTableWrapper" style="position:relative;">
+                <div class="table-wrap table-collapsible" id="productTableWrapper">
                     <table>
-                        <thead><tr><th>Nama</th><th>Jenis</th><th>Kategori</th><th>Satuan</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th style="min-width: 130px;">Nama</th>
+                                <th>Jenis</th>
+                                <th>Kategori</th>
+                                <th>Satuan</th>
+                                <th>Harga</th>
+                                <th>Stok</th>
+                                <th style="text-align: center; min-width: 110px;">Aksi</th>
+                            </tr>
+                        </thead>
                         <tbody id="productTableBody"><tr><td colspan="7" class="empty">Belum ada produk</td></tr></tbody>
                     </table>
                 </div>
+                <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
             </div>
 
             <div class="card" id="purchaseCard">
@@ -475,7 +487,7 @@
                     <button class="btn btn-outline btn-sm" onclick="setSalesFilter('week')">Minggu</button>
                     <button class="btn btn-outline btn-sm" onclick="setSalesFilter('month')">Bulan</button>
                 </div>
-                <div class="table-wrap" style="position:relative;">
+                <div class="table-wrap">
                     <table>
                         <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Metode</th><th>Kasir</th><th>Nota</th></tr></thead>
                         <tbody id="salesReportBody"><tr><td colspan="6" class="empty">Belum ada transaksi</td></tr></tbody>
@@ -494,7 +506,7 @@
                         <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('week')">Minggu</button>
                         <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('month')">Bulan</button>
                     </div>
-                    <div class="table-wrap" style="position:relative;">
+                    <div class="table-wrap">
                         <table>
                             <thead><tr><th>Waktu</th><th>Nama</th><th>Jenis</th><th>Jml</th><th>Total</th></tr></thead>
                             <tbody id="purchaseReportBody"><tr><td colspan="5" class="empty">Belum ada pembelian</td></tr></tbody>
@@ -535,7 +547,7 @@
                         <button class="btn btn-outline btn-sm" onclick="setCostFilter('week')">Minggu</button>
                         <button class="btn btn-outline btn-sm" onclick="setCostFilter('month')">Bulan</button>
                     </div>
-                    <div class="table-wrap" style="position:relative;">
+                    <div class="table-wrap">
                         <table>
                             <thead><tr><th>Waktu</th><th>Kategori</th><th>Deskripsi</th><th>Jumlah</th></tr></thead>
                             <tbody id="costReportBody"><tr><td colspan="4" class="empty">Belum ada biaya</td></tr></tbody>
@@ -551,7 +563,7 @@
                         <button class="btn btn-outline btn-sm" onclick="setBestFilter('week')">Minggu</button>
                         <button class="btn btn-outline btn-sm" onclick="setBestFilter('month')">Bulan</button>
                     </div>
-                    <div class="table-wrap" style="position:relative;">
+                    <div class="table-wrap">
                         <table>
                             <thead><tr><th>#</th><th>Nama</th><th>Jenis</th><th>Terjual</th><th>Omset</th></tr></thead>
                             <tbody id="bestSellerBody"><tr><td colspan="5" class="empty">Belum ada data</td></tr></tbody>
@@ -573,8 +585,6 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-
-<!-- Produk -->
 <div id="productModal" class="modal-overlay">
     <div class="modal">
         <h3 id="modalProductTitle">Tambah Produk</h3>
@@ -630,7 +640,6 @@
     </div>
 </div>
 
-<!-- Nota -->
 <div id="notaModal" class="modal-overlay">
     <div class="modal" style="max-width:450px;">
         <h3><i class="fas fa-receipt"></i> Nota Penjualan</h3>
@@ -643,7 +652,6 @@
     </div>
 </div>
 
-<!-- Kategori -->
 <div id="categoryModal" class="modal-overlay">
     <div class="modal">
         <h3><i class="fas fa-tags"></i> Kategori</h3>
@@ -658,7 +666,6 @@
     </div>
 </div>
 
-<!-- Restock -->
 <div id="restockModal" class="modal-overlay">
     <div class="modal">
         <h3><i class="fas fa-arrow-up"></i> Restock</h3>
@@ -672,7 +679,6 @@
     </div>
 </div>
 
-<!-- Resep -->
 <div id="recipeModal" class="modal-overlay">
     <div class="modal">
         <h3><i class="fas fa-utensils"></i> Atur Resep: <span id="recipeProductName"></span></h3>
@@ -698,7 +704,6 @@
     </div>
 </div>
 
-<!-- ===== SETTINGS ===== -->
 <div id="settingsModal" class="modal-overlay">
     <div class="modal" style="max-width:480px; max-height:90vh; overflow-y:auto;">
         <h3><i class="fas fa-cog"></i> Pengaturan</h3>
@@ -797,9 +802,6 @@
 </div>
 
 <script>
-    // ============================================================
-    // STORAGE
-    // ============================================================
     const DB = {
         get(key, def = null) { try { const v = localStorage.getItem('hdrg_' + key); return v ? JSON.parse(v) : def; } catch (e) { return def; } },
         set(key, val) { localStorage.setItem('hdrg_' + key, JSON.stringify(val)); }
@@ -830,9 +832,6 @@
     let tempRecipe = [];
     let productTableCollapsed = false;
 
-    // ============================================================
-    // THEME
-    // ============================================================
     function setTheme(primary, light) {
         currentTheme = { primary, light };
         DB.set('theme', currentTheme);
@@ -848,9 +847,6 @@
         if (splash) splash.style.background = `linear-gradient(135deg, ${currentTheme.primary}, ${currentTheme.light})`;
     }
 
-    // ============================================================
-    // SPLASH & INIT
-    // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
             document.getElementById('splashScreen').classList.add('hidden');
@@ -881,9 +877,6 @@
         document.getElementById('purchaseUnit').addEventListener('change', togglePurchaseUnitCustom);
     }
 
-    // ============================================================
-    // TOGGLES & NAV
-    // ============================================================
     function setupToggles() {
         const pBtns = document.querySelectorAll('#productTypeToggle button');
         pBtns.forEach(btn => {
@@ -918,9 +911,6 @@
         else if (pageId === 'pageLaporan') renderLaporan();
     }
 
-    // ============================================================
-    // AUTH
-    // ============================================================
     document.getElementById('setupBtn').addEventListener('click', () => {
         const name = document.getElementById('storeName').value.trim();
         const ownerPin = document.getElementById('ownerPin').value.trim();
@@ -1000,9 +990,6 @@
         document.getElementById('loginError').style.display = 'none';
     }
 
-    // ============================================================
-    // FORMAT
-    // ============================================================
     function formatRupiahInput(input) {
         let val = input.value.replace(/[^,\d]/g, '').toString();
         let split = val.split(',');
@@ -1018,9 +1005,6 @@
     function formatNumber(n) { return new Intl.NumberFormat('id-ID').format(n); }
     function formatDate(iso) { const d = new Date(iso); return d.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
 
-    // ============================================================
-    // QTY SYNC
-    // ============================================================
     function syncQtyInput() {
         const select = document.getElementById('qtySelect');
         const input = document.getElementById('qtyInput');
@@ -1035,9 +1019,6 @@
         else select.value = '1';
     }
 
-    // ============================================================
-    // CATEGORY
-    // ============================================================
     function loadCategoryDropdowns() {
         const selects = [document.getElementById('purchaseCategory'), document.getElementById('modalProductCategory')];
         selects.forEach(sel => {
@@ -1083,9 +1064,6 @@
         renderCategoryList();
     }
 
-    // ============================================================
-    // PRODUCTS & STOK
-    // ============================================================
     function toggleStockField() {
         const type = document.getElementById('modalProductType').value;
         const stockField = document.getElementById('modalProductStock');
@@ -1142,14 +1120,8 @@
     function addModalRecipe() {
         const sel = document.getElementById('modalRecipeIngredient');
         const qty = parseInt(document.getElementById('modalRecipeQty').value);
-        if (!sel.value || isNaN(qty) || qty < 1) {
-            alert('Pilih bahan baku dan jumlah yang valid!');
-            return;
-        }
-        if (modalTempRecipe.find(r => r.productId === sel.value)) {
-            alert('Bahan baku sudah ada di resep!');
-            return;
-        }
+        if (!sel.value || isNaN(qty) || qty < 1) { alert('Pilih bahan baku dan jumlah yang valid!'); return; }
+        if (modalTempRecipe.find(r => r.productId === sel.value)) { alert('Bahan baku sudah ada di resep!'); return; }
         modalTempRecipe.push({ productId: sel.value, qty: qty });
         renderModalRecipeList();
         document.getElementById('modalRecipeQty').value = '1';
@@ -1164,11 +1136,8 @@
     function toggleUnitCustom() {
         const sel = document.getElementById('modalProductUnitSelect');
         const custom = document.getElementById('modalProductUnitCustom');
-        if (sel.value === 'lainnya') {
-            custom.style.display = 'block';
-        } else {
-            custom.style.display = 'none';
-        }
+        if (sel.value === 'lainnya') custom.style.display = 'block';
+        else custom.style.display = 'none';
     }
 
     function getUnitValue() {
@@ -1199,7 +1168,12 @@
         if (currentStokFilter === 'raw') filtered = products.filter(p => p.type === 'raw');
         else if (currentStokFilter === 'finished') filtered = products.filter(p => p.type === 'finished');
         else if (currentStokFilter === 'processed') filtered = products.filter(p => p.type === 'processed');
-        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="empty">Belum ada produk</td></tr>`; return; }
+        
+        if (filtered.length === 0) { 
+            tbody.innerHTML = `<tr><td colspan="7" class="empty">Belum ada produk</td></tr>`; 
+            return; 
+        }
+        
         let html = '';
         filtered.forEach((p) => {
             let stokDisplay = p.stok;
@@ -1211,22 +1185,22 @@
                 stokClass = p.stok <= 0 ? 'stok-low' : '';
             }
             let typeLabel = '';
-            if (p.type === 'raw') typeLabel = '<span class="badge badge-purple">Bahan Baku</span>';
-            else if (p.type === 'finished') typeLabel = '<span class="badge badge-green">Produk Jadi</span>';
-            else if (p.type === 'processed') typeLabel = '<span class="badge badge-orange">Produk Olahan</span>';
-            const hasRecipe = (p.recipe && p.recipe.length > 0) ? '<span class="badge badge-blue"><i class="fas fa-utensils"></i> Resep</span>' : '';
+            if (p.type === 'raw') typeLabel = '<span class="badge badge-purple">Baku</span>';
+            else if (p.type === 'finished') typeLabel = '<span class="badge badge-green">Jadi</span>';
+            else if (p.type === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
+            
             html += `<tr>
                 <td><strong>${p.name}</strong><br><small style="color:var(--gray);">${p.barcode || '-'}</small></td>
                 <td>${typeLabel}</td>
-                <td><span style="display:inline-block; background:#e5e7eb; padding:2px 10px; border-radius:12px; font-size:0.7rem;">${p.category || '-'}</span></td>
+                <td><span style="display:inline-block; background:#f1f5f9; padding:2px 8px; border-radius:10px; font-size:0.7rem; color:var(--primary);">${p.category || '-'}</span></td>
                 <td>${p.unit || '-'}</td>
                 <td>Rp ${formatNumber(p.price)}</td>
                 <td class="${stokClass}">${stokDisplay}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline" onclick="openProductModal('${p.id}')"><i class="fas fa-edit"></i></button>
-                    ${(p.type === 'processed' || p.type === 'finished') ? `<button class="btn btn-sm btn-primary" onclick="openRecipeModal('${p.id}')"><i class="fas fa-utensils"></i></button>` : ''}
-                    <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
-                    ${p.type !== 'processed' ? `<button class="btn btn-sm btn-accent" onclick="openRestockModal('${p.id}')"><i class="fas fa-plus"></i></button>` : ''}
+                <td style="text-align: center; white-space: nowrap;">
+                    <button class="btn btn-sm btn-outline" title="Edit" onclick="openProductModal('${p.id}')"><i class="fas fa-edit"></i></button>
+                    ${(p.type === 'processed' || p.type === 'finished') ? `<button class="btn btn-sm btn-primary" title="Resep" onclick="openRecipeModal('${p.id}')"><i class="fas fa-utensils"></i></button>` : ''}
+                    <button class="btn btn-sm btn-danger" title="Hapus" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                    ${p.type !== 'processed' ? `<button class="btn btn-sm btn-accent" title="Restock" onclick="openRestockModal('${p.id}')"><i class="fas fa-plus"></i></button>` : ''}
                 </td>
             </tr>`;
         });
@@ -1234,9 +1208,6 @@
         populateProductSelect();
     }
 
-    // ============================================================
-    // PRODUK MODAL
-    // ============================================================
     function openProductModal(id = null) {
         if (currentUser.role !== 'owner') { alert('Hanya Owner.'); return; }
         document.getElementById('editProductId').value = id || '';
@@ -1318,16 +1289,10 @@
         populateProductSelect();
     }
 
-    // ============================================================
-    // RESTOCK
-    // ============================================================
     function openRestockModal(id) {
         const p = products.find(x => x.id === id);
         if (!p) return;
-        if (p.type === 'processed') {
-            alert('Produk olahan tidak memiliki stok langsung.');
-            return;
-        }
+        if (p.type === 'processed') { alert('Produk olahan tidak memiliki stok langsung.'); return; }
         document.getElementById('restockProductId').value = id;
         document.getElementById('restockProductName').textContent = `${p.name} (Stok: ${p.stok} ${p.unit || ''})`;
         document.getElementById('restockQty').value = '';
@@ -1352,16 +1317,10 @@
         alert(`Stok ${p.name} +${qty} ${p.unit || ''}`);
     }
 
-    // ============================================================
-    // RECIPE MODAL
-    // ============================================================
     function openRecipeModal(productId) {
         const product = products.find(p => p.id === productId);
         if (!product) return;
-        if (product.type === 'raw') {
-            alert('Resep hanya untuk produk jadi atau olahan!');
-            return;
-        }
+        if (product.type === 'raw') { alert('Resep hanya untuk produk jadi atau olahan!'); return; }
         editingRecipeProductId = productId;
         tempRecipe = product.recipe ? JSON.parse(JSON.stringify(product.recipe)) : [];
         document.getElementById('recipeProductName').textContent = product.name;
@@ -1373,10 +1332,7 @@
 
     function renderRecipeList() {
         const container = document.getElementById('recipeList');
-        if (tempRecipe.length === 0) {
-            container.innerHTML = '<div class="empty">Belum ada bahan baku dalam resep</div>';
-            return;
-        }
+        if (tempRecipe.length === 0) { container.innerHTML = '<div class="empty">Belum ada bahan baku dalam resep</div>'; return; }
         let html = '';
         tempRecipe.forEach((item, idx) => {
             const raw = products.find(p => p.id === item.productId);
@@ -1401,14 +1357,8 @@
     function addRecipeIngredient() {
         const sel = document.getElementById('recipeIngredientSelect');
         const qty = parseInt(document.getElementById('recipeQty').value);
-        if (!sel.value || isNaN(qty) || qty < 1) {
-            alert('Pilih bahan baku dan jumlah yang valid!');
-            return;
-        }
-        if (tempRecipe.find(r => r.productId === sel.value)) {
-            alert('Bahan baku sudah ada di resep!');
-            return;
-        }
+        if (!sel.value || isNaN(qty) || qty < 1) { alert('Pilih bahan baku dan jumlah yang valid!'); return; }
+        if (tempRecipe.find(r => r.productId === sel.value)) { alert('Bahan baku sudah ada di resep!'); return; }
         tempRecipe.push({ productId: sel.value, qty: qty });
         renderRecipeList();
         document.getElementById('recipeQty').value = '1';
@@ -1440,9 +1390,6 @@
         editingRecipeProductId = null;
     }
 
-    // ============================================================
-    // EMPLOYEE
-    // ============================================================
     function renderEmployees() {
         const container = document.getElementById('employeeList');
         if (employees.length === 0) { container.innerHTML = '<div class="empty">Belum ada karyawan</div>'; return; }
@@ -1475,15 +1422,9 @@
         renderEmployees();
     }
 
-    // ============================================================
-    // SEARCH AUTOCOMPLETE (Penjualan)
-    // ============================================================
     function searchAutocomplete(query) {
         const list = document.getElementById('autocompleteList');
-        if (!query.trim()) {
-            list.style.display = 'none';
-            return;
-        }
+        if (!query.trim()) { list.style.display = 'none'; return; }
         let filtered = products;
         if (currentTypeFilter === 'raw') filtered = products.filter(p => p.type === 'raw');
         else if (currentTypeFilter === 'finished') filtered = products.filter(p => p.type === 'finished');
@@ -1492,10 +1433,7 @@
             p.name.toLowerCase().includes(query.toLowerCase()) ||
             (p.barcode && p.barcode.toLowerCase().includes(query.toLowerCase()))
         );
-        if (matches.length === 0) {
-            list.style.display = 'none';
-            return;
-        }
+        if (matches.length === 0) { list.style.display = 'none'; return; }
         let html = '';
         matches.forEach(p => {
             const label = p.type === 'raw' ? '🌱' : p.type === 'processed' ? '🍳' : '📦';
@@ -1526,9 +1464,6 @@
         }
     });
 
-    // ============================================================
-    // PENJUALAN
-    // ============================================================
     function renderPenjualan() { renderCart(); renderRecentSales(); }
 
     function addToCart() {
@@ -1567,10 +1502,7 @@
                         const raw = products.find(r => r.id === ing.productId);
                         if (raw) {
                             const needed = ing.qty * (existing.qty + qty);
-                            if (raw.stok < needed) {
-                                alert(`Stok ${raw.name} tidak cukup!`);
-                                return;
-                            }
+                            if (raw.stok < needed) { alert(`Stok ${raw.name} tidak cukup!`); return; }
                         }
                     }
                 }
@@ -1713,9 +1645,6 @@
         alert('Transaksi berhasil!');
     }
 
-    // ============================================================
-    // NOTA
-    // ============================================================
     function openNota(saleId) {
         const sale = sales.find(s => s.id === saleId);
         if (!sale) return;
@@ -1759,9 +1688,6 @@
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    // ============================================================
-    // PEMBELIAN
-    // ============================================================
     function renderPurchaseHistoryList() {
         const container = document.getElementById('purchaseHistoryList');
         if (!container) return;
@@ -1799,11 +1725,8 @@
     function togglePurchaseUnitCustom() {
         const sel = document.getElementById('purchaseUnit');
         const custom = document.getElementById('purchaseUnitCustom');
-        if (sel.value === 'lainnya') {
-            custom.style.display = 'block';
-        } else {
-            custom.style.display = 'none';
-        }
+        if (sel.value === 'lainnya') custom.style.display = 'block';
+        else custom.style.display = 'none';
     }
 
     function getPurchaseUnit() {
@@ -1829,9 +1752,7 @@
 
         if (buyPrice > 0 && margin > 0) {
             sellPrice = buyPrice * (1 + margin / 100);
-            if (discount > 0 && discount <= 100) {
-                sellPrice = sellPrice * (1 - discount / 100);
-            }
+            if (discount > 0 && discount <= 100) sellPrice = sellPrice * (1 - discount / 100);
             sellPrice = Math.round(sellPrice);
         } else {
             sellPrice = sellPrice > 0 ? sellPrice : 0;
@@ -1839,12 +1760,8 @@
 
         const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
         if (existing) {
-            if (existing.type !== 'processed') {
-                existing.stok += qty;
-            } else {
-                alert('Produk olahan tidak memiliki stok langsung.');
-                return;
-            }
+            if (existing.type !== 'processed') existing.stok += qty;
+            else { alert('Produk olahan tidak memiliki stok langsung.'); return; }
             existing.price = sellPrice > 0 ? sellPrice : existing.price;
             existing.category = category || existing.category;
             if (unit) existing.unit = unit;
@@ -1852,14 +1769,9 @@
             const newStok = (type === 'processed') ? 0 : qty;
             const newProduct = {
                 id: Date.now().toString(),
-                name,
-                barcode: '',
-                category,
-                type,
-                unit,
+                name, barcode: '', category, type, unit,
                 price: sellPrice > 0 ? sellPrice : 0,
-                stok: newStok,
-                recipe: []
+                stok: newStok, recipe: []
             };
             products.push(newProduct);
         }
@@ -1890,9 +1802,7 @@
         const discount = parseCleanNumber(document.getElementById('purchaseDiscount').value);
         if (buyPrice > 0 && margin > 0) {
             let sellPrice = buyPrice * (1 + margin / 100);
-            if (discount > 0 && discount <= 100) {
-                sellPrice = sellPrice * (1 - discount / 100);
-            }
+            if (discount > 0 && discount <= 100) sellPrice = sellPrice * (1 - discount / 100);
             sellPrice = Math.round(sellPrice);
             document.getElementById('purchaseSellPrice').value = formatNumber(sellPrice);
         }
@@ -1935,9 +1845,6 @@
         renderPurchaseHistoryList();
     }
 
-    // ============================================================
-    // BIAYA
-    // ============================================================
     function renderCostHistoryList() {
         const container = document.getElementById('costHistoryList');
         if (!container) return;
@@ -1995,9 +1902,6 @@
         renderCostHistoryList();
     }
 
-    // ============================================================
-    // LAPORAN
-    // ============================================================
     function getDateRange(filter) {
         const now = new Date();
         let start, end;
@@ -2107,14 +2011,8 @@
 
     function setBestFilter(f) { bestFilter = f; renderBestSeller(); }
 
-    // ============================================================
-    // EXPORT EXCEL (Base64)
-    // ============================================================
     function exportExcel(data, fileName, sheetName = 'Sheet1', addTotal = true) {
-        if (!data || data.length === 0) {
-            alert('Tidak ada data!');
-            return;
-        }
+        if (!data || data.length === 0) { alert('Tidak ada data!'); return; }
         try {
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet(data);
@@ -2124,26 +2022,20 @@
                 keys.forEach(key => {
                     const values = data.map(row => parseFloat(row[key]) || 0);
                     const sum = values.reduce((a, b) => a + b, 0);
-                    if (values.some(v => v > 0)) {
-                        totalRow[key] = sum;
-                    } else {
-                        totalRow[key] = 'TOTAL';
-                    }
+                    if (values.some(v => v > 0)) totalRow[key] = sum;
+                    else totalRow[key] = 'TOTAL';
                 });
                 XLSX.utils.sheet_add_aoa(ws, [keys.map(k => totalRow[k])], { origin: -1 });
             }
             XLSX.utils.book_append_sheet(wb, ws, sheetName);
-
             const base64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
             const dataUrl = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + base64;
-
             const link = document.createElement('a');
             link.href = dataUrl;
             link.download = fileName;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
             alert(`✅ ${fileName} berhasil diexport.`);
         } catch (err) {
             console.error(err);
@@ -2210,9 +2102,6 @@
         exportExcel(data, `Laporan_Keuangan_${new Date().toISOString().split('T')[0]}.xlsx`, 'Keuangan', false);
     }
 
-    // ============================================================
-    // BACKUP & RESTORE
-    // ============================================================
     function backupData() {
         const data = {};
         for (let i = 0; i < localStorage.length; i++) {
@@ -2234,10 +2123,7 @@
 
     function restoreData() {
         const input = document.getElementById('restoreFileInput');
-        if (!input.files || !input.files[0]) {
-            alert('Pilih file backup terlebih dahulu!');
-            return;
-        }
+        if (!input.files || !input.files[0]) { alert('Pilih file backup terlebih dahulu!'); return; }
         const file = input.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -2250,22 +2136,16 @@
                         count++;
                     }
                 }
-                if (count === 0) {
-                    alert('File backup tidak valid atau tidak ada data hdrg_.');
-                    return;
-                }
-                alert(`✅ Restore berhasil! ${count} data dipulihkan. Aplikasi akan dimuat ulang.`);
+                if (count === 0) { alert('File backup tidak valid.'); return; }
+                alert(`✅ Restore berhasil! ${count} data dipulihkan.`);
                 location.reload();
             } catch (err) {
-                alert('❌ Gagal membaca file backup: ' + err.message);
+                alert('❌ Gagal membaca file: ' + err.message);
             }
         };
         reader.readAsText(file);
     }
 
-    // ============================================================
-    // SETTINGS
-    // ============================================================
     function toggleSection(header) {
         const section = header.closest('.settings-section');
         section.classList.toggle('open');
@@ -2304,9 +2184,6 @@
         } else alert('PIN salah!');
     }
 
-    // ============================================================
-    // MINIMIZE TABLE (chevron icon)
-    // ============================================================
     function toggleProductTable() {
         const wrapper = document.getElementById('productTableWrapper');
         const btn = document.getElementById('minimizeBtn');
@@ -2321,9 +2198,6 @@
         }
     }
 
-    // ============================================================
-    // RENDER ALL
-    // ============================================================
     function renderAll() {
         renderPenjualan();
         renderStok();
