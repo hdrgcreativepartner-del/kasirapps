@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* ===== RESET & VARIABEL ===== */
         :root {
             --primary: #1e3a5f;
             --primary-light: #3a6b8f;
@@ -120,10 +119,17 @@
         .btn-sm { padding: 4px 10px; font-size: 0.7rem; border-radius: 8px; }
         .btn-block { width: 100%; justify-content: center; }
 
-        /* ===== TABLE ===== */
-        .table-wrap { overflow-x: auto; margin-top: 6px; border-radius: 14px; border: 1px solid #f0f0f0; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: left; }
+        /* ===== TABLE - DENGAN SCROLL HORIZONTAL UNTUK MOBILE ===== */
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 6px;
+            border-radius: 14px;
+            border: 1px solid #f0f0f0;
+            padding: 4px 0;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 600px; }
+        th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
         th { background: #f8fafc; font-weight: 700; color: #444; }
 
         /* ===== BADGE ===== */
@@ -191,7 +197,7 @@
         .employee-item .info .pin { color: var(--gray); font-size: 0.8rem; margin-left: 8px; }
         .employee-item .btn { flex-shrink: 0; }
 
-        /* ===== SEARCH AUTOCOMPLETE ===== */
+        /* ===== AUTOCOMPLETE ===== */
         .autocomplete-container { position: relative; width: 100%; }
         .autocomplete-list {
             position: absolute; top: 100%; left: 0; right: 0; background: white;
@@ -213,6 +219,9 @@
             .auth-card { padding: 24px 16px; }
             .modal { padding: 20px 16px; }
             .toggle-group button { font-size: 0.65rem; padding: 6px 6px; }
+            .table-wrap { border-radius: 10px; }
+            table { font-size: 0.7rem; min-width: 500px; }
+            th, td { padding: 6px 4px; }
         }
 
         .stok-low { color: var(--danger); font-weight: 700; }
@@ -223,6 +232,10 @@
         .table-collapsible.collapsed { max-height: 0 !important; padding: 0 !important; margin: 0 !important; border: none !important; }
         .btn-minimize { background: transparent; border: none; color: var(--gray); cursor: pointer; font-size: 1.2rem; padding: 0 4px; }
         .btn-minimize:hover { color: var(--text); }
+
+        /* ===== FILE INPUT ===== */
+        #restoreFileInput { padding: 8px; border: 2px solid #e8edf2; border-radius: 12px; font-size: 0.85rem; background: white; }
+        #restoreFileInput:focus { border-color: var(--primary); outline: none; }
     </style>
 </head>
 <body>
@@ -636,7 +649,7 @@
     </div>
 </div>
 
-<!-- Resep (edit dari tabel) -->
+<!-- Resep -->
 <div id="recipeModal" class="modal-overlay">
     <div class="modal">
         <h3><i class="fas fa-utensils"></i> Atur Resep: <span id="recipeProductName"></span></h3>
@@ -667,6 +680,7 @@
     <div class="modal" style="max-width:480px; max-height:90vh; overflow-y:auto;">
         <h3><i class="fas fa-cog"></i> Pengaturan</h3>
 
+        <!-- Profil -->
         <div class="settings-section open">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-building"></i> Profil Usaha</span>
@@ -681,6 +695,7 @@
             </div>
         </div>
 
+        <!-- Karyawan -->
         <div class="settings-section">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-users"></i> Kelola Karyawan</span>
@@ -696,6 +711,7 @@
             </div>
         </div>
 
+        <!-- Tema -->
         <div class="settings-section">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-palette"></i> Tema Warna</span>
@@ -712,6 +728,7 @@
             </div>
         </div>
 
+        <!-- Info -->
         <div class="settings-section">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-info-circle"></i> Info Aplikasi</span>
@@ -726,6 +743,27 @@
             </div>
         </div>
 
+        <!-- Backup & Restore -->
+        <div class="settings-section">
+            <div class="header" onclick="toggleSection(this)">
+                <span><i class="fas fa-database"></i> Backup & Restore Data</span>
+                <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="body">
+                <button class="btn btn-primary btn-block" onclick="backupData()" style="margin-bottom:8px;">
+                    <i class="fas fa-download"></i> Download Backup (JSON)
+                </button>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <input type="file" id="restoreFileInput" accept=".json" style="flex:1; padding:8px; border:2px solid #e8edf2; border-radius:12px; font-size:0.85rem; background:white;">
+                    <button class="btn btn-accent" onclick="restoreData()"><i class="fas fa-upload"></i> Restore</button>
+                </div>
+                <p style="font-size:0.75rem; color:var(--gray); margin-top:8px;">
+                    * Backup menyimpan semua data toko dalam format JSON. Restore akan mengganti semua data saat ini.
+                </p>
+            </div>
+        </div>
+
+        <!-- Reset -->
         <div class="settings-section">
             <div class="header" onclick="toggleSection(this)">
                 <span><i class="fas fa-trash-alt" style="color:var(--danger);"></i> Reset Aplikasi</span>
@@ -774,7 +812,6 @@
         renderStok();
         renderPenjualan();
         renderLaporan();
-        // Purchase unit dropdown
         document.getElementById('purchaseUnit').addEventListener('change', togglePurchaseUnitCustom);
     }
 
@@ -1028,7 +1065,7 @@
     }
 
     // ============================================================
-    // PRODUCTS (dengan resep di modal)
+    // PRODUCTS
     // ============================================================
     let modalTempRecipe = [];
 
@@ -1125,7 +1162,7 @@
     }
 
     // ============================================================
-    // PRODUCT SELECT & STOK RENDER
+    // PRODUCT SELECT & STOK
     // ============================================================
     function populateProductSelect() {
         const sel = document.getElementById('productSelect');
@@ -1184,7 +1221,7 @@
     }
 
     // ============================================================
-    // PRODUK MODAL (Tambah/Edit)
+    // PRODUK MODAL
     // ============================================================
     function openProductModal(id = null) {
         if (currentUser.role !== 'owner') { alert('Hanya Owner.'); return; }
@@ -1268,7 +1305,7 @@
     }
 
     // ============================================================
-    // RESTOCK (langsung dari tombol +Restock)
+    // RESTOCK
     // ============================================================
     function openRestockModal(id) {
         const p = products.find(x => x.id === id);
@@ -1302,7 +1339,7 @@
     }
 
     // ============================================================
-    // RECIPE MODAL (edit resep dari tabel)
+    // RECIPE MODAL
     // ============================================================
     let editingRecipeProductId = null;
     let tempRecipe = [];
@@ -1428,7 +1465,7 @@
     }
 
     // ============================================================
-    // SEARCH AUTOCOMPLETE (Penjualan)
+    // SEARCH AUTOCOMPLETE (Penjualan) - TIDAK LANGSUNG TAMBAH KERANJANG
     // ============================================================
     function searchAutocomplete(query) {
         const list = document.getElementById('autocompleteList');
@@ -1463,7 +1500,12 @@
     function selectAutocomplete(id) {
         document.getElementById('autocompleteList').style.display = 'none';
         document.getElementById('searchProduct').value = '';
-        addToCartById(id, 1);
+        const sel = document.getElementById('productSelect');
+        sel.value = id;
+        const qtyInput = document.getElementById('qtyInput');
+        qtyInput.value = '1';
+        document.getElementById('qtySelect').value = '1';
+        qtyInput.focus();
     }
 
     document.addEventListener('click', function(e) {
@@ -1604,7 +1646,6 @@
     }
 
     function processSale(method) {
-        // Validasi stok
         for (const c of cart) {
             const product = products.find(p => p.id === c.productId);
             if (!product) { alert(`Produk ${c.name} tidak ditemukan!`); return; }
@@ -1628,7 +1669,6 @@
             }
         }
 
-        // Proses pengurangan stok
         const items = cart.map(c => ({ name: c.name, qty: c.qty, price: c.price, type: c.type || 'raw' }));
         const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
 
@@ -1709,7 +1749,7 @@
     }
 
     // ============================================================
-    // PEMBELIAN / RESTOCK (dengan ID produk)
+    // PEMBELIAN / RESTOCK
     // ============================================================
     function renderPurchaseHistoryList() {
         const container = document.getElementById('purchaseHistoryList');
@@ -1776,7 +1816,6 @@
 
         if (!name || isNaN(qty) || qty < 1) { alert('Nama dan jumlah wajib!'); return; }
 
-        // Hitung harga jual konsisten
         if (buyPrice > 0 && margin > 0) {
             sellPrice = buyPrice * (1 + margin / 100);
             if (discount > 0 && discount <= 100) {
@@ -1787,7 +1826,6 @@
             sellPrice = sellPrice > 0 ? sellPrice : 0;
         }
 
-        // Cari produk yang sudah ada berdasarkan nama (case-insensitive)
         const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
         if (existing) {
             if (existing.type !== 'processed') {
@@ -1819,7 +1857,6 @@
         DB.set('products', products);
         DB.set('purchases', purchases);
 
-        // Reset form
         document.getElementById('purchaseProduct').value = '';
         document.getElementById('purchaseQty').value = '';
         document.getElementById('purchasePrice').value = '';
@@ -2060,7 +2097,7 @@
     function setBestFilter(f) { bestFilter = f; renderBestSeller(); }
 
     // ============================================================
-    // EXPORT EXCEL (Stabil dengan total angka, tanpa formula)
+    // EXPORT EXCEL - MENGGUNAKAN BASE64 + DATA URI (KOMPATIBEL WEBVIEW)
     // ============================================================
     function exportExcel(data, fileName, sheetName = 'Sheet1', addTotal = true) {
         if (!data || data.length === 0) {
@@ -2085,7 +2122,19 @@
                 XLSX.utils.sheet_add_aoa(ws, [keys.map(k => totalRow[k])], { origin: -1 });
             }
             XLSX.utils.book_append_sheet(wb, ws, sheetName);
-            XLSX.writeFile(wb, fileName);
+
+            // KUNCI: Gunakan Base64, bukan writeFile
+            const base64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+            const dataUrl = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + base64;
+
+            // Buat link download dengan Data URI
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
             alert(`✅ ${fileName} berhasil diexport.`);
         } catch (err) {
             console.error(err);
@@ -2150,6 +2199,59 @@
             { 'Keterangan': 'Laba Bersih', 'Jumlah (Rp)': net }
         ];
         exportExcel(data, `Laporan_Keuangan_${new Date().toISOString().split('T')[0]}.xlsx`, 'Keuangan', false);
+    }
+
+    // ============================================================
+    // BACKUP & RESTORE
+    // ============================================================
+    function backupData() {
+        const data = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('hdrg_')) {
+                data[key] = localStorage.getItem(key);
+            }
+        }
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        alert('✅ Backup berhasil diunduh!');
+    }
+
+    function restoreData() {
+        const input = document.getElementById('restoreFileInput');
+        if (!input.files || !input.files[0]) {
+            alert('Pilih file backup terlebih dahulu!');
+            return;
+        }
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                let count = 0;
+                for (const key in data) {
+                    if (key.startsWith('hdrg_')) {
+                        localStorage.setItem(key, data[key]);
+                        count++;
+                    }
+                }
+                if (count === 0) {
+                    alert('File backup tidak valid atau tidak ada data hdrg_.');
+                    return;
+                }
+                alert(`✅ Restore berhasil! ${count} data dipulihkan. Aplikasi akan dimuat ulang.`);
+                location.reload();
+            } catch (err) {
+                alert('❌ Gagal membaca file backup: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
     }
 
     // ============================================================
