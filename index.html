@@ -32,7 +32,7 @@
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
-        .container { max-width: 600px; margin: 0 auto; padding: 12px 16px; }
+        .container { max-width: 600px; margin: 0 auto; padding: 12px 16px; width: 100%; }
 
         /* ===== SPLASH ===== */
         #splashScreen {
@@ -89,25 +89,37 @@
         .bottom-nav button#logoutBtn { color: var(--danger); }
         .bottom-nav button#logoutBtn.active { background: rgba(231,76,60,0.08); }
 
-        /* ===== PAGES & ANIMATIONS ===== */
-        .page { display: none; animation: fadeIn 0.35s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        /* ===== PAGES & REVISED FLUID TRANSITION ===== */
+        .page {
+            display: none;
+            opacity: 0;
+            transform: scale(0.98) translateY(12px);
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .page.active {
+            display: block;
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
 
-        /* ===== CARDS ===== */
-        .card { background: var(--card-bg); border-radius: var(--radius); padding: 18px 16px; box-shadow: var(--shadow); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.03); transition: var(--transition); }
+        /* ===== CARDS & FLEXIBILITY ===== */
+        .card { background: var(--card-bg); border-radius: var(--radius); padding: 18px 16px; box-shadow: var(--shadow); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.03); transition: var(--transition); width: 100%; }
         .card:hover { box-shadow: 0 12px 35px rgba(0,0,0,0.07); }
         .card-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
         .card-title i { margin-right: 8px; color: var(--primary); }
 
         /* ===== FLEX & INPUT ===== */
-        .flex { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .flex { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; width: 100%; }
         .input-group { display: flex; gap: 8px; align-items: center; width: 100%; }
-        .input-group input, .input-group select { flex: 1; padding: 12px 14px; border: 2px solid #e8edf2; border-radius: 14px; font-size: 0.9rem; outline: none; transition: 0.2s; background: white; }
+        .input-group input, .input-group select { flex: 1; min-width: 0; padding: 12px 14px; border: 2px solid #e8edf2; border-radius: 14px; font-size: 0.9rem; outline: none; transition: 0.2s; background: white; }
         .input-group input:focus, .input-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,95,0.1); }
 
+        input[type="text"], input[type="number"], input[type="password"], select {
+            width: 100%; min-width: 0; padding: 12px 14px; border: 2px solid #e8edf2; border-radius: 14px; font-size: 0.9rem; outline: none; transition: 0.2s; background: white;
+        }
+
         /* ===== BUTTONS ===== */
-        .btn { padding: 10px 18px; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; transition: var(--transition); font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
+        .btn { padding: 10px 18px; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; transition: var(--transition); font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; justify-content: center; flex-shrink: 0; }
         .btn:active { transform: scale(0.96); }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-dark); }
@@ -142,6 +154,7 @@
             border-bottom: 1px solid #f0f2f5;
             text-align: left;
             vertical-align: middle;
+            word-break: break-word;
         }
         th {
             background: #f8fafc;
@@ -216,13 +229,13 @@
         /* ===== CART ===== */
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
         .cart-item:last-child { border-bottom: none; }
-        .cart-item .info { flex: 1; }
+        .cart-item .info { flex: 1; min-width: 0; padding-right: 8px; }
         .cart-item .info .name { font-weight: 600; }
         .cart-item .info .meta { font-size: 0.75rem; color: var(--gray); display: flex; gap: 8px; margin-top: 2px; }
 
         /* ===== QTY ===== */
-        .qty-select-wrapper { display: flex; gap: 8px; align-items: center; flex: 1; }
-        .qty-select-wrapper select, .qty-select-wrapper input { flex: 1; padding: 12px; border: 2px solid #e8edf2; border-radius: 14px; font-size: 0.95rem; outline: none; background: white; }
+        .qty-select-wrapper { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 0; }
+        .qty-select-wrapper select, .qty-select-wrapper input { flex: 1; min-width: 0; padding: 12px; border: 2px solid #e8edf2; border-radius: 14px; font-size: 0.95rem; outline: none; background: white; }
 
         /* ===== MODAL ===== */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 999; padding: 16px; }
@@ -233,12 +246,12 @@
         .modal .btn-row button { flex: 1; }
 
         /* ===== NOTA ===== */
-        .nota-container { font-family: 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; background: #fafafa; padding: 16px; border-radius: 16px; border: 1px solid #eee; }
+        .nota-container { font-family: 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; background: #fafafa; padding: 16px; border-radius: 16px; border: 1px solid #eee; overflow-x: auto; }
         .nota-header { text-align: center; margin-bottom: 10px; }
         .nota-header h3 { margin: 0; font-size: 1.1rem; }
         .nota-header p { margin: 2px 0; font-size: 0.75rem; }
         .nota-divider { border-top: 1px dashed #aaa; margin: 8px 0; }
-        .nota-item { display: flex; justify-content: space-between; padding: 2px 0; }
+        .nota-item { display: flex; justify-content: space-between; padding: 2px 0; gap: 10px; }
         .nota-total { display: flex; justify-content: space-between; font-weight: 700; margin-top: 6px; font-size: 1rem; }
         .nota-footer { text-align: center; margin-top: 10px; font-size: 0.7rem; color: var(--gray); }
 
@@ -254,7 +267,7 @@
 
         .employee-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; gap: 8px; }
         .employee-item:last-child { border-bottom: none; }
-        .employee-item .info { font-size: 0.9rem; }
+        .employee-item .info { font-size: 0.9rem; min-width: 0; }
         .employee-item .info .name { font-weight: 600; }
         .employee-item .info .pin { color: var(--gray); font-size: 0.8rem; margin-left: 8px; }
 
@@ -296,16 +309,16 @@
         <h2>🏪 HDRG Kasir</h2>
         <p style="text-align:center; color:var(--gray); margin-bottom:20px; font-size:0.9rem;">Setup awal toko Anda</p>
         <input type="text" id="storeName" placeholder="Nama Toko / Usaha" required>
-        <input type="password" id="ownerPin" placeholder="PIN Owner (min 4 digit)" maxlength="6" inputmode="numeric" required>
-        <input type="password" id="ownerPinConfirm" placeholder="Konfirmasi PIN Owner" maxlength="6" inputmode="numeric" required>
-        <input type="password" id="employeePin" placeholder="PIN Karyawan (opsional)" maxlength="6" inputmode="numeric">
+        <input type="password" id="ownerPin" placeholder="PIN Owner (min 4 digit)" maxlength="6" inputmode="numeric" pattern="[0-9]*" required>
+        <input type="password" id="ownerPinConfirm" placeholder="Konfirmasi PIN Owner" maxlength="6" inputmode="numeric" pattern="[0-9]*" required>
+        <input type="password" id="employeePin" placeholder="PIN Karyawan (opsional)" maxlength="6" inputmode="numeric" pattern="[0-9]*">
         <button id="setupBtn">Simpan & Mulai</button>
         <div id="authError" class="error">Error</div>
     </div>
     <div class="auth-card" id="loginCard" style="display:none;">
         <h2>🔐 Masuk</h2>
         <p style="text-align:center; color:var(--gray); margin-bottom:16px; font-weight:600;" id="loginStoreName"></p>
-        <input type="password" id="loginPin" placeholder="PIN Akses" maxlength="6" inputmode="numeric">
+        <input type="password" id="loginPin" placeholder="PIN Akses" maxlength="6" inputmode="numeric" pattern="[0-9]*">
         <select id="loginRole">
             <option value="owner">Owner</option>
             <option value="employee">Karyawan</option>
@@ -355,7 +368,7 @@
                             <option value="4">4</option><option value="5">5</option><option value="10">10</option>
                             <option value="manual">Manual</option>
                         </select>
-                        <input type="number" id="qtyInput" value="1" min="1" placeholder="Jumlah" oninput="syncQtyDropdown()">
+                        <input type="number" id="qtyInput" value="1" min="1" placeholder="Jumlah" inputmode="numeric" pattern="[0-9]*" oninput="syncQtyDropdown()">
                     </div>
                     <button class="btn btn-primary" onclick="addToCart()"><i class="fas fa-plus"></i> Tambah</button>
                 </div>
@@ -432,15 +445,15 @@
                     <div class="suggest-list" id="productSuggestList"></div>
                 </div>
                 <div class="flex" style="margin-bottom:8px;">
-                    <input type="text" id="purchaseQty" placeholder="Jumlah" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
-                    <input type="text" id="purchasePrice" placeholder="Harga Beli" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
+                    <input type="text" id="purchaseQty" placeholder="Jumlah" class="rupiah-input" inputmode="numeric" pattern="[0-9]*" oninput="formatRupiahInput(this)" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
+                    <input type="text" id="purchasePrice" placeholder="Harga Beli" class="rupiah-input" inputmode="numeric" pattern="[0-9]*" oninput="formatRupiahInput(this)" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
                 </div>
                 <div class="flex" style="margin-bottom:8px;">
-                    <input type="text" id="purchaseMargin" placeholder="Untung %" class="rupiah-input" oninput="formatRupiahInput(this); autoCalculateSellPrice();" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
-                    <input type="text" id="purchaseSellPrice" placeholder="Harga Jual" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
+                    <input type="text" id="purchaseMargin" placeholder="Untung %" class="rupiah-input" inputmode="numeric" pattern="[0-9]*" oninput="formatRupiahInput(this); autoCalculateSellPrice();" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
+                    <input type="text" id="purchaseSellPrice" placeholder="Harga Jual" class="rupiah-input" inputmode="numeric" pattern="[0-9]*" oninput="formatRupiahInput(this)" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
                 </div>
                 <div style="margin-bottom:8px;">
-                    <input type="text" id="purchaseDiscount" placeholder="Diskon %" class="rupiah-input" oninput="formatRupiahInput(this); autoCalculateSellPrice();" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
+                    <input type="text" id="purchaseDiscount" placeholder="Diskon %" class="rupiah-input" inputmode="numeric" pattern="[0-9]*" oninput="formatRupiahInput(this); autoCalculateSellPrice();" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
                 </div>
                 <div class="flex" style="margin-bottom:10px;">
                     <select id="purchaseType" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem; background:white;">
@@ -480,7 +493,7 @@
                 <div class="flex" style="margin-bottom:8px;">
                     <input type="text" id="costCategoryInput" placeholder="Kategori" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
                     <input type="text" id="costDescriptionInput" placeholder="Deskripsi" style="flex:1.5; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
-                    <input type="text" id="costAmountInput" placeholder="Jumlah" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
+                    <input type="text" id="costAmountInput" placeholder="Jumlah" class="rupiah-input" inputmode="numeric" pattern="[0-9]*" oninput="formatRupiahInput(this)" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.9rem;">
                 </div>
                 <button class="btn btn-primary btn-block" onclick="addCost()"><i class="fas fa-plus-circle"></i> Catat Pengeluaran</button>
                 
@@ -615,8 +628,8 @@
             </select>
             <input type="text" id="modalProductUnitCustom" placeholder="Custom" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; display:none;">
         </div>
-        <input type="text" id="modalProductPrice" placeholder="Harga Jual" class="rupiah-input" oninput="formatRupiahInput(this)" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; margin-bottom:10px;">
-        <input type="text" id="modalProductStock" placeholder="Stok Awal" class="rupiah-input" oninput="formatRupiahInput(this)" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; margin-bottom:10px;">
+        <input type="text" id="modalProductPrice" placeholder="Harga Jual" class="rupiah-input" inputmode="numeric" pattern="[0-9]*" oninput="formatRupiahInput(this)" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; margin-bottom:10px;">
+        <input type="text" id="modalProductStock" placeholder="Stok Awal" class="rupiah-input" inputmode="numeric" pattern="[0-9]*" oninput="formatRupiahInput(this)" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; margin-bottom:10px;">
 
         <div id="recipeField" style="display:none; margin-top:12px; border-top:1px solid #eee; padding-top:12px;">
             <h4 style="font-size:0.95rem; margin-bottom:6px;"><i class="fas fa-layer-group"></i> Resep / Komposisi</h4>
@@ -625,7 +638,7 @@
             </div>
             <div class="flex">
                 <select id="modalRecipeIngredient" style="flex:2; padding:10px; border:2px solid #e8edf2; border-radius:12px; background:white;"><option value="">-- Pilih Bahan --</option></select>
-                <input type="number" id="modalRecipeQty" placeholder="Jumlah" min="0.01" step="0.01" value="1" style="flex:1; padding:10px; border:2px solid #e8edf2; border-radius:12px;">
+                <input type="number" id="modalRecipeQty" placeholder="Jumlah" min="0.01" step="0.01" value="1" inputmode="numeric" pattern="[0-9]*" style="flex:1; padding:10px; border:2px solid #e8edf2; border-radius:12px;">
                 <button class="btn btn-primary btn-sm" onclick="addModalRecipe()"><i class="fas fa-plus"></i></button>
             </div>
         </div>
@@ -666,7 +679,7 @@
         <h3><i class="fas fa-arrow-up"></i> Tambah Stok</h3>
         <input type="hidden" id="restockProductId">
         <p style="margin:0 0 10px 0; font-weight:600;" id="restockProductName"></p>
-        <input type="text" id="restockQty" placeholder="Jumlah Tambahan" class="rupiah-input" oninput="formatRupiahInput(this)" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; margin-bottom:12px;">
+        <input type="text" id="restockQty" placeholder="Jumlah Tambahan" class="rupiah-input" inputmode="numeric" pattern="[0-9]*" oninput="formatRupiahInput(this)" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; margin-bottom:12px;">
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeRestockModal()">Batal</button>
             <button class="btn btn-primary" onclick="confirmRestock()"><i class="fas fa-check"></i> Tambah</button>
@@ -683,7 +696,7 @@
         </div>
         <div class="flex" style="margin-bottom:12px;">
             <select id="recipeIngredientSelect" style="flex:2; padding:10px; border:2px solid #e8edf2; border-radius:12px; background:white;"><option value="">-- Pilih Bahan --</option></select>
-            <input type="number" id="recipeQty" placeholder="Jumlah" min="0.01" step="0.01" value="1" style="flex:1; padding:10px; border:2px solid #e8edf2; border-radius:12px;">
+            <input type="number" id="recipeQty" placeholder="Jumlah" min="0.01" step="0.01" value="1" inputmode="numeric" pattern="[0-9]*" style="flex:1; padding:10px; border:2px solid #e8edf2; border-radius:12px;">
             <button class="btn btn-primary btn-sm" onclick="addRecipeIngredient()"><i class="fas fa-plus"></i></button>
         </div>
         <div class="btn-row">
@@ -712,8 +725,8 @@
             <div class="header" onclick="toggleSection(this)"><span><i class="fas fa-users"></i> Kelola Karyawan</span><span class="arrow"><i class="fas fa-chevron-down"></i></span></div>
             <div class="body" style="padding-top:12px;">
                 <div class="flex" style="margin-bottom:10px;">
-                    <input type="text" id="modalEmployeeName" placeholder="Nama" style="flex:2; padding:10px; border:2px solid #e8edf2; border-radius:12px;">
-                    <input type="password" id="modalEmployeePin" placeholder="PIN" maxlength="6" inputmode="numeric" style="flex:1; padding:10px; border:2px solid #e8edf2; border-radius:12px;">
+                    <input type="text" id="modalEmployeeName" placeholder="Nama Karyawan" style="flex:2; padding:10px; border:2px solid #e8edf2; border-radius:12px;">
+                    <input type="password" id="modalEmployeePin" placeholder="PIN Angka" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="flex:1; padding:10px; border:2px solid #e8edf2; border-radius:12px;">
                     <button class="btn btn-primary btn-sm" onclick="saveEmployee()"><i class="fas fa-user-plus"></i></button>
                 </div>
                 <div id="employeeList"><div class="empty">Belum ada karyawan</div></div>
@@ -737,10 +750,18 @@
             <div class="header" onclick="toggleSection(this)"><span><i class="fas fa-database"></i> Backup & Restore</span><span class="arrow"><i class="fas fa-chevron-down"></i></span></div>
             <div class="body" style="padding-top:12px;">
                 <button class="btn btn-primary btn-block" onclick="backupData()" style="margin-bottom:8px;"><i class="fas fa-download"></i> Download Backup (JSON)</button>
-                <div class="flex">
+                <div class="flex" style="margin-bottom:12px;">
                     <input type="file" id="restoreFileInput" accept=".json" style="flex:1; padding:8px; border:2px solid #e8edf2; border-radius:12px; background:white; font-size:0.8rem;">
                     <button class="btn btn-accent" onclick="restoreData()"><i class="fas fa-upload"></i></button>
                 </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="header" onclick="toggleSection(this)" style="background:#fef2f2; color:var(--danger);"><span style="color:var(--danger);"><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> Reset Sistem</span><span class="arrow"><i class="fas fa-chevron-down"></i></span></div>
+            <div class="body" style="padding-top:12px;">
+                <p style="font-size:0.8rem; color:var(--gray); margin-bottom:10px;">Menghapus seluruh data aplikasi, produk, transaksi, dan kembali ke pengaturan awal.</p>
+                <button class="btn btn-danger btn-block" onclick="resetSystemData()"><i class="fas fa-trash-alt"></i> Reset Semua Data</button>
             </div>
         </div>
 
@@ -901,6 +922,13 @@
         document.getElementById('mainApp').style.display = 'none';
         document.getElementById('authPage').style.display = 'flex';
         document.getElementById('loginPin').value = '';
+    }
+
+    function resetSystemData() {
+        if (!confirm('PERINGATAN: Semua data toko, produk, transaksi, dan karyawan akan dihapus permanen! Yakin ingin mereset?')) return;
+        localStorage.clear();
+        alert('Sistem berhasil direset.');
+        location.reload();
     }
 
     function formatRupiahInput(input) {
@@ -1417,8 +1445,8 @@
         if (!container) return;
         if (purchases.length === 0) { container.innerHTML = '<div class="empty">Belum ada pembelian</div>'; return; }
         container.innerHTML = [...purchases].reverse().slice(0, 10).map(p => `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:0.85rem;">
-                <div><strong>${p.name}</strong><br><small style="color:var(--gray);">${formatDate(p.date)} • ${p.qty} pcs • Rp ${formatNumber(p.total)}</small></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:0.85rem; gap:8px;">
+                <div style="min-width:0; flex:1;"><strong>${p.name}</strong><br><small style="color:var(--gray);">${formatDate(p.date)} • ${p.qty} pcs • Rp ${formatNumber(p.total)}</small></div>
                 <button class="btn btn-sm btn-danger" onclick="purchases = purchases.filter(x => x.id !== '${p.id}'); DB.set('purchases', purchases); renderPurchaseHistoryList();"><i class="fas fa-trash"></i></button>
             </div>
         `).join('');
@@ -1442,8 +1470,8 @@
         if (!container) return;
         if (costs.length === 0) { container.innerHTML = '<div class="empty">Belum ada pengeluaran</div>'; return; }
         container.innerHTML = [...costs].reverse().slice(0, 10).map(c => `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:0.85rem;">
-                <div><strong>${c.category}</strong> — ${c.description}<br><small style="color:var(--gray);">${formatDate(c.date)} • Rp ${formatNumber(c.amount)}</small></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:0.85rem; gap:8px;">
+                <div style="min-width:0; flex:1;"><strong>${c.category}</strong> — ${c.description}<br><small style="color:var(--gray);">${formatDate(c.date)} • Rp ${formatNumber(c.amount)}</small></div>
                 <button class="btn btn-sm btn-danger" onclick="costs = costs.filter(x => x.id !== '${c.id}'); DB.set('costs', costs); renderCostHistoryList();"><i class="fas fa-trash"></i></button>
             </div>
         `).join('');
@@ -1544,8 +1572,6 @@
         const ws = XLSX.utils.json_to_sheet(dataToExport);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Penjualan');
-        
-        // Perbaikan agar file tersimpan sempurna di mobile sebagai .xlsx tanpa korup (.bin)
         XLSX.writeFile(wb, 'Laporan_Penjualan.xlsx', { bookType: 'xlsx', type: 'binary' });
     }
 
@@ -1558,8 +1584,6 @@
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Keuangan');
-        
-        // Perbaikan agar file tersimpan sempurna di mobile sebagai .xlsx tanpa korup (.bin)
         XLSX.writeFile(wb, 'Laporan_Keuangan.xlsx', { bookType: 'xlsx', type: 'binary' });
     }
 
@@ -1576,7 +1600,7 @@
     function saveEmployee() {
         const name = document.getElementById('modalEmployeeName').value.trim();
         const pin = document.getElementById('modalEmployeePin').value.trim();
-        if (!name || pin.length < 4) { alert('Nama dan PIN minimal 4 digit!'); return; }
+        if (!name || pin.length < 4) { alert('Nama dan PIN minimal 4 digit angka!'); return; }
         employees.push({ id: generateId('emp'), name, pin });
         DB.set('employees', employees);
         document.getElementById('modalEmployeeName').value = '';
@@ -1626,7 +1650,7 @@
             name: document.getElementById('settingsStoreName').value.trim(),
             address: document.getElementById('settingsAddress').value.trim(),
             phone: document.getElementById('settingsPhone').value.trim(),
-            social: document.getElementById('settingsSocial'.value || '').trim()
+            social: document.getElementById('settingsSocial').value.trim()
         };
         DB.set('profile', profile);
         if (profile.name) { storeData.name = profile.name; DB.set('store', storeData); document.getElementById('headerStoreName').textContent = storeData.name; }
