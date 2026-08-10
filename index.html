@@ -191,90 +191,33 @@
         .btn-sm { padding: 4px 8px; font-size: 0.7rem; border-radius: 8px; }
         .btn-block { width: 100%; justify-content: center; }
 
-        /* ===== TABEL SCROLL PROFESIONAL ===== */
+        /* ===== RESPONSIVE WRAPPED TABLES (TANPA GESER/SCROLL HORIZONTAL) ===== */
         .table-wrap {
-            position: relative;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            width: 100%;
             margin-top: 6px;
             border-radius: 14px;
             border: 1px solid #e8edf2;
             background: #ffffff;
+            overflow: hidden;
         }
-        .table-wrap::-webkit-scrollbar {
-            height: 6px;
-        }
-        .table-wrap::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 0 0 14px 14px;
-        }
-        .table-wrap::-webkit-scrollbar-thumb {
-            background: var(--primary-light);
-            border-radius: 10px;
-        }
-        .table-wrap::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
-        }
-        .scroll-hint {
-            display: none;
-            text-align: center;
-            font-size: 0.7rem;
-            color: var(--gray);
-            margin-top: 6px;
-            font-style: italic;
-        }
-        @media (max-width: 768px) {
-            .scroll-hint {
-                display: block;
-            }
-        }
-
-        .table-wrap {
-            width: 100%;
-            max-width: 100%;
-            overflow-x: auto;
-            overflow-y: hidden;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-x: contain;
-            border-radius: 14px;
-            scrollbar-width: thin;
-        }
-        .table-wrap::-webkit-scrollbar { height: 7px; }
-        .table-wrap::-webkit-scrollbar-track { background: #eef2f7; border-radius: 99px; }
-        .table-wrap::-webkit-scrollbar-thumb { background: #b8c2cf; border-radius: 99px; }
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.75rem;
-            min-width: 620px;
-            table-layout: auto;
+            table-layout: fixed;
         }
         th, td {
-            padding: 9px 8px;
+            padding: 8px 6px;
             border-bottom: 1px solid #eee;
             text-align: left;
-            white-space: normal;
-            overflow-wrap: anywhere;
             word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
             vertical-align: middle;
-            max-width: 280px;
         }
         th { background: #f8fafc; font-weight: 700; color: #444; }
-        td .btn-sm { padding: 3px 6px; font-size: 0.7rem; min-width: 28px; }
-        .table-wrap .btn, .table-wrap button { white-space: nowrap; }
-        .scroll-hint {
-            display: none;
-            margin: 6px 2px 0;
-            font-size: .68rem;
-            color: var(--gray);
-            text-align: right;
-        }
-        @media (max-width: 768px) {
-            .table-wrap { border: 1px solid #edf1f5; }
-            .table-wrap + .scroll-hint { display: block; }
-            table { min-width: 620px; font-size: .72rem; }
-            th, td { padding: 8px 7px; }
-        }
+        td .btn-sm { padding: 3px 6px; font-size: 0.65rem; min-width: 24px; }
+        .scroll-hint { display: none !important; }
 
         .settings-section.reset-section .header { color: var(--danger); }
         .settings-section.reset-section .body { border-top: 1px solid #fee2e2; }
@@ -301,11 +244,10 @@
             .card { width: 100%; overflow: hidden; }
             .modal { width: 100%; max-height: 92vh; overflow-y: auto; }
             .settings-section .body { min-width: 0; overflow-x: hidden; }
-            .table-wrap { margin-left: 0; margin-right: 0; }
         }
 
         /* ===== BADGE ===== */
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 30px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; }
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 30px; font-size: 0.55rem; font-weight: 600; white-space: nowrap; }
         .badge-green { background: #d1fae5; color: #065f46; }
         .badge-yellow { background: #fef3c7; color: #92400e; }
         .badge-blue { background: #dbeafe; color: #1e40af; }
@@ -503,8 +445,14 @@
                 <div id="recentSalesContainer">
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Metode</th><th>Nota</th></tr></thead>
-                            <tbody id="recentSalesBody"><tr><td colspan="5" class="empty">Belum ada transaksi</td></tr></tbody>
+                            <colgroup>
+                                <col style="width: 24%;">
+                                <col style="width: 36%;">
+                                <col style="width: 22%;">
+                                <col style="width: 18%;">
+                            </colgroup>
+                            <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Nota</th></tr></thead>
+                            <tbody id="recentSalesBody"><tr><td colspan="4" class="empty">Belum ada transaksi</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -531,21 +479,23 @@
                 </div>
                 <div class="table-wrap table-collapsible" id="productTableWrapper">
                     <table>
+                        <colgroup>
+                            <col style="width: 36%;">
+                            <col style="width: 26%;">
+                            <col style="width: 18%;">
+                            <col style="width: 20%;">
+                        </colgroup>
                         <thead>
                             <tr>
-                                <th style="min-width: 130px;">Nama</th>
+                                <th>Produk</th>
+                                <th>Harga/Stok</th>
                                 <th>Jenis</th>
-                                <th>Kategori</th>
-                                <th>Satuan</th>
-                                <th>Harga</th>
-                                <th>Stok</th>
-                                <th style="text-align: center; min-width: 110px;">Aksi</th>
+                                <th style="text-align: center;">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="productTableBody"><tr><td colspan="7" class="empty">Belum ada produk</td></tr></tbody>
+                        <tbody id="productTableBody"><tr><td colspan="4" class="empty">Belum ada produk</td></tr></tbody>
                     </table>
                 </div>
-                <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
             </div>
 
             <div class="card" id="purchaseCard">
@@ -633,8 +583,14 @@
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Metode</th><th>Kasir</th><th>Nota</th></tr></thead>
-                        <tbody id="salesReportBody"><tr><td colspan="6" class="empty">Belum ada transaksi</td></tr></tbody>
+                        <colgroup>
+                            <col style="width: 24%;">
+                            <col style="width: 38%;">
+                            <col style="width: 22%;">
+                            <col style="width: 16%;">
+                        </colgroup>
+                        <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Nota</th></tr></thead>
+                        <tbody id="salesReportBody"><tr><td colspan="4" class="empty">Belum ada transaksi</td></tr></tbody>
                     </table>
                 </div>
                 <div style="font-weight:700; text-align:right; margin-top:8px; font-size:0.95rem;" id="salesTotalReport">Total: Rp 0</div>
@@ -652,8 +608,14 @@
                     </div>
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>Waktu</th><th>Nama</th><th>Jenis</th><th>Jml</th><th>Total</th></tr></thead>
-                            <tbody id="purchaseReportBody"><tr><td colspan="5" class="empty">Belum ada pembelian</td></tr></tbody>
+                            <colgroup>
+                                <col style="width: 26%;">
+                                <col style="width: 34%;">
+                                <col style="width: 16%;">
+                                <col style="width: 24%;">
+                            </colgroup>
+                            <thead><tr><th>Waktu</th><th>Nama</th><th>Jml</th><th>Total</th></tr></thead>
+                            <tbody id="purchaseReportBody"><tr><td colspan="4" class="empty">Belum ada pembelian</td></tr></tbody>
                         </table>
                     </div>
                     <div style="font-weight:700; text-align:right; margin-top:8px;" id="purchaseTotalReport">Total: Rp 0</div>
@@ -693,8 +655,13 @@
                     </div>
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>Waktu</th><th>Kategori</th><th>Deskripsi</th><th>Jumlah</th></tr></thead>
-                            <tbody id="costReportBody"><tr><td colspan="4" class="empty">Belum ada biaya</td></tr></tbody>
+                            <colgroup>
+                                <col style="width: 26%;">
+                                <col style="width: 32%;">
+                                <col style="width: 42%;">
+                            </colgroup>
+                            <thead><tr><th>Waktu</th><th>Kategori</th><th>Jumlah</th></tr></thead>
+                            <tbody id="costReportBody"><tr><td colspan="3" class="empty">Belum ada biaya</td></tr></tbody>
                         </table>
                     </div>
                     <div style="font-weight:700; text-align:right; margin-top:8px;" id="costTotalReport">Total: Rp 0</div>
@@ -709,8 +676,13 @@
                     </div>
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>#</th><th>Nama</th><th>Jenis</th><th>Terjual</th><th>Omset</th></tr></thead>
-                            <tbody id="bestSellerBody"><tr><td colspan="5" class="empty">Belum ada data</td></tr></tbody>
+                            <colgroup>
+                                <col style="width: 44%;">
+                                <col style="width: 24%;">
+                                <col style="width: 32%;">
+                            </colgroup>
+                            <thead><tr><th>Nama</th><th>Terjual</th><th>Omset</th></tr></thead>
+                            <tbody id="bestSellerBody"><tr><td colspan="3" class="empty">Belum ada data</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -1314,7 +1286,7 @@
         else if (currentStokFilter === 'processed') filtered = products.filter(p => p.type === 'processed');
         
         if (filtered.length === 0) { 
-            tbody.innerHTML = `<tr><td colspan="7" class="empty">Belum ada produk</td></tr>`; 
+            tbody.innerHTML = `<tr><td colspan="4" class="empty">Belum ada produk</td></tr>`; 
             return; 
         }
         
@@ -1334,17 +1306,16 @@
             else if (p.type === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
             
             html += `<tr>
-                <td><strong>${p.name}</strong><br><small style="color:var(--gray);">${p.barcode || '-'}</small></td>
+                <td><strong>${p.name}</strong><br><small style="color:var(--gray);">${p.category || '-'}</small></td>
+                <td>Rp ${formatNumber(p.price)}<br><span class="${stokClass}">${stokDisplay} ${p.unit || ''}</span></td>
                 <td>${typeLabel}</td>
-                <td><span style="display:inline-block; background:#f1f5f9; padding:2px 8px; border-radius:10px; font-size:0.7rem; color:var(--primary);">${p.category || '-'}</span></td>
-                <td>${p.unit || '-'}</td>
-                <td>Rp ${formatNumber(p.price)}</td>
-                <td class="${stokClass}">${stokDisplay}</td>
-                <td style="text-align: center; white-space: nowrap;">
-                    <button class="btn btn-sm btn-outline" title="Edit" onclick="openProductModal('${p.id}')"><i class="fas fa-edit"></i></button>
-                    ${(p.type === 'processed' || p.type === 'finished') ? `<button class="btn btn-sm btn-primary" title="Resep" onclick="openRecipeModal('${p.id}')"><i class="fas fa-utensils"></i></button>` : ''}
-                    <button class="btn btn-sm btn-danger" title="Hapus" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
-                    ${p.type !== 'processed' ? `<button class="btn btn-sm btn-accent" title="Restock" onclick="openRestockModal('${p.id}')"><i class="fas fa-plus"></i></button>` : ''}
+                <td style="text-align: center;">
+                    <div style="display: flex; gap: 2px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-sm btn-outline" title="Edit" onclick="openProductModal('${p.id}')"><i class="fas fa-edit"></i></button>
+                        ${(p.type === 'processed' || p.type === 'finished') ? `<button class="btn btn-sm btn-primary" title="Resep" onclick="openRecipeModal('${p.id}')"><i class="fas fa-utensils"></i></button>` : ''}
+                        <button class="btn btn-sm btn-danger" title="Hapus" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                        ${p.type !== 'processed' ? `<button class="btn btn-sm btn-accent" title="Restock" onclick="openRestockModal('${p.id}')"><i class="fas fa-plus"></i></button>` : ''}
+                    </div>
                 </td>
             </tr>`;
         });
@@ -1695,7 +1666,7 @@
 
     function renderRecentSales() {
         const tbody = document.getElementById('recentSalesBody');
-        if (sales.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="empty">Belum ada transaksi</td></tr>`; return; }
+        if (sales.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="empty">Belum ada transaksi</td></tr>`; return; }
         const recent = [...sales].reverse().slice(0, 5);
         let html = '';
         recent.forEach(s => {
@@ -1704,8 +1675,7 @@
                 <td>${formatDate(s.date)}</td>
                 <td>${itemsStr}</td>
                 <td>Rp ${formatNumber(s.total)}</td>
-                <td><span class="badge ${s.method === 'Cash' ? 'badge-green' : 'badge-yellow'}">${s.method}</span></td>
-                <td><button class="btn btn-sm btn-outline" onclick="openNota('${s.id}')"><i class="fas fa-receipt"></i></button></td>
+                <td style="text-align: center;"><button class="btn btn-sm btn-outline" onclick="openNota('${s.id}')"><i class="fas fa-receipt"></i></button></td>
             </tr>`;
         });
         tbody.innerHTML = html;
@@ -2065,12 +2035,12 @@
         const totalSpan = document.getElementById('salesTotalReport');
         const { start, end } = getDateRange(salesFilter);
         let filtered = sales.filter(s => { const d = new Date(s.date); return d >= start && d < end; });
-        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="empty">Tidak ada data</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
+        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="empty">Tidak ada data</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
         let html = ''; let total = 0;
         filtered.forEach(s => {
             const itemsStr = s.items.map(i => `${i.name} (${i.qty})`).join(', ');
             total += s.total;
-            html += `<tr><td>${formatDate(s.date)}</td><td>${itemsStr}</td><td>Rp ${formatNumber(s.total)}</td><td><span class="badge ${s.method === 'Cash' ? 'badge-green' : 'badge-yellow'}">${s.method}</span></td><td>${s.cashier}</td><td><button class="btn btn-sm btn-outline" onclick="openNota('${s.id}')"><i class="fas fa-receipt"></i></button></td></tr>`;
+            html += `<tr><td>${formatDate(s.date)}</td><td>${itemsStr}</td><td>Rp ${formatNumber(s.total)}</td><td style="text-align: center;"><button class="btn btn-sm btn-outline" onclick="openNota('${s.id}')"><i class="fas fa-receipt"></i></button></td></tr>`;
         });
         tbody.innerHTML = html;
         totalSpan.textContent = `Total: Rp ${formatNumber(total)}`;
@@ -2083,15 +2053,11 @@
         const totalSpan = document.getElementById('purchaseTotalReport');
         const { start, end } = getDateRange(purchaseFilter);
         let filtered = purchases.filter(p => { const d = new Date(p.date); return d >= start && d < end; });
-        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="empty">Tidak ada data</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
+        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="empty">Tidak ada data</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
         let html = ''; let total = 0;
         filtered.forEach(p => {
             total += p.total;
-            let typeLabel = '';
-            if (p.type === 'raw') typeLabel = '<span class="badge badge-purple">Baku</span>';
-            else if (p.type === 'finished') typeLabel = '<span class="badge badge-green">Jadi</span>';
-            else if (p.type === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
-            html += `<tr><td>${formatDate(p.date)}</td><td>${p.name}</td><td>${typeLabel}</td><td>${p.qty}</td><td>Rp ${formatNumber(p.total)}</td></tr>`;
+            html += `<tr><td>${formatDate(p.date)}</td><td>${p.name}</td><td>${p.qty}</td><td>Rp ${formatNumber(p.total)}</td></tr>`;
         });
         tbody.innerHTML = html;
         totalSpan.textContent = `Total: Rp ${formatNumber(total)}`;
@@ -2104,9 +2070,9 @@
         const totalSpan = document.getElementById('costTotalReport');
         const { start, end } = getDateRange(costFilter);
         let filtered = costs.filter(c => { const d = new Date(c.date); return d >= start && d < end; });
-        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="empty">Belum ada biaya</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
+        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="3" class="empty">Belum ada biaya</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
         let html = ''; let total = 0;
-        filtered.forEach(c => { total += c.amount; html += `<tr><td>${formatDate(c.date)}</td><td>${c.category}</td><td>${c.description}</td><td>Rp ${formatNumber(c.amount)}</td></tr>`; });
+        filtered.forEach(c => { total += c.amount; html += `<tr><td>${formatDate(c.date)}</td><td>${c.category}<br><small style="color:var(--gray);">${c.description}</small></td><td>Rp ${formatNumber(c.amount)}</td></tr>`; });
         tbody.innerHTML = html;
         totalSpan.textContent = `Total: Rp ${formatNumber(total)}`;
     }
@@ -2140,15 +2106,11 @@
             });
         });
         const sorted = Object.entries(productCount).sort((a, b) => b[1] - a[1]);
-        if (sorted.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="empty">Belum ada data</td></tr>`; return; }
+        if (sorted.length === 0) { tbody.innerHTML = `<tr><td colspan="3" class="empty">Belum ada data</td></tr>`; return; }
         let html = '';
-        sorted.forEach(([name, qty], idx) => {
+        sorted.forEach(([name, qty]) => {
             const revenue = productRevenue[name] || 0;
-            let typeLabel = '';
-            if (productType[name] === 'raw') typeLabel = '<span class="badge badge-purple">Baku</span>';
-            else if (productType[name] === 'finished') typeLabel = '<span class="badge badge-green">Jadi</span>';
-            else if (productType[name] === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
-            html += `<tr><td>${idx+1}</td><td>${name}</td><td>${typeLabel}</td><td>${qty} pcs</td><td>Rp ${formatNumber(revenue)}</td></tr>`;
+            html += `<tr><td><strong>${name}</strong></td><td>${qty} pcs</td><td>Rp ${formatNumber(revenue)}</td></tr>`;
         });
         tbody.innerHTML = html;
     }
@@ -2466,7 +2428,7 @@
         } else {
             wrapper.classList.add('collapsed');
             btn.innerHTML = '<i class="fas fa-chevron-down"></i>';
-            productTableCollapsed = true;
+            productTable`
         }
     }
 
