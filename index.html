@@ -190,7 +190,7 @@
         .btn-sm { padding: 6px 12px; font-size: 0.72rem; border-radius: 10px; }
         .btn-block { width: 100%; justify-content: center; }
 
-        /* ===== TABLES & WRAPPING UNTUK NAMA PRODUK PANJANG ===== */
+        /* ===== TABLES & RESPONSIVE MOBILE WRAPPING ===== */
         .table-wrap {
             width: 100%; margin-top: 8px; border-radius: var(--radius-sm); border: none; background: transparent; 
             overflow-x: visible; overflow-y: visible; position: relative;
@@ -210,13 +210,14 @@
                 position: relative;
             }
             .table-wrap td {
-                display: flex; justify-content: space-between; align-items: center;
-                padding: 7px 0; border-bottom: 1px solid var(--bg); text-align: right; word-break: break-word; overflow-wrap: anywhere; font-size: 0.85rem;
+                display: flex; justify-content: space-between; align-items: flex-start;
+                padding: 7px 0; border-bottom: 1px solid var(--bg); text-align: left; word-break: break-word; overflow-wrap: anywhere; font-size: 0.85rem;
+                gap: 12px;
             }
             .table-wrap td:last-child { border-bottom: none; padding-top: 10px; justify-content: flex-end; }
             .table-wrap td::before {
                 content: attr(data-label); font-weight: 600; color: var(--gray); font-size: 0.75rem; text-align: left;
-                margin-right: 12px; flex-shrink: 0;
+                flex-shrink: 0; width: 32%;
             }
             .table-wrap td:last-child::before { display: none; }
         }
@@ -1087,13 +1088,13 @@ input:focus,select:focus,textarea:focus{
 
         <div class="settings-section">
             <div class="header" onclick="toggleSection(this)">
-                <span><i class="fas fa-palette"></i> Tema Warna Apple</span>
+                <span><i class="fas fa-palette"></i> Tema Warna</span>
                 <span class="arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             <div class="body">
-                <div style="font-size:0.82rem; color:var(--gray); margin-bottom:10px;">Pilih palet warna khas Apple untuk antarmuka kasir:</div>
+                <div style="font-size:0.82rem; color:var(--gray); margin-bottom:10px;">Pilih palet warna untuk antarmuka kasir:</div>
                 <div class="theme-grid">
-                    <button class="theme-btn" id="themeBtn_blue" onclick="setTheme('#007AFF', '#5AC8FA', 'blue')"><span class="theme-dot" style="background:#007AFF;"></span> iOS Blue</button>
+                    <button class="theme-btn" id="themeBtn_blue" onclick="setTheme('#007AFF', '#5AC8FA', 'blue')"><span class="theme-dot" style="background:#007AFF;"></span> Blue Sky</button>
                     <button class="theme-btn" id="themeBtn_indigo" onclick="setTheme('#5856D6', '#8B88EE', 'indigo')"><span class="theme-dot" style="background:#5856D6;"></span> Midnight</button>
                     <button class="theme-btn" id="themeBtn_gray" onclick="setTheme('#48484A', '#8E8E93', 'gray')"><span class="theme-dot" style="background:#48484A;"></span> Graphite</button>
                     <button class="theme-btn" id="themeBtn_amber" onclick="setTheme('#FF9500', '#FFB340', 'amber')"><span class="theme-dot" style="background:#FF9500;"></span> Warm Amber</button>
@@ -1685,9 +1686,9 @@ input:focus,select:focus,textarea:focus{
             else if (p.type === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
             
             html += `<tr>
-                <td data-label="Produk"><strong style="word-break: break-word; display:block;">${p.name}</strong><small style="color:var(--gray);">${p.category || '-'}</small></td>
-                <td data-label="Harga/Stok">Rp ${formatNumber(p.price)}<br><span class="${stokClass}">${stokDisplay}</span></td>
-                <td data-label="Jenis">${typeLabel}</td>
+                <td data-label="Produk"><div style="text-align: left; flex: 1; min-width: 0;"><strong style="word-break: break-word; display:block;">${p.name}</strong><small style="color:var(--gray); display:block; margin-top:2px;">${p.category || '-'}</small></div></td>
+                <td data-label="Harga/Stok"><div style="text-align: left; flex: 1; min-width: 0;">Rp ${formatNumber(p.price)}<br><span class="${stokClass}">${stokDisplay}</span></div></td>
+                <td data-label="Jenis"><div style="text-align: left; flex: 1; min-width: 0;">${typeLabel}</div></td>
                 <td data-label="Aksi" style="text-align: center;">
                     <div class="action-dropdown">
                         <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
@@ -2127,9 +2128,9 @@ input:focus,select:focus,textarea:focus{
         recent.forEach(s => {
             const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
             html += `<tr class="report-editable-row">
-                <td data-label="Waktu">${formatDate(s.date)}</td>
-                <td data-label="Item" style="word-break: break-word;">${itemsStr}</td>
-                <td data-label="Total">Rp ${formatNumber(s.total)}</td>
+                <td data-label="Waktu"><div style="text-align: left; flex: 1; min-width: 0;">${formatDate(s.date)}</div></td>
+                <td data-label="Item"><div style="text-align: left; flex: 1; min-width: 0; word-break: break-word;">${itemsStr}</div></td>
+                <td data-label="Total"><div style="text-align: left; flex: 1; min-width: 0;">Rp ${formatNumber(s.total)}</div></td>
                 <td data-label="Aksi" style="text-align: center;">
                     <div class="action-dropdown">
                         <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
@@ -2950,9 +2951,9 @@ input:focus,select:focus,textarea:focus{
             filtered.forEach(s => {
                 const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
                 html += `<tr class="report-editable-row">
-                    <td data-label="Waktu">${formatDate(s.date)}</td>
-                    <td data-label="Item" style="word-break: break-word;">${itemsStr}</td>
-                    <td data-label="Total">Rp ${formatNumber(s.total)}</td>
+                    <td data-label="Waktu"><div style="text-align: left; flex: 1; min-width: 0;">${formatDate(s.date)}</div></td>
+                    <td data-label="Item"><div style="text-align: left; flex: 1; min-width: 0; word-break: break-word;">${itemsStr}</div></td>
+                    <td data-label="Total"><div style="text-align: left; flex: 1; min-width: 0;">Rp ${formatNumber(s.total)}</div></td>
                     <td data-label="Aksi" style="text-align: center;">
                         <div class="action-dropdown">
                             <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
@@ -3026,9 +3027,9 @@ input:focus,select:focus,textarea:focus{
             filtered.forEach(p => {
                 const unitStr = p.unit || 'pcs';
                 html += `<tr class="report-editable-row">
-                    <td data-label="Waktu">${formatDate(p.date)}</td>
-                    <td data-label="Nama" style="word-break: break-word;">${p.name}</td>
-                    <td data-label="Jumlah">${formatNumber(p.qty)} ${unitStr}</td>
+                    <td data-label="Waktu"><div style="text-align: left; flex: 1; min-width: 0;">${formatDate(p.date)}</div></td>
+                    <td data-label="Nama"><div style="text-align: left; flex: 1; min-width: 0; word-break: break-word;">${p.name}</div></td>
+                    <td data-label="Jumlah"><div style="text-align: left; flex: 1; min-width: 0;">${formatNumber(p.qty)} ${unitStr}</div></td>
                     <td data-label="Aksi" style="text-align: center;">
                         <div class="action-dropdown">
                             <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
@@ -3099,8 +3100,8 @@ input:focus,select:focus,textarea:focus{
                 <tbody>`;
             filtered.forEach(c => {
                 html += `<tr class="report-editable-row">
-                    <td data-label="Waktu">${formatDate(c.date)}</td>
-                    <td data-label="Kategori" style="word-break: break-word;">${c.category}<br><small style="color:var(--gray);">${c.description}</small></td>
+                    <td data-label="Waktu"><div style="text-align: left; flex: 1; min-width: 0;">${formatDate(c.date)}</div></td>
+                    <td data-label="Kategori"><div style="text-align: left; flex: 1; min-width: 0; word-break: break-word;">${c.category}<br><small style="color:var(--gray); display:block; margin-top:2px;">${c.description}</small></div></td>
                     <td data-label="Aksi" style="text-align: center;">
                         <div class="action-dropdown">
                             <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
@@ -3167,7 +3168,11 @@ input:focus,select:focus,textarea:focus{
         sorted.forEach(([name, qty]) => {
             const revenue = productRevenue[name] || 0;
             const unit = productUnit[name] || 'pcs';
-            html += `<tr><td data-label="Nama" style="word-break: break-word;"><strong>${name}</strong></td><td data-label="Terjual">${formatNumber(qty)} ${unit}</td><td data-label="Omset">Rp ${formatNumber(revenue)}</td></tr>`;
+            html += `<tr>
+                <td data-label="Nama"><div style="text-align: left; flex: 1; min-width: 0; word-break: break-word;"><strong>${name}</strong></div></td>
+                <td data-label="Terjual"><div style="text-align: left; flex: 1; min-width: 0;">${formatNumber(qty)} ${unit}</div></td>
+                <td data-label="Omset"><div style="text-align: left; flex: 1; min-width: 0;">Rp ${formatNumber(revenue)}</div></td>
+            </tr>`;
         });
         tbody.innerHTML = html;
     }
