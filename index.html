@@ -255,7 +255,7 @@
         .qty-select-wrapper select, .qty-select-wrapper input { flex: 1; padding: 10px; border: 2px solid #e8edf2; border-radius: 12px; font-size: 0.9rem; outline: none; background: white; }
         .qty-select-wrapper select:focus, .qty-select-wrapper input:focus { border-color: var(--primary); }
 
-        /* ===== UNPAID BILLS / TABUNGAN / BAYAR NANTI CARD ===== */
+        /* ===== UNPAID BILLS CARD ===== */
         .unpaid-card {
             background: #ffffff;
             border: 1px solid #fed7aa;
@@ -449,7 +449,6 @@
                 </div>
                 <div style="margin-top:12px; font-weight:700; font-size:1.2rem; text-align:right;" id="cartTotal">Total: Rp 0</div>
                 
-                <!-- Opsi Pembayaran: Sekarang & Nanti -->
                 <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
                     <div style="font-size:0.8rem; font-weight:600; color:var(--gray);">Pilih Metode Pembayaran & Eksekusi:</div>
                     <div class="flex">
@@ -460,7 +459,7 @@
                 </div>
             </div>
 
-            <!-- Page / Daftar Penjualan Belum Dibayar (Bayar Nanti) -->
+            <!-- Page / Daftar Penjualan Belum Dibayar -->
             <div class="card" style="border-color: #fed7aa;">
                 <div class="card-title" style="color: #9a3412;">
                     <span><i class="fas fa-clock" style="color: var(--accent);"></i> Penjualan Belum Dibayar (Bayar Nanti)</span>
@@ -1518,7 +1517,7 @@
         const p = products.find(x => x.id === id);
         if (!p) return;
         p.stok += qty;
-        purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name: p.name, type: p.type || 'raw', qty, total: 0 });
+        purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name: p.name, type: p.type || 'raw', qty, unit: p.unit || 'pcs', total: 0 });
         DB.set('products', products);
         DB.set('purchases', purchases);
         closeRestockModal();
@@ -1721,7 +1720,7 @@
             }
             existing.qty += qty;
         } else {
-            cart.push({ productId: id, name: p.name, price: p.price, qty, type: p.type || 'raw', recipe: p.recipe || [], unit: p.unit || '' });
+            cart.push({ productId: id, name: p.name, price: p.price, qty, type: p.type || 'raw', recipe: p.recipe || [], unit: p.unit || 'pcs' });
         }
         document.getElementById('qtyInput').value = '1';
         document.getElementById('qtySelect').value = '1';
@@ -1747,7 +1746,7 @@
             html += `<div class="cart-item">
                 <div class="info">
                     <div class="name">${c.name}</div>
-                    <div class="meta">${typeLabel} ${recipeLabel} ${c.unit ? `(${c.unit})` : ''} Rp ${formatNumber(c.price)} x ${c.qty}</div>
+                    <div class="meta">${typeLabel} ${recipeLabel} Rp ${formatNumber(c.price)} x ${c.qty} ${c.unit || 'pcs'}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <span style="font-weight:600;">Rp ${formatNumber(subtotal)}</span>
@@ -1765,7 +1764,7 @@
         const recent = [...sales].reverse().slice(0, 5);
         let html = '';
         recent.forEach(s => {
-            const itemsStr = s.items.map(i => `${i.name} (${i.qty})`).join(', ');
+            const itemsStr = s.items.map(i => `${i.name} (${i.qty} ${i.unit || 'pcs'})`).join(', ');
             html += `<tr>
                 <td>${formatDate(s.date)}</td>
                 <td>${itemsStr}</td>
@@ -1821,7 +1820,7 @@
             }
         }
 
-        const items = cart.map(c => ({ productId: c.productId, name: c.name, qty: c.qty, price: c.price, type: c.type || 'raw' }));
+        const items = cart.map(c => ({ productId: c.productId, name: c.name, qty: c.qty, price: c.price, unit: c.unit || 'pcs', type: c.type || 'raw' }));
         const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
 
         for (const c of cart) {
@@ -1854,13 +1853,11 @@
         alert('Transaksi berhasil!');
     }
 
-    // Fitur Bayar Nanti (Masuk Daftar Penjualan Belum Dibayar)
     function payLater() {
         if (cart.length === 0) { alert('Keranjang kosong!'); return; }
         const customerName = prompt('Masukkan Nama Pemesan / Nomor Meja:', 'Meja 1');
         if (!customerName) return;
 
-        // Validasi stok sebelum masuk list belum dibayar & kurangi stok
         for (const c of cart) {
             const product = products.find(p => p.id === c.productId);
             if (!product) { alert(`Produk ${c.name} tidak ditemukan!`); return; }
@@ -1884,10 +1881,9 @@
             }
         }
 
-        const items = cart.map(c => ({ productId: c.productId, name: c.name, qty: c.qty, price: c.price, type: c.type || 'raw' }));
+        const items = cart.map(c => ({ productId: c.productId, name: c.name, qty: c.qty, price: c.price, unit: c.unit || 'pcs', type: c.type || 'raw' }));
         const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
 
-        // Kurangi stok saat masuk ke belum dibayar
         for (const c of cart) {
             const product = products.find(p => p.id === c.productId);
             if (!product) continue;
@@ -1918,7 +1914,6 @@
 
         unpaidSales.push(unpaidItem);
         
-        // Juga otomatis catat ke task dapur agar bisa dikerjakan
         const newTask = {
             id: 'task_' + unpaidItem.id,
             date: unpaidItem.date,
@@ -1939,7 +1934,6 @@
         alert('Penjualan dicatat sebagai "Bayar Nanti" dan masuk Task Dapur!');
     }
 
-    // Render Daftar Penjualan Belum Dibayar di Page Penjualan
     function renderUnpaidSales() {
         const container = document.getElementById('unpaidSalesContainer');
         if (!container) return;
@@ -1951,7 +1945,7 @@
         let html = '';
         const sorted = [...unpaidSales].reverse();
         sorted.forEach(u => {
-            const itemsStr = u.items.map(i => `${i.name} x${i.qty}`).join(', ');
+            const itemsStr = u.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
             html += `<div class="unpaid-card">
                 <div class="unpaid-header">
                     <div>
@@ -1974,7 +1968,6 @@
         container.innerHTML = html;
     }
 
-    // Eksekusi Pembayaran dari List Belum Dibayar -> Masuk Riwayat Penjualan
     function payUnpaid(unpaidId, method) {
         const item = unpaidSales.find(x => x.id === unpaidId);
         if (!item) return;
@@ -1989,7 +1982,6 @@
             if (!confirm(`Konfirmasi pembayaran QRIS untuk ${item.customer} sebesar Rp ${formatNumber(item.total)}?`)) return;
         }
 
-        // Pindahkan ke riwayat sales resmi
         const sale = {
             id: Date.now().toString(),
             date: new Date().toISOString(),
@@ -2000,7 +1992,6 @@
         };
         sales.push(sale);
 
-        // Hapus dari list unpaid
         unpaidSales = unpaidSales.filter(x => x.id !== unpaidId);
 
         DB.set('sales', sales);
@@ -2009,7 +2000,6 @@
         alert('Pembayaran berhasil! Transaksi dimasukkan ke Riwayat Penjualan.');
     }
 
-    // Batalkan penjualan belum dibayar & kembalikan stok
     function cancelUnpaid(unpaidId) {
         if (!confirm('Batalkan transaksi ini dan kembalikan stok?')) return;
         const item = unpaidSales.find(x => x.id === unpaidId);
@@ -2033,7 +2023,6 @@
         alert('Transaksi dibatalkan dan stok dikembalikan.');
     }
 
-    // Render Task Dapur
     function renderTask() {
         const container = document.getElementById('taskListContainer');
         if (!container) return;
@@ -2050,7 +2039,7 @@
         const sorted = [...filtered].reverse();
         sorted.forEach(t => {
             const isDone = t.status === 'done';
-            const itemsList = t.items.map(i => `• ${i.name} x${i.qty}`).join('<br>');
+            const itemsList = t.items.map(i => `• ${i.name} ${i.qty} ${i.unit || 'pcs'}`).join('<br>');
             html += `<div class="task-card ${isDone ? 'done-task' : ''}">
                 <div class="task-header">
                     <div>
@@ -2127,7 +2116,7 @@
         if (existing) {
             existing.qty += qty;
         } else {
-            taskModalItems.push({ productId: p.id, name: p.name, price: p.price, qty, type: p.type || 'raw' });
+            taskModalItems.push({ productId: p.id, name: p.name, price: p.price, qty, unit: p.unit || 'pcs', type: p.type || 'raw' });
         }
         qtyInput.value = '1';
         sel.value = '';
@@ -2148,7 +2137,7 @@
         let html = '';
         taskModalItems.forEach((item, idx) => {
             html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f0f0f0; font-size:0.85rem;">
-                <span>${item.name} x${item.qty} (Rp ${formatNumber(item.price * item.qty)})</span>
+                <span>${item.name} ${item.qty} ${item.unit || 'pcs'} (Rp ${formatNumber(item.price * item.qty)})</span>
                 <button class="btn btn-sm btn-danger" onclick="removeTaskModalItem(${idx})"><i class="fas fa-times"></i></button>
             </div>`;
         });
@@ -2200,7 +2189,7 @@
         container.innerHTML = `
             <div class="nota-header"><h3>${profileName}</h3>${address ? `<p>${address}</p>` : ''}${phone ? `<p>Telp: ${phone}</p>` : ''}${social ? `<p>${social}</p>` : ''}
             <div class="nota-divider"></div><p style="text-align:left;">${formatDate(sale.date)} | Kasir: ${sale.cashier}</p><div class="nota-divider"></div></div>
-            <div class="nota-body">${sale.items.map(i => `<div class="nota-item"><span>${i.name} ${i.type === 'raw' ? '(Baku)' : ''} x${i.qty}</span><span>Rp ${formatNumber(i.price * i.qty)}</span></div>`).join('')}</div>
+            <div class="nota-body">${sale.items.map(i => `<div class="nota-item"><span>${i.name} ${i.type === 'raw' ? '(Baku)' : ''} ${i.qty} ${i.unit || 'pcs'}</span><span>Rp ${formatNumber(i.price * i.qty)}</span></div>`).join('')}</div>
             <div class="nota-divider"></div>
             <div class="nota-total"><span>Total</span><span>Rp ${formatNumber(sale.total)}</span></div>
             <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span>Metode: ${sale.method}</span></div>
@@ -2225,7 +2214,7 @@
         const address = profile.address || '';
         const phone = profile.phone || '';
         const social = profile.social || '';
-        const itemsStr = currentNotaSale.items.map(i => `${i.name} ${i.type === 'raw' ? '(Baku)' : ''} x${i.qty} = Rp ${formatNumber(i.price * i.qty)}`).join('\n');
+        const itemsStr = currentNotaSale.items.map(i => `${i.name} ${i.type === 'raw' ? '(Baku)' : ''} ${i.qty} ${i.unit || 'pcs'} = Rp ${formatNumber(i.price * i.qty)}`).join('\n');
         const totalStr = formatNumber(currentNotaSale.total);
         const msg = `*NOTA PENJUALAN*\n${profileName}\n${address}\n${phone}\n${social}\n------------------------\n${itemsStr}\n------------------------\nTotal: Rp ${totalStr}\nMetode: ${currentNotaSale.method}\n------------------------\nTerima kasih!`;
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
@@ -2243,7 +2232,7 @@
             else if (p.type === 'finished') typeLabel = '<span class="badge badge-green">Jadi</span>';
             else if (p.type === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
             html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:0.85rem;">
-                <div><strong>${p.name}</strong> ${typeLabel}<br><small style="color:var(--gray);">${formatDate(p.date)} • ${formatNumber(p.qty)} pcs • Rp ${formatNumber(p.total)}</small></div>
+                <div><strong>${p.name}</strong> ${typeLabel}<br><small style="color:var(--gray);">${formatDate(p.date)} • ${formatNumber(p.qty)} ${p.unit || 'pcs'} • Rp ${formatNumber(p.total)}</small></div>
                 <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-outline" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i></button></div>
             </div>`;
         });
@@ -2289,7 +2278,7 @@
         let sellPrice = parseCleanNumber(document.getElementById('purchaseSellPrice').value) || 0;
         const discount = parseCleanNumber(document.getElementById('purchaseDiscount').value) || 0;
         const type = document.getElementById('purchaseType').value;
-        const unit = getPurchaseUnit();
+        const unit = getPurchaseUnit() || 'pcs';
 
         if (!name || isNaN(qty) || qty < 1) { alert('Nama dan jumlah wajib!'); return; }
 
@@ -2319,7 +2308,7 @@
             products.push(newProduct);
         }
 
-        purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name, type, qty, total: qty * buyPrice });
+        purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name, type, qty, unit, total: qty * buyPrice });
         DB.set('products', products);
         DB.set('purchases', purchases);
 
@@ -2370,7 +2359,7 @@
         p.date = new Date().toISOString();
         const newProd = products.find(prod => prod.name.toLowerCase() === p.name.toLowerCase());
         if (newProd && newProd.type !== 'processed') newProd.stok += parsedQty;
-        else if (!newProd) products.push({ id: Date.now().toString(), name: p.name, barcode: '', category: '', type: 'raw', unit: '', price: 0, stok: parsedQty, recipe: [] });
+        else if (!newProd) products.push({ id: Date.now().toString(), name: p.name, barcode: '', category: '', type: 'raw', unit: p.unit || 'pcs', price: 0, stok: parsedQty, recipe: [] });
         DB.set('products', products);
         DB.set('purchases', purchases);
         renderAll();
@@ -2467,7 +2456,7 @@
         if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="empty">Tidak ada data</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
         let html = ''; let total = 0;
         filtered.forEach(s => {
-            const itemsStr = s.items.map(i => `${i.name} (${i.qty})`).join(', ');
+            const itemsStr = s.items.map(i => `${i.name} (${i.qty} ${i.unit || 'pcs'})`).join(', ');
             total += s.total;
             html += `<tr><td>${formatDate(s.date)}</td><td>${itemsStr}</td><td>Rp ${formatNumber(s.total)}</td><td style="text-align: center;"><button class="btn btn-sm btn-outline" onclick="openNota('${s.id}')"><i class="fas fa-receipt"></i></button></td></tr>`;
         });
@@ -2486,7 +2475,7 @@
         let html = ''; let total = 0;
         filtered.forEach(p => {
             total += p.total;
-            html += `<tr><td>${formatDate(p.date)}</td><td>${p.name}</td><td>${p.qty}</td><td>Rp ${formatNumber(p.total)}</td></tr>`;
+            html += `<tr><td>${formatDate(p.date)}</td><td>${p.name}</td><td>${formatNumber(p.qty)} ${p.unit || 'pcs'}</td><td>Rp ${formatNumber(p.total)}</td></tr>`;
         });
         tbody.innerHTML = html;
         totalSpan.textContent = `Total: Rp ${formatNumber(total)}`;
@@ -2526,12 +2515,12 @@
         const tbody = document.getElementById('bestSellerBody');
         const { start, end } = getDateRange(bestFilter);
         let filtered = sales.filter(s => { const d = new Date(s.date); return d >= start && d < end; });
-        const productCount = {}; const productRevenue = {}; const productType = {};
+        const productCount = {}; const productRevenue = {}; const productUnit = {};
         filtered.forEach(s => {
             s.items.forEach(item => {
                 productCount[item.name] = (productCount[item.name] || 0) + item.qty;
                 productRevenue[item.name] = (productRevenue[item.name] || 0) + (item.price * item.qty);
-                productType[item.name] = item.type || 'raw';
+                productUnit[item.name] = item.unit || 'pcs';
             });
         });
         const sorted = Object.entries(productCount).sort((a, b) => b[1] - a[1]);
@@ -2539,7 +2528,8 @@
         let html = '';
         sorted.forEach(([name, qty]) => {
             const revenue = productRevenue[name] || 0;
-            html += `<tr><td><strong>${name}</strong></td><td>${qty} pcs</td><td>Rp ${formatNumber(revenue)}</td></tr>`;
+            const unit = productUnit[name] || 'pcs';
+            html += `<tr><td><strong>${name}</strong></td><td>${formatNumber(qty)} ${unit}</td><td>Rp ${formatNumber(revenue)}</td></tr>`;
         });
         tbody.innerHTML = html;
     }
@@ -2705,7 +2695,7 @@
         const data = filtered.map((s, idx) => ({
             'No': idx + 1,
             'Tanggal': formatDate(s.date),
-            'Item Terjual': s.items.map(i => `${i.name}${i.type === 'raw' ? ' (Baku)' : ''} x${i.qty}`).join(', '),
+            'Item Terjual': s.items.map(i => `${i.name}${i.type === 'raw' ? ' (Baku)' : ''} ${i.qty} ${i.unit || 'pcs'}`).join(', '),
             'Total (Rp)': s.total,
             'Metode': s.method,
             'Kasir': s.cashier
@@ -2722,7 +2712,7 @@
             'Tanggal': formatDate(p.date),
             'Nama Barang': p.name,
             'Jenis': p.type === 'raw' ? 'Bahan Baku' : p.type === 'finished' ? 'Produk Jadi' : 'Produk Olahan',
-            'Jumlah': p.qty,
+            'Jumlah': `${formatNumber(p.qty)} ${p.unit || 'pcs'}`,
             'Total Biaya (Rp)': p.total
         }));
         exportExcel(data, `Laporan_Pembelian_${new Date().toISOString().split('T')[0]}.xlsx`, 'Pembelian', true);
