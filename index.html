@@ -10,9 +10,9 @@
     <style>
         /* ===== RESET & VARIABEL (Apple Style / SF Pro Inspired) ===== */
         :root {
-            --primary: #0066CC;
-            --primary-light: #4799E8;
-            --primary-dark: #004499;
+            --primary: #007AFF;
+            --primary-light: #5AC8FA;
+            --primary-dark: #0051A8;
             --accent: #FF9500;
             --danger: #FF3B30;
             --success: #34C759;
@@ -43,7 +43,7 @@
         #splashScreen {
             position: fixed; inset: 0; background: linear-gradient(135deg, #0f172a, #1e293b);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s ease;
+            z-index: 99999; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s ease;
             opacity: 1; visibility: visible; padding: 20px; text-align: center;
         }
         #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -75,7 +75,7 @@
         .login-title { display: block; color: var(--gray); font-size: 0.85rem; line-height: 1.2; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
         #loginCard .login-brand::after { content: ""; display: block; width: 36px; height: 3px; margin: 14px auto 0; border-radius: 99px; background: var(--primary); }
         .auth-card input, .auth-card select { width: 100%; padding: 14px 18px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 1rem; margin-bottom: 16px; outline: none; transition: var(--transition); background: var(--bg); color: var(--text); }
-        .auth-card input:focus, .auth-card select:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.12); }
+        .auth-card input:focus, .auth-card select:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12); }
         .auth-card button { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; font-size: 1rem; cursor: pointer; transition: var(--transition); }
         .auth-card button:active { transform: scale(0.97); }
         .auth-card .error { color: var(--danger); font-size: 0.85rem; text-align: center; margin-top: 8px; display: none; font-weight: 500; }
@@ -94,7 +94,7 @@
             color: var(--gray); transition: var(--transition); padding: 6px 0; border-radius: 18px;
         }
         .bottom-nav button .nav-icon { font-size: 1.2rem; transition: var(--transition); }
-        .bottom-nav button.active { color: var(--primary); background: rgba(0, 102, 204, 0.08); }
+        .bottom-nav button.active { color: var(--primary); background: rgba(0, 122, 255, 0.08); }
         .bottom-nav button.active .nav-icon { transform: translateY(-2px); }
         .bottom-nav button#logoutBtn { color: var(--danger); }
         .bottom-nav button#logoutBtn.active { background: rgba(255, 59, 48, 0.08); color: var(--danger); }
@@ -115,9 +115,9 @@
         .btn { padding: 10px 16px; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; transition: var(--transition); font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
         .btn:active { transform: scale(0.96); }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 6px 16px rgba(0,102,204,0.25); }
+        .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 6px 16px rgba(0,122,255,0.25); }
         .btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
-        .btn-outline:hover { background: rgba(0,102,204,0.06); }
+        .btn-outline:hover { background: rgba(0,122,255,0.06); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-danger:hover { background: #d92b20; box-shadow: 0 6px 16px rgba(255,59,48,0.25); }
         .btn-accent { background: var(--accent); color: white; }
@@ -129,7 +129,8 @@
 
         /* ===== TABLES ===== */
         .table-wrap {
-            width: 100%; margin-top: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: #ffffff; overflow: hidden;
+            width: 100%; margin-top: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: #ffffff; 
+            overflow-x: auto; overflow-y: visible; position: relative;
         }
         table { width: 100%; border-collapse: collapse; font-size: 0.75rem; table-layout: fixed; }
         th, td { padding: 10px 8px; border-bottom: 1px solid var(--bg); text-align: left; word-break: break-word; overflow-wrap: break-word; white-space: normal; vertical-align: middle; }
@@ -144,11 +145,38 @@
             .app-header { padding-top: calc(16px + env(safe-area-inset-top)); }
         }
 
+        /* ===== ACTION DROPDOWN MENU (TITIK TIGA) - BODY PORTAL ALWAYS ON TOP ===== */
+        .action-dropdown { position: relative; display: inline-block; }
+        .action-dots-btn {
+            background: var(--bg); border: 1.5px solid var(--border); color: var(--text);
+            width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: var(--transition); font-size: 0.85rem;
+        }
+        .action-dots-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .action-menu {
+            position: fixed; background: white;
+            border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); border: 1.5px solid var(--border);
+            display: none; flex-direction: column; min-width: 140px; 
+            z-index: 999999; /* Z-Index sangat ekstrem agar di atas segalanya */
+            overflow: hidden;
+            animation: fadeInMenu 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .action-menu.show { display: flex; }
+        @keyframes fadeInMenu { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .action-menu button {
+            background: none; border: none; padding: 11px 14px; text-align: left; font-size: 0.8rem;
+            cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text); transition: background 0.2s;
+            width: 100%;
+        }
+        .action-menu button:hover { background: var(--gray-light); }
+        .action-menu button.danger { color: var(--danger); }
+        .action-menu button.danger:hover { background: rgba(255,59,48,0.08); }
+
         /* ===== BADGE ===== */
         .badge { display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; letter-spacing: 0.02em; }
         .badge-green { background: rgba(52,199,89,0.15); color: #248a3d; }
         .badge-yellow { background: rgba(255,149,0,0.15); color: #b26800; }
-        .badge-blue { background: rgba(0,102,204,0.12); color: #0055b3; }
+        .badge-blue { background: rgba(0,122,255,0.12); color: #0051a8; }
         .badge-purple { background: rgba(175,82,222,0.12); color: #8930b8; }
         .badge-orange { background: rgba(255,159,10,0.15); color: #b36b00; }
         .empty { text-align: center; padding: 35px 10px; color: var(--gray); font-style: italic; font-size: 0.85rem; font-weight: 500; }
@@ -169,7 +197,7 @@
         /* ===== QTY ===== */
         .qty-select-wrapper { display: flex; gap: 8px; align-items: center; flex: 1; }
         .qty-select-wrapper select, .qty-select-wrapper input { flex: 1; padding: 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem; outline: none; background: white; transition: var(--transition); }
-        .qty-select-wrapper select:focus, .qty-select-wrapper input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,204,0.12); }
+        .qty-select-wrapper select:focus, .qty-select-wrapper input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,122,255,0.12); }
 
         /* ===== UNPAID BILLS CARD ===== */
         .unpaid-card {
@@ -203,7 +231,7 @@
         .modal .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
         .modal .btn-row button { flex: 1; }
         .modal input, .modal select { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem; margin-bottom: 10px; outline: none; background: var(--bg); transition: var(--transition); }
-        .modal input:focus, .modal select:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(0,102,204,0.12); }
+        .modal input:focus, .modal select:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(0,122,255,0.12); }
 
         /* ===== NOTA ===== */
         .nota-container { font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; background: #fafafa; padding: 16px; border-radius: var(--radius-sm); border: 1px dashed var(--border); }
@@ -224,12 +252,23 @@
         .settings-section .body { padding: 0 18px 18px; display: none; }
         .settings-section.open .body { display: block; }
         .settings-section input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem; margin-bottom: 8px; outline: none; background: var(--bg); transition: var(--transition); }
-        .settings-section input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(0,102,204,0.12); }
+        .settings-section input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(0,122,255,0.12); }
 
         .employee-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bg); gap: 8px; flex-wrap: wrap; }
         .employee-item .info { font-size: 0.9rem; flex: 1; }
         .employee-item .info .name { font-weight: 600; }
         .employee-item .info .pin { color: var(--gray); font-size: 0.8rem; margin-left: 8px; }
+
+        /* ===== THEME PALETTE BUTTONS ===== */
+        .theme-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+        .theme-btn {
+            padding: 12px 14px; border-radius: var(--radius-sm); border: 2px solid var(--border);
+            font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            background: white; color: var(--text); transition: var(--transition);
+        }
+        .theme-btn:hover { border-color: var(--primary); }
+        .theme-btn.active { border-color: var(--primary); background: rgba(0, 122, 255, 0.06); }
+        .theme-dot { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
 
         /* ===== AUTOCOMPLETE ===== */
         .autocomplete-container { position: relative; width: 100%; }
@@ -237,11 +276,11 @@
             position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1.5px solid var(--border); border-radius: 0 0 var(--radius-sm) var(--radius-sm); max-height: 200px; overflow-y: auto; z-index: 50; display: none; box-shadow: var(--shadow);
         }
         .autocomplete-list .item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--bg); font-size: 0.85rem; display: flex; justify-content: space-between; transition: background 0.2s; }
-        .autocomplete-list .item:hover { background: rgba(0,102,204,0.06); }
+        .autocomplete-list .item:hover { background: rgba(0,122,255,0.06); }
         .autocomplete-list .item .price { color: var(--gray); font-weight: 600; }
 
-        .table-collapsible { transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; }
-        .table-collapsible.collapsed { max-height: 0 !important; padding: 0 !important; margin: 0 !important; border: none !important; }
+        .table-collapsible { transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1); overflow: visible; }
+        .table-collapsible.collapsed { max-height: 0 !important; padding: 0 !important; margin: 0 !important; border: none !important; overflow: hidden !important; }
         .btn-minimize { background: transparent; border: none; color: var(--gray); cursor: pointer; font-size: 1.1rem; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; }
         .btn-minimize:hover { background: var(--bg); color: var(--text); }
 
@@ -249,6 +288,197 @@
         .stok-na { color: var(--gray); font-style: italic; }
         #restoreFileInput { padding: 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; background: white; width: 100%; }
     </style>
+<style>
+/* ===== HDRG CLEAN / DYNAMIC / RESPONSIVE UI LAYER ===== */
+:root{
+  --ui-radius:18px;
+  --ui-radius-sm:13px;
+  --ui-shadow:0 10px 35px rgba(0,0,0,.07);
+  --ui-shadow-hover:0 16px 45px rgba(0,0,0,.11);
+  --ui-border:rgba(0,0,0,.075);
+  --ui-surface:rgba(255,255,255,.86);
+  --ui-muted:#6b7280;
+  --ui-transition:220ms cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{font:inherit}
+button,.btn,[role="button"]{
+  transition:transform var(--ui-transition),box-shadow var(--ui-transition),
+             background var(--ui-transition),border-color var(--ui-transition),
+             opacity var(--ui-transition);
+}
+button:active,.btn:active,[role="button"]:active{transform:scale(.975)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid rgba(0,122,255,.18);
+  outline-offset:2px;
+}
+.card,.panel,.modal-content,.stat-card,.report-card,.purchase-card,.product-card{
+  border-radius:var(--ui-radius);
+}
+.card,.panel,.stat-card,.report-card,.purchase-card{
+  border:1px solid var(--ui-border);
+  box-shadow:var(--ui-shadow);
+  background:var(--ui-surface);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.card:hover,.panel:hover,.stat-card:hover,.report-card:hover,.purchase-card:hover{
+  box-shadow:var(--ui-shadow-hover);
+}
+input,select,textarea{
+  min-height:44px;
+  border-radius:var(--ui-radius-sm)!important;
+  border:1px solid var(--ui-border)!important;
+  transition:border-color var(--ui-transition),box-shadow var(--ui-transition),background var(--ui-transition);
+}
+input:hover,select:hover,textarea:hover{border-color:rgba(0,0,0,.14)!important}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(0,122,255,.42)!important;
+  box-shadow:0 0 0 4px rgba(0,122,255,.08)!important;
+}
+table{border-collapse:separate!important;border-spacing:0 7px!important}
+thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:rgba(248,249,251,.94)!important;
+  backdrop-filter:blur(12px);
+}
+tbody tr{
+  transition:box-shadow var(--ui-transition),background var(--ui-transition);
+}
+tbody tr:hover{
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
+  background: rgba(0,0,0,0.012);
+}
+tbody td{background:rgba(255,255,255,.72); position:relative;}
+tbody tr td:first-child{border-radius:12px 0 0 12px}
+tbody tr td:last-child{border-radius:0 12px 12px 0}
+
+/* Responsive page containers */
+.container,.content,.main-content,.page-content{
+  width:min(100% - 28px, 1240px);
+  margin-inline:auto;
+}
+.grid,.dashboard-grid,.stats-grid{
+  gap:16px!important;
+}
+@media (min-width:900px){
+  .container,.content,.main-content,.page-content{
+    width:min(100% - 48px, 1240px);
+  }
+}
+
+/* Sticky mobile action area */
+.mobile-sticky-actions{
+  position:sticky;
+  bottom:calc(10px + env(safe-area-inset-bottom));
+  z-index:20;
+}
+
+/* Cards become full-width and comfortable on small screens */
+@media (max-width:720px){
+  body{font-size:14px}
+  .container,.content,.main-content,.page-content{
+    width:calc(100% - 20px)!important;
+  }
+  .card,.panel,.stat-card,.report-card,.purchase-card{
+    border-radius:16px;
+  }
+  .grid,.dashboard-grid,.stats-grid{
+    grid-template-columns:1fr!important;
+    gap:12px!important;
+  }
+  .row,.form-row,.toolbar,.action-row{
+    flex-wrap:wrap!important;
+  }
+  .row>*,
+  .form-row>*{
+    min-width:0;
+    flex:1 1 100%;
+  }
+  .toolbar{
+    gap:8px!important;
+  }
+  .toolbar input,
+  .toolbar select{
+    width:100%!important;
+  }
+  table{
+    min-width:680px;
+  }
+  .table-wrap,.table-responsive,.report-table-wrap{
+    overflow-x:auto!important;
+    overflow-y:visible!important;
+    -webkit-overflow-scrolling:touch;
+    border-radius:14px;
+  }
+  .modal,.modal-overlay{
+    align-items:flex-end!important;
+    padding:0!important;
+  }
+  .modal-content{
+    width:100%!important;
+    max-width:none!important;
+    max-height:92dvh!important;
+    overflow:auto!important;
+    border-radius:22px 22px 0 0!important;
+    padding-bottom:calc(18px + env(safe-area-inset-bottom))!important;
+    animation:sheetIn .28s cubic-bezier(.2,.8,.2,1);
+  }
+  .bottom-nav{
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+}
+@keyframes sheetIn{
+  from{transform:translateY(28px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+
+/* Compact touch targets */
+@media (pointer:coarse){
+  button,.btn,[role="button"]{min-height:44px}
+  .icon-btn{min-width:44px;min-height:44px}
+}
+
+/* Empty/loading states */
+.empty-state{
+  padding:42px 18px;
+  text-align:center;
+  color:var(--ui-muted);
+}
+.skeleton{
+  position:relative;
+  overflow:hidden;
+  background:#eef0f3!important;
+}
+.skeleton:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform:translateX(-100%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);
+  animation:skeleton 1.2s infinite;
+}
+@keyframes skeleton{to{transform:translateX(100%)}}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion:reduce){
+  *,*:before,*:after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -362,11 +592,11 @@
                         <table>
                             <colgroup>
                                 <col style="width: 24%;">
-                                <col style="width: 36%;">
-                                <col style="width: 22%;">
-                                <col style="width: 18%;">
+                                <col style="width: 38%;">
+                                <col style="width: 26%;">
+                                <col style="width: 12%;">
                             </colgroup>
-                            <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th>Nota</th></tr></thead>
+                            <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th style="text-align:center;">Aksi</th></tr></thead>
                             <tbody id="recentSalesBody"><tr><td colspan="4" class="empty">Belum ada transaksi</td></tr></tbody>
                         </table>
                     </div>
@@ -410,10 +640,10 @@
                 <div class="table-wrap table-collapsible" id="productTableWrapper">
                     <table>
                         <colgroup>
-                            <col style="width: 36%;">
-                            <col style="width: 26%;">
-                            <col style="width: 18%;">
+                            <col style="width: 38%;">
+                            <col style="width: 28%;">
                             <col style="width: 20%;">
+                            <col style="width: 14%;">
                         </colgroup>
                         <thead>
                             <tr>
@@ -514,10 +744,10 @@
                 <div class="table-wrap">
                     <table>
                         <colgroup>
-                            <col style="width: 22%;">
-                            <col style="width: 36%;">
-                            <col style="width: 22%;">
-                            <col style="width: 20%;">
+                            <col style="width: 24%;">
+                            <col style="width: 40%;">
+                            <col style="width: 24%;">
+                            <col style="width: 12%;">
                         </colgroup>
                         <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th style="text-align:center;">Aksi</th></tr></thead>
                         <tbody id="salesReportBody"><tr><td colspan="4" class="empty">Belum ada transaksi</td></tr></tbody>
@@ -539,12 +769,12 @@
                     <div class="table-wrap">
                         <table>
                             <colgroup>
+                                <col style="width: 24%;">
+                                <col style="width: 34%;">
                                 <col style="width: 22%;">
-                                <col style="width: 32%;">
                                 <col style="width: 20%;">
-                                <col style="width: 26%;">
                             </colgroup>
-                            <thead><tr><th>Waktu</th><th>Nama</th><th>Jml</th><th style="text-align:center;">Total/Aksi</th></tr></thead>
+                            <thead><tr><th>Waktu</th><th>Nama</th><th>Jml</th><th style="text-align:center;">Aksi</th></tr></thead>
                             <tbody id="purchaseReportBody"><tr><td colspan="4" class="empty">Belum ada pembelian</td></tr></tbody>
                         </table>
                     </div>
@@ -586,11 +816,11 @@
                     <div class="table-wrap">
                         <table>
                             <colgroup>
-                                <col style="width: 24%;">
-                                <col style="width: 36%;">
-                                <col style="width: 40%;">
+                                <col style="width: 26%;">
+                                <col style="width: 42%;">
+                                <col style="width: 32%;">
                             </colgroup>
-                            <thead><tr><th>Waktu</th><th>Kategori</th><th style="text-align:right;">Jumlah/Aksi</th></tr></thead>
+                            <thead><tr><th>Waktu</th><th>Kategori</th><th style="text-align:center;">Aksi</th></tr></thead>
                             <tbody id="costReportBody"><tr><td colspan="3" class="empty">Belum ada biaya</td></tr></tbody>
                         </table>
                     </div>
@@ -774,7 +1004,6 @@
     </div>
 </div>
 
-<!-- MODAL EDIT LAPORAN TRANSAKSI / PEMBELIAN / BIAYA -->
 <div id="editReportModal" class="modal-overlay">
     <div class="modal">
         <h3 id="editReportTitle">Edit Laporan</h3>
@@ -802,6 +1031,23 @@
                 <input type="text" id="settingsPhone" placeholder="Telepon">
                 <input type="text" id="settingsSocial" placeholder="Sosial Media">
                 <button class="btn btn-primary btn-block" onclick="saveProfile()"><i class="fas fa-save"></i> Simpan Profil</button>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="header" onclick="toggleSection(this)">
+                <span><i class="fas fa-palette"></i> Tema Warna Apple</span>
+                <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="body">
+                <div style="font-size:0.82rem; color:var(--gray); margin-bottom:10px;">Pilih palet warna khas Apple untuk antarmuka kasir:</div>
+                <div class="theme-grid">
+                    <button class="theme-btn" id="themeBtn_blue" onclick="setTheme('#007AFF', '#5AC8FA', 'blue')"><span class="theme-dot" style="background:#007AFF;"></span> iOS Blue</button>
+                    <button class="theme-btn" id="themeBtn_indigo" onclick="setTheme('#5856D6', '#8B88EE', 'indigo')"><span class="theme-dot" style="background:#5856D6;"></span> Midnight</button>
+                    <button class="theme-btn" id="themeBtn_gray" onclick="setTheme('#48484A', '#8E8E93', 'gray')"><span class="theme-dot" style="background:#48484A;"></span> Graphite</button>
+                    <button class="theme-btn" id="themeBtn_amber" onclick="setTheme('#FF9500', '#FFB340', 'amber')"><span class="theme-dot" style="background:#FF9500;"></span> Warm Amber</button>
+                    <button class="theme-btn" id="themeBtn_mint" onclick="setTheme('#00C7BE', '#64D2FF', 'mint')"><span class="theme-dot" style="background:#00C7BE;"></span> Emerald Mint</button>
+                </div>
             </div>
         </div>
 
@@ -874,7 +1120,7 @@
     let costFilter = 'today';
     let financialFilter = 'today';
     let bestFilter = 'today';
-    let currentTheme = DB.get('theme', { primary: '#0066CC', light: '#4799E8' });
+    let currentTheme = DB.get('theme', { primary: '#007AFF', light: '#5AC8FA', name: 'blue' });
     let currentNotaSale = null;
     let currentTypeFilter = 'all';
     let currentStokFilter = 'all';
@@ -885,8 +1131,12 @@
     let productTableCollapsed = false;
     let taskModalItems = [];
 
-    function setTheme(primary, light) {
-        currentTheme = { primary, light };
+    // State untuk Body Portal Action Menu
+    let activeMenu = null;
+    let originalParent = null;
+
+    function setTheme(primary, light, name) {
+        currentTheme = { primary, light, name };
         DB.set('theme', currentTheme);
         applyTheme();
     }
@@ -894,6 +1144,11 @@
     function applyTheme() {
         document.documentElement.style.setProperty('--primary', currentTheme.primary);
         document.documentElement.style.setProperty('--primary-light', currentTheme.light);
+        
+        document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.getElementById(`themeBtn_${currentTheme.name || 'blue'}`);
+        if (activeBtn) activeBtn.classList.add('active');
+
         const splash = document.getElementById('splashScreen');
         if (splash) splash.style.background = `linear-gradient(135deg, #1c1c1e, #2c2c2e)`;
     }
@@ -904,7 +1159,73 @@
             document.getElementById('authPage').style.display = 'flex';
             initApp();
         }, 3400);
+        
+        // Global click listener: Tutup pop-up jika klik di luar area pop-up atau tombol
+        document.addEventListener('click', function(e) {
+            if (activeMenu && !activeMenu.contains(e.target) && !e.target.closest('.action-dots-btn')) {
+                closeActiveMenu();
+            }
+        });
     });
+
+    function toggleActionMenu(event, btnElement) {
+        event.stopPropagation();
+        const dropdown = btnElement.closest('.action-dropdown');
+        const menu = dropdown.querySelector('.action-menu');
+        const isOpen = menu.classList.contains('show') || (activeMenu === menu);
+
+        // Tutup menu aktif sebelumnya jika ada
+        closeActiveMenu();
+
+        if (!isOpen) {
+            activeMenu = menu;
+            originalParent = menu.parentNode;
+            
+            // Pindahkan menu secara dinamis ke body untuk lolos dari semua stacking context / overflow clipping
+            document.body.appendChild(menu);
+            menu.style.display = 'flex';
+
+            const rect = btnElement.getBoundingClientRect();
+            const menuWidth = menu.offsetWidth || 140;
+            const menuHeight = menu.offsetHeight || 120;
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+
+            let top, left;
+
+            // Penentuan posisi (atas / bawah tombol)
+            if (rect.bottom + menuHeight + 8 > viewportHeight && rect.top - menuHeight - 8 >= 0) {
+                top = rect.top - menuHeight - 4; // Di atas
+            } else {
+                top = rect.bottom + 4; // Di bawah
+            }
+
+            // Penentuan posisi horizontal
+            left = rect.right - menuWidth;
+            if (left < 10) left = 10;
+            if (left + menuWidth > viewportWidth - 10) {
+                left = viewportWidth - menuWidth - 10;
+            }
+
+            menu.style.top = `${top}px`;
+            menu.style.left = `${left}px`;
+            menu.classList.add('show');
+        }
+    }
+
+    function closeActiveMenu() {
+        if (activeMenu) {
+            activeMenu.classList.remove('show');
+            activeMenu.style.top = '';
+            activeMenu.style.left = '';
+            activeMenu.style.display = '';
+            if (originalParent) {
+                originalParent.appendChild(activeMenu);
+            }
+            activeMenu = null;
+            originalParent = null;
+        }
+    }
 
     function initApp() {
         applyTheme();
@@ -961,6 +1282,7 @@
     }
 
     function switchPage(pageId) {
+        closeActiveMenu();
         document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
         document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.remove('active'));
@@ -1046,6 +1368,7 @@
 
     function logout() {
         if (!confirm('Yakin keluar?')) return;
+        closeActiveMenu();
         document.getElementById('mainApp').style.display = 'none';
         document.getElementById('authPage').style.display = 'flex';
         document.getElementById('loginPin').value = '';
@@ -1263,11 +1586,14 @@
                 <td>Rp ${formatNumber(p.price)}<br><span class="${stokClass}">${stokDisplay}</span></td>
                 <td>${typeLabel}</td>
                 <td style="text-align: center;">
-                    <div style="display: flex; gap: 2px; justify-content: center; flex-wrap: wrap;">
-                        <button class="btn btn-sm btn-outline" title="Edit" onclick="openProductModal('${p.id}')"><i class="fas fa-edit"></i></button>
-                        ${(p.type === 'processed' || p.type === 'finished') ? `<button class="btn btn-sm btn-primary" title="Resep" onclick="openRecipeModal('${p.id}')"><i class="fas fa-utensils"></i></button>` : ''}
-                        <button class="btn btn-sm btn-danger" title="Hapus" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
-                        ${p.type !== 'processed' ? `<button class="btn btn-sm btn-accent" title="Restock" onclick="openRestockModal('${p.id}')"><i class="fas fa-plus"></i></button>` : ''}
+                    <div class="action-dropdown">
+                        <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="action-menu">
+                            <button onclick="openProductModal('${p.id}')"><i class="fas fa-edit"></i> Edit</button>
+                            ${(p.type === 'processed' || p.type === 'finished') ? `<button onclick="openRecipeModal('${p.id}')"><i class="fas fa-utensils"></i> Resep</button>` : ''}
+                            ${p.type !== 'processed' ? `<button onclick="openRestockModal('${p.id}')"><i class="fas fa-plus"></i> Restock</button>` : ''}
+                            <button class="danger" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                        </div>
                     </div>
                 </td>
             </tr>`;
@@ -1277,6 +1603,7 @@
     }
 
     function openProductModal(id = null) {
+        closeActiveMenu();
         if (currentUser.role !== 'owner') { alert('Hanya Owner.'); return; }
         document.getElementById('editProductId').value = id || '';
         document.getElementById('modalProductTitle').textContent = id ? 'Edit Produk' : 'Tambah Produk';
@@ -1350,6 +1677,7 @@
     }
 
     function deleteProduct(id) {
+        closeActiveMenu();
         if (!confirm('Hapus produk?')) return;
         products = products.filter(p => p.id !== id);
         DB.set('products', products);
@@ -1358,6 +1686,7 @@
     }
 
     function openRestockModal(id) {
+        closeActiveMenu();
         const p = products.find(x => x.id === id);
         if (!p) return;
         if (p.type === 'processed') { alert('Produk olahan tidak memiliki stok langsung.'); return; }
@@ -1386,6 +1715,7 @@
     }
 
     function openRecipeModal(productId) {
+        closeActiveMenu();
         const product = products.find(p => p.id === productId);
         if (!product) return;
         if (product.type === 'raw') { alert('Resep hanya untuk produk jadi atau olahan!'); return; }
@@ -1638,7 +1968,14 @@
                 <td>${formatDate(s.date)}</td>
                 <td>${itemsStr}</td>
                 <td>Rp ${formatNumber(s.total)}</td>
-                <td style="text-align: center;"><button class="btn btn-sm btn-outline" onclick="openNota('${s.id}')"><i class="fas fa-receipt"></i></button></td>
+                <td style="text-align: center;">
+                    <div class="action-dropdown">
+                        <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="action-menu">
+                            <button onclick="openNota('${s.id}')"><i class="fas fa-receipt"></i> Nota</button>
+                        </div>
+                    </div>
+                </td>
             </tr>`;
         });
         tbody.innerHTML = html;
@@ -2051,6 +2388,7 @@
     }
 
     function openNota(saleId) {
+        closeActiveMenu();
         const sale = sales.find(s => s.id === saleId);
         if (!sale) return;
         currentNotaSale = sale;
@@ -2076,20 +2414,7 @@
     function printNota() {
         const content = document.getElementById('notaContent').innerHTML;
         const win = window.open('', '_blank', 'width=400,height=600');
-        win.document.write(`<html><head><title>Nota</title><style>body{font-family:'Courier New',monospace;font-size:12px;padding:20px;}.nota-header{text-align:center;}.nota-divider{border-top:1px dashed #000;margin:8px 0;}.nota-item{display:flex;justify-content:space-between;padding:2px 0;}.nota-total{display:flex;justify-content:space-between;font-weight:700;margin-top:8px;}.nota-footer{text-align:center;margin-top:12px;}
-        /* HDRG REPORT EDIT + APPLE POLISH */
-        .report-editable-row { transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
-        .report-editable-row:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.06); }
-        #editReportModal .modal { animation: hdrgModalIn .22s cubic-bezier(.22,.61,.36,1); }
-        @keyframes hdrgModalIn { from { opacity:0; transform:translateY(12px) scale(.98); } to { opacity:1; transform:none; } }
-        #editReportFields { display:grid; gap:10px; }
-        .edit-report-section { padding:12px; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.72); }
-        .edit-report-item { display:grid; grid-template-columns:minmax(0,2fr) 1fr 1.3fr; gap:8px; align-items:end; padding:10px 0; border-bottom:1px solid var(--bg); }
-        .edit-report-item:last-child { border-bottom:0; }
-        .edit-report-label { display:block; margin-bottom:5px; font-size:.72rem; font-weight:700; color:var(--gray); }
-        .unit-sync-note { margin-top:6px; font-size:.72rem; color:var(--gray); line-height:1.4; }
-        @media(max-width:600px){ .edit-report-item{grid-template-columns:1fr 1fr;} .edit-report-item > div:first-child{grid-column:1/-1;} }
-</style></head><body>${content}</body></html>`);
+        win.document.write(`<html><head><title>Nota</title><style>body{font-family:'Courier New',monospace;font-size:12px;padding:20px;}.nota-header{text-align:center;}.nota-divider{border-top:1px dashed #000;margin:8px 0;}.nota-item{display:flex;justify-content:space-between;padding:2px 0;}.nota-total{display:flex;justify-content:space-between;font-weight:700;margin-top:8px;}.nota-footer{text-align:center;margin-top:12px;}</style></head><body>${content}</body></html>`);
         win.document.close();
         win.print();
     }
@@ -2120,7 +2445,13 @@
             const unitStr = p.unit || 'pcs';
             html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);font-size:0.85rem;">
                 <div><strong>${p.name}</strong> ${typeLabel}<br><small style="color:var(--gray);">${formatDate(p.date)} • ${formatNumber(p.qty)} ${unitStr} • Rp ${formatNumber(p.total)}</small></div>
-                <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-outline" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i></button></div>
+                <div class="action-dropdown">
+                    <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                    <div class="action-menu">
+                        <button onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="danger" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                    </div>
+                </div>
             </div>`;
         });
         container.innerHTML = html;
@@ -2230,12 +2561,14 @@
     function manualSellPrice() {}
 
     function editPurchase(id) {
+        closeActiveMenu();
         const p = purchases.find(x => x.id === id);
         if (!p) return;
         openEditReportModal('purchase', id);
     }
 
     function deletePurchase(id) {
+        closeActiveMenu();
         if (!confirm('Hapus pembelian? Stok yang berasal dari pembelian ini juga akan disesuaikan.')) return;
         const p = purchases.find(x => x.id === id);
         if (p) applyPurchaseStock(p, -1);
@@ -2253,7 +2586,13 @@
         recent.forEach(c => {
             html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);font-size:0.85rem;">
                 <div><strong>${c.category}</strong> — ${c.description}<br><small style="color:var(--gray);">${formatDate(c.date)} • Rp ${formatNumber(c.amount)}</small></div>
-                <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-outline" onclick="editCost('${c.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="deleteCost('${c.id}')"><i class="fas fa-trash"></i></button></div>
+                <div class="action-dropdown">
+                    <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                    <div class="action-menu">
+                        <button onclick="editCost('${c.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="danger" onclick="deleteCost('${c.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                    </div>
+                </div>
             </div>`;
         });
         container.innerHTML = html;
@@ -2276,6 +2615,7 @@
     }
 
     function editCost(id) {
+        closeActiveMenu();
         const c = costs.find(x => x.id === id);
         if (!c) return;
         const category = prompt('Edit kategori:', c.category); if (category === null) return;
@@ -2294,6 +2634,7 @@
     }
 
     function deleteCost(id) {
+        closeActiveMenu();
         if (!confirm('Hapus biaya?')) return;
         costs = costs.filter(c => c.id !== id);
         DB.set('costs', costs);
@@ -2301,7 +2642,6 @@
         renderCostHistoryList();
     }
 
-    // ===== SATUAN & KONSISTENSI DATA =====
     const HDRG_MASS_UNITS = { gram: 1, ons: 100, kg: 1000 };
     function normalizeUnit(unit) {
         return String(unit || 'pcs').trim().toLowerCase();
@@ -2314,10 +2654,6 @@
             return Number(qty) * HDRG_MASS_UNITS[from] / HDRG_MASS_UNITS[to];
         }
         return null;
-    }
-    function formatQtySmart(qty) {
-        const n = Number(qty);
-        return Number.isInteger(n) ? formatNumber(n) : n.toLocaleString('id-ID', { maximumFractionDigits: 3 });
     }
     function applyPurchaseStock(purchase, direction) {
         const product = products.find(p => p.name.toLowerCase() === String(purchase.name || '').toLowerCase());
@@ -2399,9 +2735,12 @@
                 <td>${itemsStr}</td>
                 <td>Rp ${formatNumber(s.total)}</td>
                 <td style="text-align: center;">
-                    <div style="display:flex; gap:4px; justify-content:center;">
-                        <button class="btn btn-sm btn-outline" title="Edit" onclick="openEditReportModal('sales', '${s.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-danger" title="Hapus" onclick="deleteReportItem('sales', '${s.id}')"><i class="fas fa-trash"></i></button>
+                    <div class="action-dropdown">
+                        <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="action-menu">
+                            <button onclick="openEditReportModal('sales', '${s.id}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="danger" onclick="deleteReportItem('sales', '${s.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                        </div>
                     </div>
                 </td>
             </tr>`;
@@ -2427,10 +2766,12 @@
                 <td>${p.name}</td>
                 <td>${formatNumber(p.qty)} ${unitStr}</td>
                 <td style="text-align: center;">
-                    <div style="display:flex; gap:4px; justify-content:center; align-items:center;">
-                        <span style="font-weight:600; font-size:0.75rem;">Rp ${formatNumber(p.total)}</span>
-                        <button class="btn btn-sm btn-outline" title="Edit" onclick="openEditReportModal('purchase', '${p.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-danger" title="Hapus" onclick="deleteReportItem('purchase', '${p.id}')"><i class="fas fa-trash"></i></button>
+                    <div class="action-dropdown">
+                        <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="action-menu">
+                            <button onclick="openEditReportModal('purchase', '${p.id}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="danger" onclick="deleteReportItem('purchase', '${p.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                        </div>
                     </div>
                 </td>
             </tr>`;
@@ -2453,11 +2794,13 @@
             html += `<tr class="report-editable-row">
                 <td>${formatDate(c.date)}</td>
                 <td>${c.category}<br><small style="color:var(--gray);">${c.description}</small></td>
-                <td style="text-align: right;">
-                    <div style="display:flex; gap:4px; justify-content:flex-end; align-items:center;">
-                        <span style="font-weight:600; font-size:0.75rem;">Rp ${formatNumber(c.amount)}</span>
-                        <button class="btn btn-sm btn-outline" title="Edit" onclick="openEditReportModal('cost', '${c.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-danger" title="Hapus" onclick="deleteReportItem('cost', '${c.id}')"><i class="fas fa-trash"></i></button>
+                <td style="text-align: center;">
+                    <div class="action-dropdown">
+                        <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="action-menu">
+                            <button onclick="openEditReportModal('cost', '${c.id}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="danger" onclick="deleteReportItem('cost', '${c.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                        </div>
                     </div>
                 </td>
             </tr>`; 
@@ -2507,8 +2850,8 @@
 
     function setBestFilter(f) { bestFilter = f; renderBestSeller(); }
 
-    // ===== FITUR EDIT LAPORAN (BARU) =====
     function openEditReportModal(type, id) {
+        closeActiveMenu();
         document.getElementById('editReportType').value = type;
         document.getElementById('editReportId').value = id;
         const fields = document.getElementById('editReportFields');
@@ -2530,7 +2873,7 @@
             const product = products.find(x => x.name.toLowerCase() === String(item.name).toLowerCase());
             const currentUnit = item.unit || product?.unit || 'pcs';
             fields.innerHTML = `<div class="edit-report-section"><label class="edit-report-label">Tanggal & waktu</label><input type="datetime-local" id="editPurchaseDate" value="${toLocalDateTimeInput(item.date)}"></div>
-            <div class="edit-report-section"><label class="edit-report-label">Nama Barang</label><input type="text" id="editPurchaseName" value="${String(item.name).replace(/\"/g,'&quot;')}"><label class="edit-report-label" style="margin-top:10px">Jumlah</label><input type="number" id="editPurchaseQty" value="${item.qty}" min="0.001" step="any"><label class="edit-report-label" style="margin-top:10px">Satuan</label><select id="editPurchaseUnit"><option value="gram">gram</option><option value="ons">Ons</option><option value="kg">Kilogram (kg)</option><option value="ml">Milliliter (ml)</option><option value="liter">Liter</option><option value="pcs">pcs</option><option value="biji">biji</option><option value="pack">pack</option><option value="botol">botol</option><option value="lainnya">Lainnya</option></select><input type="text" id="editPurchaseUnitCustom" placeholder="Satuan custom" style="display:none;margin-top:8px"><div class="unit-sync-note">Satuan gram, ons, dan kg dapat dikonversi otomatis. Satuan custom hanya dapat disinkronkan jika sama.</div></div>
+            <div class="edit-report-section"><label class="edit-report-label">Nama Barang</label><input type="text" id="editPurchaseName" value="${String(item.name).replace(/\"/g,'&quot;')}"><label class="edit-report-label" style="margin-top:10px">Jumlah</label><input type="number" id="editPurchaseQty" value="${item.qty}" min="0.001" step="any"><label class="edit-report-label" style="margin-top:10px">Satuan</label><select id="editPurchaseUnit"><option value="gram">gram</option><option value="ons">Ons</option><option value="kg">Kilogram (kg)</option><option value="ml">Milliliter (ml)</option><option value="liter">Liter</option><option value="pcs">pcs</option><option value="biji">biji</option><option value="pack">pack</option><option value="botol">botol</option><option value="lainnya">Lainnya</option></select><input type="text" id="editPurchaseUnitCustom" placeholder="Satuan custom" style="display:none;margin-top:8px"></div>
             <div class="edit-report-section"><label class="edit-report-label">Total Biaya (Rp)</label><input type="text" id="editPurchaseTotal" value="${formatNumber(item.total)}" class="rupiah-input" oninput="formatRupiahInput(this)"></div>`;
             const unitSel=document.getElementById('editPurchaseUnit'); const custom=document.getElementById('editPurchaseUnitCustom');
             const standard=['gram','ons','kg','ml','liter','pcs','biji','pack','botol'];
@@ -2592,10 +2935,11 @@
             if(!cat||!desc||amt<=0){alert('Data biaya tidak valid.');return;}
             item.category=cat; item.description=desc; item.amount=amt; const dateVal=document.getElementById('editCostDate').value; if(dateVal)item.date=new Date(dateVal).toISOString(); DB.set('costs',costs);
         }
-        closeEditReportModal(); renderAll(); renderPurchaseHistoryList(); renderCostHistoryList(); populateProductSelect(); alert('Laporan berhasil diperbarui dan data terkait disinkronkan.');
+        closeEditReportModal(); renderAll(); renderPurchaseHistoryList(); renderCostHistoryList(); populateProductSelect(); alert('Laporan berhasil diperbarui.');
     }
 
     function deleteReportItem(type, id) {
+        closeActiveMenu();
         if (!confirm('Hapus item laporan ini?')) return;
         if (type === 'sales') {
             sales = sales.filter(s => s.id !== id);
@@ -2862,12 +3206,14 @@
     }
 
     function openSettings() {
+        closeActiveMenu();
         document.getElementById('settingsStoreName').value = profile.name || storeData.name || '';
         document.getElementById('settingsAddress').value = profile.address || '';
         document.getElementById('settingsPhone').value = profile.phone || '';
         document.getElementById('settingsSocial').value = profile.social || '';
         document.getElementById('settingsModal').style.display = 'flex';
         renderEmployees();
+        applyTheme();
     }
 
     function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
