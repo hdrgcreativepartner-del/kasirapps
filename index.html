@@ -190,13 +190,13 @@
         .btn-sm { padding: 6px 12px; font-size: 0.72rem; border-radius: 10px; }
         .btn-block { width: 100%; justify-content: center; }
 
-        /* ===== TABLES & MINIMALIST MOBILE RESPONSIVE STACKING ===== */
+        /* ===== TABLES & WRAPPING UNTUK NAMA PRODUK PANJANG ===== */
         .table-wrap {
             width: 100%; margin-top: 8px; border-radius: var(--radius-sm); border: none; background: transparent; 
             overflow-x: visible; overflow-y: visible; position: relative;
         }
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; table-layout: auto; }
-        th, td { padding: 12px 14px; border-bottom: 1px solid var(--bg); text-align: left; vertical-align: middle; }
+        th, td { padding: 12px 14px; border-bottom: 1px solid var(--bg); text-align: left; vertical-align: middle; word-break: break-word; overflow-wrap: anywhere; }
         th { background: #FAFAFC; font-weight: 700; color: var(--gray); text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; }
 
         @media (max-width: 768px) {
@@ -211,7 +211,7 @@
             }
             .table-wrap td {
                 display: flex; justify-content: space-between; align-items: center;
-                padding: 7px 0; border-bottom: 1px solid var(--bg); text-align: right; word-break: break-word; font-size: 0.85rem;
+                padding: 7px 0; border-bottom: 1px solid var(--bg); text-align: right; word-break: break-word; overflow-wrap: anywhere; font-size: 0.85rem;
             }
             .table-wrap td:last-child { border-bottom: none; padding-top: 10px; justify-content: flex-end; }
             .table-wrap td::before {
@@ -230,7 +230,7 @@
             .app-header { padding-top: calc(16px + env(safe-area-inset-top)); }
         }
 
-        /* ===== ACTION BUTTON (SEPERTI TOMBOL KATEGORI) ===== */
+        /* ===== ACTION BUTTON ===== */
         .action-dropdown { position: relative; display: inline-block; }
         .action-dots-btn {
             background: var(--bg); border: 1.5px solid var(--border); color: var(--text);
@@ -275,7 +275,7 @@
         /* ===== CART ===== */
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bg); font-size: 0.85rem; }
         .cart-item:last-child { border-bottom: none; }
-        .cart-item .info { flex: 1; }
+        .cart-item .info { flex: 1; word-break: break-word; }
         .cart-item .info .name { font-weight: 600; color: var(--text); }
         .cart-item .info .meta { font-size: 0.7rem; color: var(--gray); display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
 
@@ -289,9 +289,9 @@
             background: #ffffff; border: 1.5px solid rgba(255,149,0,0.3); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(255,149,0,0.06);
         }
         .unpaid-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
-        .unpaid-customer { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+        .unpaid-customer { font-weight: 700; font-size: 0.95rem; color: var(--text); word-break: break-word; }
         .unpaid-time { font-size: 0.72rem; color: var(--gray); }
-        .unpaid-items-list { font-size: 0.82rem; margin-bottom: 10px; padding-left: 10px; border-left: 3px solid var(--accent); color: #48484a; }
+        .unpaid-items-list { font-size: 0.82rem; margin-bottom: 10px; padding-left: 10px; border-left: 3px solid var(--accent); color: #48484a; word-break: break-word; }
         .unpaid-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--bg); padding-top: 8px; }
         .unpaid-total { font-size: 0.85rem; font-weight: 700; color: var(--primary); }
 
@@ -301,13 +301,13 @@
         }
         .task-card.done-task { opacity: 0.65; background: #fafafa; border-style: dashed; }
         .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
-        .task-customer { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+        .task-customer { font-weight: 700; font-size: 0.95rem; color: var(--text); word-break: break-word; }
         .task-time { font-size: 0.72rem; color: var(--gray); }
-        .task-items-list { font-size: 0.82rem; margin-bottom: 10px; padding-left: 10px; border-left: 3px solid var(--accent); color: #48484a; }
+        .task-items-list { font-size: 0.82rem; margin-bottom: 10px; padding-left: 10px; border-left: 3px solid var(--accent); color: #48484a; word-break: break-word; }
         .task-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--bg); padding-top: 8px; }
         .task-meta { font-size: 0.75rem; font-weight: 600; color: var(--gray); }
 
-        /* ===== MODAL (FLOATING CENTER UNTUK SEMUA POP UP) ===== */
+        /* ===== MODAL ===== */
         .modal-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
             display: none; justify-content: center; align-items: center; z-index: 999; padding: 20px; 
@@ -336,7 +336,7 @@
         .nota-header h3 { margin: 0; font-size: 1rem; }
         .nota-header p { margin: 2px 0; font-size: 0.7rem; color: var(--gray); }
         .nota-divider { border-top: 1px dashed #c7c7cc; margin: 8px 0; }
-        .nota-item { display: flex; justify-content: space-between; padding: 2px 0; font-size: 0.75rem; }
+        .nota-item { display: flex; justify-content: space-between; padding: 2px 0; font-size: 0.75rem; word-break: break-word; }
         .nota-total { display: flex; justify-content: space-between; font-weight: 700; margin-top: 6px; font-size: 0.9rem; }
         .nota-footer { text-align: center; margin-top: 10px; font-size: 0.65rem; color: var(--gray); }
 
@@ -352,7 +352,7 @@
         .settings-section input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(0,122,255,0.12); }
 
         .employee-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bg); gap: 8px; flex-wrap: wrap; }
-        .employee-item .info { font-size: 0.9rem; flex: 1; }
+        .employee-item .info { font-size: 0.9rem; flex: 1; word-break: break-word; }
         .employee-item .info .name { font-weight: 600; }
         .employee-item .info .pin { color: var(--gray); font-size: 0.8rem; margin-left: 8px; }
 
@@ -372,9 +372,9 @@
         .autocomplete-list {
             position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1.5px solid var(--border); border-radius: 0 0 var(--radius-sm) var(--radius-sm); max-height: 200px; overflow-y: auto; z-index: 50; display: none; box-shadow: var(--shadow);
         }
-        .autocomplete-list .item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--bg); font-size: 0.85rem; display: flex; justify-content: space-between; transition: background 0.2s; }
+        .autocomplete-list .item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--bg); font-size: 0.85rem; display: flex; justify-content: space-between; transition: background 0.2s; word-break: break-word; }
         .autocomplete-list .item:hover { background: rgba(0,122,255,0.06); }
-        .autocomplete-list .item .price { color: var(--gray); font-weight: 600; }
+        .autocomplete-list .item .price { color: var(--gray); font-weight: 600; flex-shrink: 0; margin-left: 8px; }
 
         .table-collapsible { transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1); overflow: visible; }
         .table-collapsible.collapsed { max-height: 0 !important; padding: 0 !important; margin: 0 !important; border: none !important; overflow: hidden !important; }
@@ -385,7 +385,7 @@
         .stok-na { color: var(--gray); font-style: italic; }
         #restoreFileInput { padding: 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; background: white; width: 100%; }
 
-        .short-view-item { cursor: pointer; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; transition: var(--transition); }
+        .short-view-item { cursor: pointer; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; transition: var(--transition); word-break: break-word; }
         .short-view-item:hover { border-color: var(--primary); background: rgba(0,122,255,0.02); }
     </style>
 <style>
@@ -584,7 +584,7 @@ input:focus,select:focus,textarea:focus{
                         </select>
                         <input type="number" id="qtyInput" value="1" min="1" placeholder="Jumlah" oninput="syncQtyDropdown()">
                     </div>
-                    <button class="btn btn-primary" onclick="addToCart()"><i class="fas fa-plus"></i> Tambah</button>
+                    <button class="btn btn-primary" onclick="addToCart()"><i class="fas fa-plus" style="color: white !important;"></i> Tambah</button>
                 </div>
                 <div style="max-height:200px; overflow-y:auto; border:1.5px solid var(--bg); border-radius:var(--radius-sm); padding:6px 10px; background: #fafafa;">
                     <div id="cartItems"><div class="empty">Keranjang kosong</div></div>
@@ -613,7 +613,7 @@ input:focus,select:focus,textarea:focus{
             <div class="card">
                 <div class="card-title">
                     <span><i class="fas fa-history"></i> Riwayat</span>
-                    <button class="btn btn-outline btn-sm" onclick="toggleRecentSales()" id="toggleSalesBtn">Minimalkan ▲</button>
+                    <button class="btn btn-outline btn-sm" onclick="toggleRecentSales()" id="toggleSalesBtn" style="margin-left:auto;">Minimalkan ▲</button>
                 </div>
                 <div id="recentSalesContainer">
                     <div class="table-wrap">
@@ -631,7 +631,7 @@ input:focus,select:focus,textarea:focus{
             <div class="card">
                 <div class="card-title">
                     <span><i class="fas fa-tasks"></i> Task Pesanan (Dapur)</span>
-                    <button class="btn btn-primary btn-sm" onclick="openTaskModal()"><i class="fas fa-plus"></i> Pesanan Manual</button>
+                    <button class="btn btn-primary btn-sm" onclick="openTaskModal()" style="margin-left:auto;"><i class="fas fa-plus" style="color: white !important;"></i> Pesanan Manual</button>
                 </div>
                 <div class="toggle-group" id="taskStatusToggle" style="margin-bottom:14px;">
                     <button class="active" data-status="all"><i class="fas fa-layer-group"></i> Semua</button>
@@ -652,7 +652,7 @@ input:focus,select:focus,textarea:focus{
                     <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
                         <button class="btn btn-outline btn-sm" onclick="toggleStockViewMode()" id="stockViewModeBtn">Versi Ringkas</button>
                         <button class="btn-minimize" onclick="toggleProductTable()" id="minimizeBtn" title="Minimalkan tabel"><i class="fas fa-chevron-up"></i></button>
-                        <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i> Tambah</button>
+                        <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus" style="color: white !important;"></i> Tambah</button>
                     </div>
                 </div>
                 <div class="toggle-group" id="stokTypeToggle">
@@ -685,7 +685,7 @@ input:focus,select:focus,textarea:focus{
                     <select id="purchaseCategory" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                         <option value="">-- Kategori --</option>
                     </select>
-                    <button class="btn btn-outline btn-sm" onclick="openCategoryModal()"><i class="fas fa-tag"></i> Kategori</button>
+                    <button class="btn btn-outline btn-sm" onclick="openCategoryModal()"><i class="fas fa-tag" style="color: var(--primary) !important;"></i> Kategori</button>
                 </div>
                 <div style="margin-bottom:8px;">
                     <div class="suggest-container" style="position:relative;">
@@ -693,7 +693,8 @@ input:focus,select:focus,textarea:focus{
                         <div class="suggest-list" id="productSuggestList" style="display:none; background:white; border:1.5px solid var(--border); border-radius:0 0 var(--radius-sm) var(--radius-sm); max-height:150px; overflow-y:auto; position:absolute; width:100%; z-index:10;"></div>
                     </div>
                 </div>
-                <!-- Satuan & Jenis dipindah ke Awal Input Pembelian -->
+                
+                <!-- SATUAN & JENIS DI AWAL INPUT PEMBELIAN -->
                 <div class="flex" style="margin-bottom:8px;">
                     <select id="purchaseType" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                         <option value="raw">Bahan Baku</option>
@@ -715,6 +716,7 @@ input:focus,select:focus,textarea:focus{
                     </select>
                     <input type="text" id="purchaseUnitCustom" placeholder="Satuan custom" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; display:none; background: var(--bg);" oninput="updatePricePlaceholder()">
                 </div>
+
                 <div class="flex" style="margin-bottom:8px;">
                     <input type="text" id="purchaseQty" placeholder="Jumlah" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                     <input type="text" id="purchasePrice" placeholder="Harga Beli (Rp/satuan)" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
@@ -726,7 +728,7 @@ input:focus,select:focus,textarea:focus{
                 <div style="margin-bottom:8px;">
                     <input type="text" id="purchaseDiscount" placeholder="Diskon %" class="rupiah-input" oninput="formatRupiahInput(this); autoCalculateSellPrice();" style="width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                 </div>
-                <button class="btn btn-primary btn-block" onclick="addPurchase()"><i class="fas fa-save"></i> Catat Pembelian</button>
+                <button class="btn btn-primary btn-block" onclick="addPurchase()"><i class="fas fa-save" style="color: white !important;"></i> Catat Pembelian</button>
                 <div style="margin-top:12px;">
                     <div style="font-weight:600; margin-bottom:8px; font-size:0.9rem;">📋 Riwayat Pembelian</div>
                     <div id="purchaseHistoryList" style="max-height:200px; overflow-y:auto; border:1.5px solid var(--bg); border-radius:var(--radius-sm); padding:8px; background: #fafafa;">
@@ -742,7 +744,7 @@ input:focus,select:focus,textarea:focus{
                     <input type="text" id="costDescriptionInput" placeholder="Deskripsi" style="flex:2; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                     <input type="text" id="costAmountInput" placeholder="Jumlah" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                 </div>
-                <button class="btn btn-primary btn-block" onclick="addCost()"><i class="fas fa-plus-circle"></i> Catat Pengeluaran</button>
+                <button class="btn btn-primary btn-block" onclick="addCost()"><i class="fas fa-plus-circle" style="color: white !important;"></i> Catat Pengeluaran</button>
                 <div style="margin-top:12px;">
                     <div style="font-weight:600; margin-bottom:8px; font-size:0.9rem;">📋 Riwayat Pengeluaran</div>
                     <div id="costHistoryList" style="max-height:200px; overflow-y:auto; border:1.5px solid var(--bg); border-radius:var(--radius-sm); padding:8px; background: #fafafa;">
@@ -758,7 +760,7 @@ input:focus,select:focus,textarea:focus{
                 <div class="card-title">
                     <span><i class="fas fa-chart-bar"></i> Laporan Penjualan</span>
                     <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
-                        <button class="btn btn-success btn-sm" onclick="exportSales()"><i class="fas fa-file-excel"></i></button>
+                        <button class="btn btn-success btn-sm" onclick="exportSales()"><i class="fas fa-file-excel" style="color: white !important;"></i></button>
                         <button class="btn-minimize" onclick="toggleReportSection(this, 'salesReportWrapper')"><i class="fas fa-chevron-up"></i></button>
                     </div>
                 </div>
@@ -786,7 +788,7 @@ input:focus,select:focus,textarea:focus{
                     <div class="card-title">
                         <span><i class="fas fa-shopping-cart"></i> Laporan Pembelian</span>
                         <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
-                            <button class="btn btn-success btn-sm" onclick="exportPurchases()"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-success btn-sm" onclick="exportPurchases()"><i class="fas fa-file-excel" style="color: white !important;"></i></button>
                             <button class="btn-minimize" onclick="toggleReportSection(this, 'purchaseReportWrapper')"><i class="fas fa-chevron-up"></i></button>
                         </div>
                     </div>
@@ -813,7 +815,7 @@ input:focus,select:focus,textarea:focus{
                     <div class="card-title">
                         <span><i class="fas fa-wallet"></i> Laporan Keuangan</span>
                         <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
-                            <button class="btn btn-success btn-sm" onclick="exportFinancial()"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-success btn-sm" onclick="exportFinancial()"><i class="fas fa-file-excel" style="color: white !important;"></i></button>
                             <button class="btn-minimize" onclick="toggleReportSection(this, 'financialReportWrapper')"><i class="fas fa-chevron-up"></i></button>
                         </div>
                     </div>
@@ -822,7 +824,7 @@ input:focus,select:focus,textarea:focus{
                             <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('today')">Hari Ini</button>
                             <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('week')">Minggu</button>
                             <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('month')">Bulan</button>
-                            <button class="btn btn-primary btn-sm" onclick="openDetailPopup('financial')"><i class="fas fa-info-circle"></i> Detail Pop-up</button>
+                            <button class="btn btn-primary btn-sm" onclick="openDetailPopup('financial')"><i class="fas fa-info-circle" style="color: white !important;"></i> Detail Pop-up</button>
                         </div>
                         <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--bg); font-size:0.88rem;">
                             <span>Total Penjualan</span> <span id="financialSales" style="font-weight:600;">Rp 0</span>
@@ -843,7 +845,7 @@ input:focus,select:focus,textarea:focus{
                     <div class="card-title">
                         <span><i class="fas fa-file-invoice-dollar"></i> Laporan Biaya</span>
                         <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
-                            <button class="btn btn-success btn-sm" onclick="exportCosts()"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-success btn-sm" onclick="exportCosts()"><i class="fas fa-file-excel" style="color: white !important;"></i></button>
                             <button class="btn-minimize" onclick="toggleReportSection(this, 'costReportWrapper')"><i class="fas fa-chevron-up"></i></button>
                         </div>
                     </div>
@@ -889,7 +891,7 @@ input:focus,select:focus,textarea:focus{
         </div>
     </div>
 
-    <!-- BOTTOM NAV (Solid Bar) -->
+    <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
         <button class="active" onclick="switchPage('pagePenjualan')"><span class="nav-icon"><i class="fas fa-cash-register"></i></span>Penjualan</button>
         <button onclick="switchPage('pageTask')"><span class="nav-icon"><i class="fas fa-tasks"></i></span>Task Dapur</button>
@@ -944,14 +946,14 @@ input:focus,select:focus,textarea:focus{
                     <option value="">-- Pilih Bahan Baku --</option>
                 </select>
                 <input type="number" id="modalRecipeQty" placeholder="Jumlah" min="1" value="1" style="flex:1; padding:10px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
-                <button class="btn btn-primary btn-sm" onclick="addModalRecipe()"><i class="fas fa-plus"></i></button>
+                <button class="btn btn-primary btn-sm" onclick="addModalRecipe()"><i class="fas fa-plus" style="color: white !important;"></i></button>
             </div>
             <div style="font-size:0.7rem; color:var(--gray);">* Satuan mengikuti satuan bahan baku yang dipilih.</div>
         </div>
 
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeProductModal()">Batal</button>
-            <button class="btn btn-primary" onclick="saveProduct()"><i class="fas fa-save"></i> Simpan</button>
+            <button class="btn btn-primary" onclick="saveProduct()"><i class="fas fa-save" style="color: white !important;"></i> Simpan</button>
         </div>
     </div>
 </div>
@@ -971,8 +973,8 @@ input:focus,select:focus,textarea:focus{
         <h3><i class="fas fa-receipt"></i> Nota Penjualan</h3>
         <div id="notaContent" class="nota-container"></div>
         <div class="nota-actions" style="display:flex; gap:10px; margin-top:16px;">
-            <button class="btn btn-primary" onclick="printNota()"><i class="fas fa-print"></i> Print</button>
-            <button class="btn btn-accent" onclick="shareNotaWA()"><i class="fab fa-whatsapp"></i> WA</button>
+            <button class="btn btn-primary" onclick="printNota()"><i class="fas fa-print" style="color: white !important;"></i> Print</button>
+            <button class="btn btn-accent" onclick="shareNotaWA()"><i class="fab fa-whatsapp" style="color: white !important;"></i> WA</button>
             <button class="btn btn-outline" onclick="closeNotaModal()">Tutup</button>
         </div>
     </div>
@@ -989,14 +991,14 @@ input:focus,select:focus,textarea:focus{
         </select>
         <div class="flex" style="margin-bottom:8px;">
             <input type="number" id="taskItemQty" placeholder="Jumlah" min="1" value="1" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm);">
-            <button class="btn btn-primary" onclick="addTaskItem()"><i class="fas fa-plus"></i> Tambah Item</button>
+            <button class="btn btn-primary" onclick="addTaskItem()"><i class="fas fa-plus" style="color: white !important;"></i> Tambah Item</button>
         </div>
         <div style="max-height:120px; overflow-y:auto; border:1.5px solid var(--bg); border-radius:var(--radius-sm); padding:6px; margin-bottom:8px; background: #fafafa;">
             <div id="taskItemList"><div class="empty">Belum ada item pesanan</div></div>
         </div>
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeTaskModal()">Batal</button>
-            <button class="btn btn-primary" onclick="saveTaskModal()"><i class="fas fa-save"></i> Simpan Task</button>
+            <button class="btn btn-primary" onclick="saveTaskModal()"><i class="fas fa-save" style="color: white !important;"></i> Simpan Task</button>
         </div>
     </div>
 </div>
@@ -1010,7 +1012,7 @@ input:focus,select:focus,textarea:focus{
         </div>
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeCategoryModal()">Tutup</button>
-            <button class="btn btn-primary" onclick="addCategory()"><i class="fas fa-plus"></i> Tambah</button>
+            <button class="btn btn-primary" onclick="addCategory()"><i class="fas fa-plus" style="color: white !important;"></i> Tambah</button>
         </div>
     </div>
 </div>
@@ -1023,7 +1025,7 @@ input:focus,select:focus,textarea:focus{
         <input type="text" id="restockQty" placeholder="Jumlah tambahan" class="rupiah-input" oninput="formatRupiahInput(this)">
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeRestockModal()">Batal</button>
-            <button class="btn btn-primary" onclick="confirmRestock()"><i class="fas fa-check"></i> Tambah</button>
+            <button class="btn btn-primary" onclick="confirmRestock()"><i class="fas fa-check" style="color: white !important;"></i> Tambah</button>
         </div>
     </div>
 </div>
@@ -1043,12 +1045,12 @@ input:focus,select:focus,textarea:focus{
                 <option value="">-- Pilih Bahan Baku --</option>
             </select>
             <input type="number" id="recipeQty" placeholder="Jumlah" min="1" value="1" style="flex:1; padding:10px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
-            <button class="btn btn-primary btn-sm" onclick="addRecipeIngredient()"><i class="fas fa-plus"></i></button>
+            <button class="btn btn-primary btn-sm" onclick="addRecipeIngredient()"><i class="fas fa-plus" style="color: white !important;"></i></button>
         </div>
         <div style="font-size:0.7rem; color:var(--gray); margin-bottom:8px;">* Satuan mengikuti satuan bahan baku yang dipilih.</div>
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeRecipeModal()">Tutup</button>
-            <button class="btn btn-primary" onclick="saveRecipe()"><i class="fas fa-save"></i> Simpan Resep</button>
+            <button class="btn btn-primary" onclick="saveRecipe()"><i class="fas fa-save" style="color: white !important;"></i> Simpan Resep</button>
         </div>
     </div>
 </div>
@@ -1061,7 +1063,7 @@ input:focus,select:focus,textarea:focus{
         <div id="editReportFields"></div>
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeEditReportModal()">Batal</button>
-            <button class="btn btn-primary" onclick="saveEditReport()"><i class="fas fa-save"></i> Simpan Perubahan</button>
+            <button class="btn btn-primary" onclick="saveEditReport()"><i class="fas fa-save" style="color: white !important;"></i> Simpan Perubahan</button>
         </div>
     </div>
 </div>
@@ -1079,7 +1081,7 @@ input:focus,select:focus,textarea:focus{
                 <input type="text" id="settingsAddress" placeholder="Alamat">
                 <input type="text" id="settingsPhone" placeholder="Telepon">
                 <input type="text" id="settingsSocial" placeholder="Sosial Media">
-                <button class="btn btn-primary btn-block" onclick="saveProfile()"><i class="fas fa-save"></i> Simpan Profil</button>
+                <button class="btn btn-primary btn-block" onclick="saveProfile()"><i class="fas fa-save" style="color: white !important;"></i> Simpan Profil</button>
             </div>
         </div>
 
@@ -1109,7 +1111,7 @@ input:focus,select:focus,textarea:focus{
                 <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
                     <input type="text" id="modalEmployeeName" placeholder="Nama" style="flex:2; min-width:120px; padding:10px 12px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background:var(--bg);">
                     <input type="password" id="modalEmployeePin" placeholder="PIN" maxlength="6" inputmode="numeric" style="flex:1; min-width:80px; padding:10px 12px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background:var(--bg);">
-                    <button class="btn btn-primary btn-sm" onclick="saveEmployee()"><i class="fas fa-user-plus"></i> Tambah</button>
+                    <button class="btn btn-primary btn-sm" onclick="saveEmployee()"><i class="fas fa-user-plus" style="color: white !important;"></i> Tambah</button>
                 </div>
                 <div id="employeeList"><div class="empty">Belum ada karyawan</div></div>
             </div>
@@ -1121,10 +1123,10 @@ input:focus,select:focus,textarea:focus{
                 <span class="arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             <div class="body">
-                <button class="btn btn-primary btn-block" onclick="backupData()" style="margin-bottom:8px;"><i class="fas fa-download"></i> Download Backup (JSON)</button>
+                <button class="btn btn-primary btn-block" onclick="backupData()" style="margin-bottom:8px;"><i class="fas fa-download" style="color: white !important;"></i> Download Backup (JSON)</button>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                     <input type="file" id="restoreFileInput" accept=".json,application/json,text/json">
-                    <button class="btn btn-accent" onclick="restoreData()"><i class="fas fa-upload"></i> Restore</button>
+                    <button class="btn btn-accent" onclick="restoreData()"><i class="fas fa-upload" style="color: white !important;"></i> Restore</button>
                 </div>
             </div>
         </div>
@@ -1135,7 +1137,7 @@ input:focus,select:focus,textarea:focus{
                 <span class="arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             <div class="body">
-                <button class="btn btn-danger btn-block" onclick="resetApp()"><i class="fas fa-exclamation-triangle"></i> Hapus Semua Data</button>
+                <button class="btn btn-danger btn-block" onclick="resetApp()"><i class="fas fa-exclamation-triangle" style="color: white !important;"></i> Hapus Semua Data</button>
             </div>
         </div>
 
@@ -1532,7 +1534,7 @@ input:focus,select:focus,textarea:focus{
             const raw = products.find(p => p.id === item.productId);
             const name = raw ? raw.name : '(bahan baku dihapus)';
             const unit = raw ? (raw.unit || 'pcs') : 'pcs';
-            html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg);font-size:0.85rem;">
+            html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg);font-size:0.85rem; word-break:break-word;">
                 <span>${name} — ${item.qty} ${unit}</span>
                 <button class="btn btn-sm btn-danger" onclick="removeModalRecipe(${idx})"><i class="fas fa-times"></i></button>
             </div>`;
@@ -1644,11 +1646,11 @@ input:focus,select:focus,textarea:focus{
                 const unitStr = p.unit || 'pcs';
                 const stokDisplay = p.type === 'processed' ? 'Olahan' : `${p.stok} ${unitStr}`;
                 shortHtml += `<div class="short-view-item" onclick="openProductDetailModal('${p.id}')">
-                    <div>
+                    <div style="word-break: break-word;">
                         <strong>${p.name}</strong>
                         <div style="font-size:0.75rem; color:var(--gray);">Rp ${formatNumber(p.price)}</div>
                     </div>
-                    <div>
+                    <div style="flex-shrink:0; margin-left:8px;">
                         <span class="badge badge-blue">Stok: ${stokDisplay}</span>
                         <i class="fas fa-chevron-right" style="margin-left:6px; font-size:0.75rem; color:var(--gray);"></i>
                     </div>
@@ -1683,7 +1685,7 @@ input:focus,select:focus,textarea:focus{
             else if (p.type === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
             
             html += `<tr>
-                <td data-label="Produk"><strong>${p.name}</strong><br><small style="color:var(--gray);">${p.category || '-'}</small></td>
+                <td data-label="Produk"><strong style="word-break: break-word; display:block;">${p.name}</strong><small style="color:var(--gray);">${p.category || '-'}</small></td>
                 <td data-label="Harga/Stok">Rp ${formatNumber(p.price)}<br><span class="${stokClass}">${stokDisplay}</span></td>
                 <td data-label="Jenis">${typeLabel}</td>
                 <td data-label="Aksi" style="text-align: center;">
@@ -1896,7 +1898,7 @@ input:focus,select:focus,textarea:focus{
             const raw = products.find(p => p.id === item.productId);
             const name = raw ? raw.name : '(bahan baku dihapus)';
             const unit = raw ? (raw.unit || 'pcs') : 'pcs';
-            html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg);">
+            html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg); word-break:break-word;">
                 <span>${name} — ${item.qty} ${unit}</span>
                 <button class="btn btn-sm btn-danger" onclick="removeRecipeIngredient(${idx})"><i class="fas fa-times"></i></button>
             </div>`;
@@ -1996,7 +1998,7 @@ input:focus,select:focus,textarea:focus{
         matches.forEach(p => {
             const label = p.type === 'raw' ? '🌱' : p.type === 'processed' ? '🍳' : '📦';
             html += `<div class="item" onclick="selectAutocomplete('${p.id}')">
-                <span>${label} ${p.name}</span>
+                <span style="word-break: break-word;">${label} ${p.name}</span>
                 <span class="price">Rp ${formatNumber(p.price)}</span>
             </div>`;
         });
@@ -2107,7 +2109,7 @@ input:focus,select:focus,textarea:focus{
                     <div class="name">${c.name}</div>
                     <div class="meta">${typeLabel} ${recipeLabel} Rp ${formatNumber(c.price)} x ${c.qty} ${unitStr}</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px; flex-shrink:0; margin-left:8px;">
                     <span style="font-weight:600;">Rp ${formatNumber(subtotal)}</span>
                     <button class="btn btn-danger btn-sm" onclick="removeCart(${idx})"><i class="fas fa-times"></i></button>
                 </div>
@@ -2126,7 +2128,7 @@ input:focus,select:focus,textarea:focus{
             const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
             html += `<tr class="report-editable-row">
                 <td data-label="Waktu">${formatDate(s.date)}</td>
-                <td data-label="Item">${itemsStr}</td>
+                <td data-label="Item" style="word-break: break-word;">${itemsStr}</td>
                 <td data-label="Total">Rp ${formatNumber(s.total)}</td>
                 <td data-label="Aksi" style="text-align: center;">
                     <div class="action-dropdown">
@@ -2328,9 +2330,9 @@ input:focus,select:focus,textarea:focus{
                 <div class="unpaid-footer">
                     <div class="unpaid-total">Total: Rp ${formatNumber(u.total)}</div>
                     <div style="display:flex; gap:6px;">
-                        <button class="btn btn-sm btn-accent" onclick="payUnpaid('${u.id}', 'cash')"><i class="fas fa-money-bill-wave"></i> Cash</button>
-                        <button class="btn btn-sm btn-primary" onclick="payUnpaid('${u.id}', 'qris')"><i class="fas fa-qrcode"></i> QRIS</button>
-                        <button class="btn btn-sm btn-danger" onclick="cancelUnpaid('${u.id}')"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm btn-accent" onclick="payUnpaid('${u.id}', 'cash')"><i class="fas fa-money-bill-wave" style="color: white !important;"></i> Cash</button>
+                        <button class="btn btn-sm btn-primary" onclick="payUnpaid('${u.id}', 'qris')"><i class="fas fa-qrcode" style="color: white !important;"></i> QRIS</button>
+                        <button class="btn btn-sm btn-danger" onclick="cancelUnpaid('${u.id}')"><i class="fas fa-trash" style="color: white !important;"></i></button>
                     </div>
                 </div>
             </div>`;
@@ -2425,10 +2427,10 @@ input:focus,select:focus,textarea:focus{
                     <div class="task-meta">Total: Rp ${formatNumber(t.total)}</div>
                     <div style="display:flex; gap:6px;">
                         <button class="btn btn-sm ${isDone ? 'btn-outline' : 'btn-success'}" onclick="toggleTaskStatus('${t.id}')">
-                            <i class="fas ${isDone ? 'fa-undo' : 'fa-check'}"></i> ${isDone ? 'Batal' : 'Done'}
+                            <i class="fas ${isDone ? 'fa-undo' : 'fa-check'}" style="color: ${isDone ? 'var(--primary)' : 'white'} !important;"></i> ${isDone ? 'Batal' : 'Done'}
                         </button>
-                        <button class="btn btn-sm btn-outline" onclick="openTaskModal('${t.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteTask('${t.id}')"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm btn-outline" onclick="openTaskModal('${t.id}')"><i class="fas fa-edit" style="color: var(--primary) !important;"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteTask('${t.id}')"><i class="fas fa-trash" style="color: white !important;"></i></button>
                     </div>
                 </div>
             </div>`;
@@ -2506,7 +2508,7 @@ input:focus,select:focus,textarea:focus{
         }
         let html = '';
         taskModalItems.forEach((item, idx) => {
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid var(--bg); font-size:0.85rem;">
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid var(--bg); font-size:0.85rem; word-break:break-word;">
                 <span>${item.name} ${item.qty} ${item.unit || 'pcs'} (Rp ${formatNumber(item.price * item.qty)})</span>
                 <button class="btn btn-sm btn-danger" onclick="removeTaskModalItem(${idx})"><i class="fas fa-times"></i></button>
             </div>`;
@@ -2603,9 +2605,9 @@ input:focus,select:focus,textarea:focus{
             else if (p.type === 'finished') typeLabel = '<span class="badge badge-green">Jadi</span>';
             else if (p.type === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
             const unitStr = p.unit || 'pcs';
-            html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);font-size:0.85rem;">
-                <div><strong>${p.name}</strong> ${typeLabel}<br><small style="color:var(--gray);">${formatDate(p.date)} • ${formatNumber(p.qty)} ${unitStr} • Rp ${formatNumber(p.total)}</small></div>
-                <div class="action-dropdown">
+            html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);font-size:0.85rem; word-break:break-word;">
+                <div style="word-break: break-word; flex:1;"><strong>${p.name}</strong> ${typeLabel}<br><small style="color:var(--gray);">${formatDate(p.date)} • ${formatNumber(p.qty)} ${unitStr} • Rp ${formatNumber(p.total)}</small></div>
+                <div class="action-dropdown" style="flex-shrink:0; margin-left:8px;">
                     <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
                     <div class="action-menu">
                         <button onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i> Edit</button>
@@ -2624,7 +2626,7 @@ input:focus,select:focus,textarea:focus{
         if (matches.length === 0) { list.style.display = 'none'; return; }
         let html = '';
         matches.forEach(p => {
-            html += `<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--bg);" onclick="selectProductSuggestion('${p.name}')">${p.name}</div>`;
+            html += `<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--bg); word-break: break-word;" onclick="selectProductSuggestion('${p.name}')">${p.name}</div>`;
         });
         list.innerHTML = html;
         list.style.display = 'block';
@@ -2748,9 +2750,9 @@ input:focus,select:focus,textarea:focus{
         const recent = [...costs].reverse().slice(0, 10);
         let html = '';
         recent.forEach(c => {
-            html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);font-size:0.85rem;">
-                <div><strong>${c.category}</strong> — ${c.description}<br><small style="color:var(--gray);">${formatDate(c.date)} • Rp ${formatNumber(c.amount)}</small></div>
-                <div class="action-dropdown">
+            html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);font-size:0.85rem; word-break:break-word;">
+                <div style="word-break: break-word; flex:1;"><strong>${c.category}</strong> — ${c.description}<br><small style="color:var(--gray);">${formatDate(c.date)} • Rp ${formatNumber(c.amount)}</small></div>
+                <div class="action-dropdown" style="flex-shrink:0; margin-left:8px;">
                     <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
                     <div class="action-menu">
                         <button onclick="editCost('${c.id}')"><i class="fas fa-edit"></i> Edit</button>
@@ -2930,11 +2932,11 @@ input:focus,select:focus,textarea:focus{
             let html = '';
             filtered.forEach(s => {
                 html += `<div class="short-view-item" onclick="openDetailSaleModal('${s.id}')">
-                    <div>
+                    <div style="word-break: break-word;">
                         <strong>${formatDate(s.date)}</strong>
                         <div style="font-size:0.75rem; color:var(--gray);">Kasir: ${s.cashier} (${s.method})</div>
                     </div>
-                    <div>
+                    <div style="flex-shrink:0; margin-left:8px;">
                         <span style="font-weight:700; color:var(--primary);">Rp ${formatNumber(s.total)}</span>
                         <i class="fas fa-chevron-right" style="margin-left:6px; font-size:0.75rem; color:var(--gray);"></i>
                     </div>
@@ -2949,7 +2951,7 @@ input:focus,select:focus,textarea:focus{
                 const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
                 html += `<tr class="report-editable-row">
                     <td data-label="Waktu">${formatDate(s.date)}</td>
-                    <td data-label="Item">${itemsStr}</td>
+                    <td data-label="Item" style="word-break: break-word;">${itemsStr}</td>
                     <td data-label="Total">Rp ${formatNumber(s.total)}</td>
                     <td data-label="Aksi" style="text-align: center;">
                         <div class="action-dropdown">
@@ -2976,7 +2978,7 @@ input:focus,select:focus,textarea:focus{
         <p><strong>Metode Pembayaran:</strong> ${s.method}</p>
         <h4 style="margin-top:10px; font-size:0.9rem;">Daftar Item:</h4><ul>`;
         s.items.forEach(i => {
-            content += `<li>${i.name} - ${i.qty} ${i.unit || 'pcs'} @ Rp ${formatNumber(i.price)} = Rp ${formatNumber(i.price * i.qty)}</li>`;
+            content += `<li style="word-break: break-word;">${i.name} - ${i.qty} ${i.unit || 'pcs'} @ Rp ${formatNumber(i.price)} = Rp ${formatNumber(i.price * i.qty)}</li>`;
         });
         content += `</ul><hr style="margin:10px 0; border:0; border-top:1px solid var(--border);">
         <p style="font-weight:700;">Total Transaksi: Rp ${formatNumber(s.total)}</p>`;
@@ -3006,11 +3008,11 @@ input:focus,select:focus,textarea:focus{
             filtered.forEach(p => {
                 const unitStr = p.unit || 'pcs';
                 html += `<div class="short-view-item" onclick="openDetailPurchaseModal('${p.id}')">
-                    <div>
+                    <div style="word-break: break-word;">
                         <strong>${p.name}</strong>
                         <div style="font-size:0.75rem; color:var(--gray);">${formatDate(p.date)}</div>
                     </div>
-                    <div>
+                    <div style="flex-shrink:0; margin-left:8px;">
                         <span style="font-weight:700;">${formatNumber(p.qty)} ${unitStr}</span>
                         <i class="fas fa-chevron-right" style="margin-left:6px; font-size:0.75rem; color:var(--gray);"></i>
                     </div>
@@ -3025,7 +3027,7 @@ input:focus,select:focus,textarea:focus{
                 const unitStr = p.unit || 'pcs';
                 html += `<tr class="report-editable-row">
                     <td data-label="Waktu">${formatDate(p.date)}</td>
-                    <td data-label="Nama">${p.name}</td>
+                    <td data-label="Nama" style="word-break: break-word;">${p.name}</td>
                     <td data-label="Jumlah">${formatNumber(p.qty)} ${unitStr}</td>
                     <td data-label="Aksi" style="text-align: center;">
                         <div class="action-dropdown">
@@ -3049,7 +3051,7 @@ input:focus,select:focus,textarea:focus{
         if (!p) return;
         const unitStr = p.unit || 'pcs';
         let content = `
-            <p><strong>Nama Barang:</strong> ${p.name}</p>
+            <p style="word-break: break-word;"><strong>Nama Barang:</strong> ${p.name}</p>
             <p><strong>Tanggal:</strong> ${formatDate(p.date)}</p>
             <p><strong>Jumlah Pembelian:</strong> ${formatNumber(p.qty)} ${unitStr}</p>
             <p><strong>Jenis:</strong> ${p.type === 'raw' ? 'Bahan Baku' : p.type === 'finished' ? 'Produk Jadi' : 'Produk Olahan'}</p>
@@ -3080,11 +3082,11 @@ input:focus,select:focus,textarea:focus{
             let html = '';
             filtered.forEach(c => {
                 html += `<div class="short-view-item" onclick="openDetailCostModal('${c.id}')">
-                    <div>
+                    <div style="word-break: break-word;">
                         <strong>${c.category}</strong>
                         <div style="font-size:0.75rem; color:var(--gray);">${c.description}</div>
                     </div>
-                    <div>
+                    <div style="flex-shrink:0; margin-left:8px;">
                         <span style="font-weight:700; color:var(--danger);">Rp ${formatNumber(c.amount)}</span>
                         <i class="fas fa-chevron-right" style="margin-left:6px; font-size:0.75rem; color:var(--gray);"></i>
                     </div>
@@ -3098,7 +3100,7 @@ input:focus,select:focus,textarea:focus{
             filtered.forEach(c => {
                 html += `<tr class="report-editable-row">
                     <td data-label="Waktu">${formatDate(c.date)}</td>
-                    <td data-label="Kategori">${c.category}<br><small style="color:var(--gray);">${c.description}</small></td>
+                    <td data-label="Kategori" style="word-break: break-word;">${c.category}<br><small style="color:var(--gray);">${c.description}</small></td>
                     <td data-label="Aksi" style="text-align: center;">
                         <div class="action-dropdown">
                             <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
@@ -3121,7 +3123,7 @@ input:focus,select:focus,textarea:focus{
         if (!c) return;
         let content = `
             <p><strong>Kategori:</strong> ${c.category}</p>
-            <p><strong>Deskripsi:</strong> ${c.description}</p>
+            <p style="word-break: break-word;"><strong>Deskripsi:</strong> ${c.description}</p>
             <p><strong>Waktu:</strong> ${formatDate(c.date)}</p>
             <hr style="margin:10px 0; border:0; border-top:1px solid var(--border);">
             <p style="font-weight:700; color:var(--danger);">Jumlah Biaya: Rp ${formatNumber(c.amount)}</p>
@@ -3165,7 +3167,7 @@ input:focus,select:focus,textarea:focus{
         sorted.forEach(([name, qty]) => {
             const revenue = productRevenue[name] || 0;
             const unit = productUnit[name] || 'pcs';
-            html += `<tr><td data-label="Nama"><strong>${name}</strong></td><td data-label="Terjual">${formatNumber(qty)} ${unit}</td><td data-label="Omset">Rp ${formatNumber(revenue)}</td></tr>`;
+            html += `<tr><td data-label="Nama" style="word-break: break-word;"><strong>${name}</strong></td><td data-label="Terjual">${formatNumber(qty)} ${unit}</td><td data-label="Omset">Rp ${formatNumber(revenue)}</td></tr>`;
         });
         tbody.innerHTML = html;
     }
