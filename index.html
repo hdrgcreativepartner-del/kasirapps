@@ -131,11 +131,11 @@
             box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
         }
         .bottom-nav button {
-            flex: 1; background: transparent; border: none; font-size: 0.65rem; font-weight: 600;
+            flex: 1; background: transparent; border: none; font-size: 0.62rem; font-weight: 600;
             display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer;
             color: var(--gray); transition: 0.2s; padding: 4px 0; border-top: 3px solid transparent;
         }
-        .bottom-nav button .nav-icon { font-size: 1.4rem; }
+        .bottom-nav button .nav-icon { font-size: 1.3rem; }
         .bottom-nav button.active { color: var(--primary); border-top-color: var(--primary); }
         .bottom-nav button#logoutBtn { color: var(--danger); }
         .bottom-nav button#logoutBtn.active { border-top-color: var(--danger); }
@@ -254,6 +254,24 @@
         .qty-select-wrapper { display: flex; gap: 8px; align-items: center; flex: 1; }
         .qty-select-wrapper select, .qty-select-wrapper input { flex: 1; padding: 10px; border: 2px solid #e8edf2; border-radius: 12px; font-size: 0.9rem; outline: none; background: white; }
         .qty-select-wrapper select:focus, .qty-select-wrapper input:focus { border-color: var(--primary); }
+
+        /* ===== TASK CARD STYLES ===== */
+        .task-card {
+            background: #ffffff;
+            border: 1px solid #e8edf2;
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: var(--transition);
+        }
+        .task-card.done-task { opacity: 0.65; background: #fcfcfc; border-style: dashed; }
+        .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+        .task-customer { font-weight: 700; font-size: 0.95rem; color: var(--primary-dark); }
+        .task-time { font-size: 0.72rem; color: var(--gray); }
+        .task-items-list { font-size: 0.82rem; margin-bottom: 10px; padding-left: 12px; border-left: 3px solid var(--accent); }
+        .task-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px solid #f0f0f0; padding-top: 8px; }
+        .task-meta { font-size: 0.75rem; font-weight: 600; color: var(--gray); }
 
         /* ===== MODAL ===== */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 999; padding: 16px; }
@@ -413,9 +431,15 @@
                     <div id="cartItems"><div class="empty">Keranjang kosong</div></div>
                 </div>
                 <div style="margin-top:12px; font-weight:700; font-size:1.2rem; text-align:right;" id="cartTotal">Total: Rp 0</div>
-                <div class="flex" style="margin-top:14px;">
-                    <button class="btn btn-accent" style="flex:1;" onclick="pay('cash')"><i class="fas fa-money-bill-wave"></i> Cash</button>
-                    <button class="btn btn-primary" style="flex:1;" onclick="pay('qris')"><i class="fas fa-qrcode"></i> QRIS</button>
+                
+                <!-- Opsi Pembayaran: Sekarang & Nanti -->
+                <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:0.8rem; font-weight:600; color:var(--gray);">Pilih Metode Pembayaran & Eksekusi:</div>
+                    <div class="flex">
+                        <button class="btn btn-accent" style="flex:1;" onclick="pay('cash')"><i class="fas fa-money-bill-wave"></i> Bayar Cash</button>
+                        <button class="btn btn-primary" style="flex:1;" onclick="pay('qris')"><i class="fas fa-qrcode"></i> Bayar QRIS</button>
+                    </div>
+                    <button class="btn btn-outline btn-block" onclick="payLater()"><i class="fas fa-clock"></i> Bayar Nanti (Masuk Task Dapur)</button>
                 </div>
             </div>
 
@@ -437,6 +461,23 @@
                             <tbody id="recentSalesBody"><tr><td colspan="4" class="empty">Belum ada transaksi</td></tr></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TASK / DAPUR ===== -->
+        <div id="pageTask" class="page">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-tasks"></i> Task Pesanan (Dapur)
+                    <button class="btn btn-primary btn-sm" onclick="openTaskModal()"><i class="fas fa-plus"></i> Pesanan Manual</button>
+                </div>
+                <div class="toggle-group" id="taskStatusToggle" style="margin-bottom:14px;">
+                    <button class="active" data-status="all"><i class="fas fa-layer-group"></i> Semua</button>
+                    <button data-status="pending"><i class="fas fa-hourglass-half"></i> Belum Selesai</button>
+                    <button data-status="done"><i class="fas fa-check-circle"></i> Selesai</button>
+                </div>
+                <div id="taskListContainer">
+                    <div class="empty">Belum ada task pesanan</div>
                 </div>
             </div>
         </div>
@@ -675,6 +716,7 @@
     <!-- ===== BOTTOM NAV ===== -->
     <nav class="bottom-nav">
         <button class="active" onclick="switchPage('pagePenjualan')"><span class="nav-icon"><i class="fas fa-cash-register"></i></span>Penjualan</button>
+        <button onclick="switchPage('pageTask')"><span class="nav-icon"><i class="fas fa-tasks"></i></span>Task Dapur</button>
         <button id="navStok" onclick="switchPage('pageStok')"><span class="nav-icon"><i class="fas fa-boxes"></i></span>Stok</button>
         <button onclick="switchPage('pageLaporan')"><span class="nav-icon"><i class="fas fa-chart-pie"></i></span>Laporan</button>
         <button id="settingsBtn" onclick="openSettings()" style="display:none;"><span class="nav-icon"><i class="fas fa-cog"></i></span>Pengaturan</button>
@@ -746,6 +788,30 @@
             <button class="btn btn-primary" onclick="printNota()"><i class="fas fa-print"></i> Print</button>
             <button class="btn btn-accent" onclick="shareNotaWA()"><i class="fab fa-whatsapp"></i> WA</button>
             <button class="btn btn-outline" onclick="closeNotaModal()">Tutup</button>
+        </div>
+    </div>
+</div>
+
+<!-- TASK EDIT/MANUAL MODAL -->
+<div id="taskModal" class="modal-overlay">
+    <div class="modal">
+        <h3 id="taskModalTitle">Pesanan Dapur Manual</h3>
+        <input type="hidden" id="editTaskId">
+        <input type="text" id="taskCustomerName" placeholder="Nama Pemesan / Meja" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; margin-bottom:8px;">
+        <div style="font-size:0.85rem; font-weight:600; margin-bottom:4px;">Pilih Produk:</div>
+        <select id="taskProductSelect" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; margin-bottom:8px;">
+            <option value="">-- Pilih Produk --</option>
+        </select>
+        <div class="flex" style="margin-bottom:8px;">
+            <input type="number" id="taskItemQty" placeholder="Jumlah" min="1" value="1" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px;">
+            <button class="btn btn-primary" onclick="addTaskItem()"><i class="fas fa-plus"></i> Tambah Item</button>
+        </div>
+        <div style="max-height:120px; overflow-y:auto; border:1px solid #eee; border-radius:12px; padding:6px; margin-bottom:8px;">
+            <div id="taskItemList"><div class="empty">Belum ada item pesanan</div></div>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-outline" onclick="closeTaskModal()">Batal</button>
+            <button class="btn btn-primary" onclick="saveTaskModal()"><i class="fas fa-save"></i> Simpan Task</button>
         </div>
     </div>
 </div>
@@ -912,6 +978,7 @@
     let employees = DB.get('employees', []);
     let costs = DB.get('costs', []);
     let categories = DB.get('categories', []);
+    let tasks = DB.get('tasks', []);
     let profile = DB.get('profile', { name: '', address: '', phone: '', social: '' });
     let cart = [];
 
@@ -925,10 +992,12 @@
     let currentNotaSale = null;
     let currentTypeFilter = 'all';
     let currentStokFilter = 'all';
+    let currentTaskStatusFilter = 'all';
     let modalTempRecipe = [];
     let editingRecipeProductId = null;
     let tempRecipe = [];
     let productTableCollapsed = false;
+    let taskModalItems = [];
 
     function setTheme(primary, light) {
         currentTheme = { primary, light };
@@ -971,6 +1040,7 @@
         populateProductSelect();
         renderStok();
         renderPenjualan();
+        renderTask();
         renderLaporan();
         document.getElementById('purchaseUnit').addEventListener('change', togglePurchaseUnitCustom);
     }
@@ -995,16 +1065,26 @@
                 renderStok();
             });
         });
+        const tBtns = document.querySelectorAll('#taskStatusToggle button');
+        tBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTaskStatusFilter = this.dataset.status;
+                renderTask();
+            });
+        });
     }
 
     function switchPage(pageId) {
         document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
         document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.remove('active'));
-        const map = { pagePenjualan: 0, pageStok: 1, pageLaporan: 2 };
-        const idx = map[pageId] || 0;
+        const map = { pagePenjualan: 0, pageTask: 1, pageStok: 2, pageLaporan: 3 };
+        const idx = map[pageId] !== undefined ? map[pageId] : 0;
         document.querySelectorAll('.bottom-nav button')[idx].classList.add('active');
         if (pageId === 'pagePenjualan') { renderPenjualan(); populateProductSelect(); }
+        else if (pageId === 'pageTask') renderTask();
         else if (pageId === 'pageStok') renderStok();
         else if (pageId === 'pageLaporan') renderLaporan();
     }
@@ -1246,16 +1326,21 @@
     }
 
     function populateProductSelect() {
-        const sel = document.getElementById('productSelect');
-        sel.innerHTML = '<option value="">-- Pilih Produk --</option>';
-        let filtered = products;
-        if (currentTypeFilter === 'raw') filtered = products.filter(p => p.type === 'raw');
-        else if (currentTypeFilter === 'finished') filtered = products.filter(p => p.type === 'finished');
-        else if (currentTypeFilter === 'processed') filtered = products.filter(p => p.type === 'processed');
-        filtered.forEach(p => {
-            const label = p.type === 'raw' ? '🌱' : p.type === 'processed' ? '🍳' : '📦';
-            const stokDisplay = p.type === 'processed' ? '✓' : p.stok;
-            sel.innerHTML += `<option value="${p.id}">${label} ${p.name} (${p.unit || '-'}) Stok: ${stokDisplay} - Rp ${formatNumber(p.price)}</option>`;
+        const selects = [document.getElementById('productSelect'), document.getElementById('taskProductSelect')];
+        selects.forEach(sel => {
+            if (!sel) return;
+            const currentVal = sel.value;
+            sel.innerHTML = '<option value="">-- Pilih Produk --</option>';
+            let filtered = products;
+            if (currentTypeFilter === 'raw') filtered = products.filter(p => p.type === 'raw');
+            else if (currentTypeFilter === 'finished') filtered = products.filter(p => p.type === 'finished');
+            else if (currentTypeFilter === 'processed') filtered = products.filter(p => p.type === 'processed');
+            filtered.forEach(p => {
+                const label = p.type === 'raw' ? '🌱' : p.type === 'processed' ? '🍳' : '📦';
+                const stokDisplay = p.type === 'processed' ? '✓' : p.stok;
+                sel.innerHTML += `<option value="${p.id}">${label} ${p.name} (${p.unit || '-'}) Stok: ${stokDisplay} - Rp ${formatNumber(p.price)}</option>`;
+            });
+            sel.value = currentVal;
         });
     }
 
@@ -1708,7 +1793,7 @@
             }
         }
 
-        const items = cart.map(c => ({ name: c.name, qty: c.qty, price: c.price, type: c.type || 'raw' }));
+        const items = cart.map(c => ({ productId: c.productId, name: c.name, qty: c.qty, price: c.price, type: c.type || 'raw' }));
         const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
 
         for (const c of cart) {
@@ -1739,6 +1824,252 @@
         renderAll();
         populateProductSelect();
         alert('Transaksi berhasil!');
+    }
+
+    // Fitur Bayar Nanti (Masuk Task Dapur)
+    function payLater() {
+        if (cart.length === 0) { alert('Keranjang kosong!'); return; }
+        const customerName = prompt('Masukkan Nama Pemesan / Nomor Meja:', 'Meja 1');
+        if (!customerName) return;
+
+        // Validasi stok sebelum masuk task dapur & kurangi stok
+        for (const c of cart) {
+            const product = products.find(p => p.id === c.productId);
+            if (!product) { alert(`Produk ${c.name} tidak ditemukan!`); return; }
+            if (product.type === 'processed') {
+                if (product.recipe && product.recipe.length > 0) {
+                    for (const ing of product.recipe) {
+                        const raw = products.find(p => p.id === ing.productId);
+                        if (!raw) { alert(`Bahan baku untuk ${product.name} tidak ditemukan!`); return; }
+                        const needed = ing.qty * c.qty;
+                        if (raw.stok < needed) {
+                            alert(`Stok ${raw.name} tidak cukup untuk ${product.name}! Butuh: ${needed}, tersisa: ${raw.stok}`);
+                            return;
+                        }
+                    }
+                }
+            } else {
+                if (product.stok < c.qty) {
+                    alert(`Stok ${product.name} tidak cukup! Sisa: ${product.stok}`);
+                    return;
+                }
+            }
+        }
+
+        const items = cart.map(c => ({ productId: c.productId, name: c.name, qty: c.qty, price: c.price, type: c.type || 'raw' }));
+        const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
+
+        // Kurangi stok saat masuk antrean task dapur
+        for (const c of cart) {
+            const product = products.find(p => p.id === c.productId);
+            if (!product) continue;
+            if (product.type === 'processed') {
+                if (product.recipe) {
+                    for (const ing of product.recipe) {
+                        const raw = products.find(p => p.id === ing.productId);
+                        if (raw) {
+                            raw.stok -= ing.qty * c.qty;
+                            if (raw.stok < 0) raw.stok = 0;
+                        }
+                    }
+                }
+            } else {
+                product.stok -= c.qty;
+                if (product.stok < 0) product.stok = 0;
+            }
+        }
+
+        const newTask = {
+            id: Date.now().toString(),
+            date: new Date().toISOString(),
+            customer: customerName.trim(),
+            items,
+            total,
+            status: 'pending', // pending | done
+            cashier: currentUser.name
+        };
+
+        tasks.push(newTask);
+        DB.set('products', products);
+        DB.set('tasks', tasks);
+        cart = [];
+        renderAll();
+        populateProductSelect();
+        alert('Pesanan berhasil dicatat dan masuk Task Dapur!');
+        switchPage('pageTask');
+    }
+
+    // Render Task Dapur
+    function renderTask() {
+        const container = document.getElementById('taskListContainer');
+        if (!container) return;
+        let filtered = tasks;
+        if (currentTaskStatusFilter === 'pending') filtered = tasks.filter(t => t.status === 'pending');
+        else if (currentTaskStatusFilter === 'done') filtered = tasks.filter(t => t.status === 'done');
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty">Tidak ada task pesanan</div>';
+            return;
+        }
+
+        let html = '';
+        // Urutkan dari yang terbaru
+        const sorted = [...filtered].reverse();
+        sorted.forEach(t => {
+            const isDone = t.status === 'done';
+            const itemsList = t.items.map(i => `• ${i.name} x${i.qty}`).join('<br>');
+            html += `<div class="task-card ${isDone ? 'done-task' : ''}">
+                <div class="task-header">
+                    <div>
+                        <div class="task-customer"><i class="fas fa-user-circle"></i> ${t.customer}</div>
+                        <div class="task-time">${formatDate(t.date)} • Kasir: ${t.cashier}</div>
+                    </div>
+                    <div>
+                        ${isDone ? '<span class="badge badge-green">Selesai</span>' : '<span class="badge badge-yellow">Belum Selesai</span>'}
+                    </div>
+                </div>
+                <div class="task-items-list">${itemsList}</div>
+                <div class="task-footer">
+                    <div class="task-meta">Total: Rp ${formatNumber(t.total)}</div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-sm ${isDone ? 'btn-outline' : 'btn-success'}" onclick="toggleTaskStatus('${t.id}')">
+                            <i class="fas ${isDone ? 'fa-undo' : 'fa-check'}"></i> ${isDone ? 'Batal' : 'Done'}
+                        </button>
+                        <button class="btn btn-sm btn-outline" onclick="openTaskModal('${t.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteTask('${t.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function toggleTaskStatus(taskId) {
+        const t = tasks.find(x => x.id === taskId);
+        if (!t) return;
+        t.status = t.status === 'pending' ? 'done' : 'pending';
+        DB.set('tasks', tasks);
+        renderTask();
+    }
+
+    function deleteTask(taskId) {
+        if (!confirm('Hapus task pesanan ini?')) return;
+        const t = tasks.find(x => x.id === taskId);
+        if (t && t.status === 'pending') {
+            // Jika dihapus saat belum selesai, kembalikan stok
+            t.items.forEach(i => {
+                const prod = products.find(p => p.id === i.productId);
+                if (prod && prod.type !== 'processed') {
+                    prod.stok += i.qty;
+                } else if (prod && prod.type === 'processed' && prod.recipe) {
+                    prod.recipe.forEach(ing => {
+                        const raw = products.find(r => r.id === ing.productId);
+                        if (raw) raw.stok += ing.qty * i.qty;
+                    });
+                }
+            });
+            DB.set('products', products);
+        }
+        tasks = tasks.filter(x => x.id !== taskId);
+        DB.set('tasks', tasks);
+        renderTask();
+        renderStok();
+    }
+
+    function openTaskModal(taskId = null) {
+        document.getElementById('editTaskId').value = taskId || '';
+        document.getElementById('taskModalTitle').textContent = taskId ? 'Edit Task Pesanan' : 'Tambah Pesanan Manual';
+        taskModalItems = [];
+        document.getElementById('taskCustomerName').value = '';
+        if (taskId) {
+            const t = tasks.find(x => x.id === taskId);
+            if (t) {
+                document.getElementById('taskCustomerName').value = t.customer;
+                taskModalItems = JSON.parse(JSON.stringify(t.items));
+            }
+        }
+        renderTaskModalItems();
+        populateProductSelect();
+        document.getElementById('taskModal').style.display = 'flex';
+    }
+
+    function closeTaskModal() {
+        document.getElementById('taskModal').style.display = 'none';
+        taskModalItems = [];
+    }
+
+    function addTaskItem() {
+        const sel = document.getElementById('taskProductSelect');
+        const qtyInput = document.getElementById('taskItemQty');
+        if (!sel.value) { alert('Pilih produk!'); return; }
+        const qty = parseInt(qtyInput.value);
+        if (isNaN(qty) || qty < 1) { alert('Jumlah tidak valid!'); return; }
+        const p = products.find(x => x.id === sel.value);
+        if (!p) return;
+
+        const existing = taskModalItems.find(i => i.productId === p.id);
+        if (existing) {
+            existing.qty += qty;
+        } else {
+            taskModalItems.push({ productId: p.id, name: p.name, price: p.price, qty, type: p.type || 'raw' });
+        }
+        qtyInput.value = '1';
+        sel.value = '';
+        renderTaskModalItems();
+    }
+
+    function removeTaskModalItem(idx) {
+        taskModalItems.splice(idx, 1);
+        renderTaskModalItems();
+    }
+
+    function renderTaskModalItems() {
+        const container = document.getElementById('taskItemList');
+        if (taskModalItems.length === 0) {
+            container.innerHTML = '<div class="empty">Belum ada item pesanan</div>';
+            return;
+        }
+        let html = '';
+        taskModalItems.forEach((item, idx) => {
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f0f0f0; font-size:0.85rem;">
+                <span>${item.name} x${item.qty} (Rp ${formatNumber(item.price * item.qty)})</span>
+                <button class="btn btn-sm btn-danger" onclick="removeTaskModalItem(${idx})"><i class="fas fa-times"></i></button>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function saveTaskModal() {
+        const taskId = document.getElementById('editTaskId').value;
+        const customer = document.getElementById('taskCustomerName').value.trim();
+        if (!customer) { alert('Nama pemesan / meja wajib diisi!'); return; }
+        if (taskModalItems.length === 0) { alert('Item pesanan minimal 1!'); return; }
+        const total = taskModalItems.reduce((sum, i) => sum + (i.price * i.qty), 0);
+
+        if (taskId) {
+            const t = tasks.find(x => x.id === taskId);
+            if (t) {
+                t.customer = customer;
+                t.items = taskModalItems;
+                t.total = total;
+            }
+        } else {
+            const newTask = {
+                id: Date.now().toString(),
+                date: new Date().toISOString(),
+                customer,
+                items: taskModalItems,
+                total,
+                status: 'pending',
+                cashier: currentUser.name
+            };
+            tasks.push(newTask);
+        }
+
+        DB.set('tasks', tasks);
+        closeTaskModal();
+        renderTask();
+        alert('Task pesanan disimpan!');
     }
 
     function openNota(saleId) {
@@ -2102,7 +2433,6 @@
     async function saveBlobFile(blob, fileName, mimeType) {
         const safeName = fileName || 'download';
         
-        // Deteksi lingkungan Median.co / WebView
         const isMedianApp = /median|gonative/i.test(navigator.userAgent) || window.median;
 
         if (isMedianApp) {
@@ -2444,6 +2774,7 @@
     function renderAll() {
         renderPenjualan();
         renderStok();
+        renderTask();
         renderLaporan();
     }
 </script>
