@@ -33,7 +33,7 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--text);
-            padding-bottom: 96px;
+            padding-bottom: 84px;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
@@ -126,18 +126,21 @@
         .auth-card button:active { transform: scale(0.97); }
         .auth-card .error { color: var(--danger); font-size: 0.85rem; text-align: center; margin-top: 8px; display: none; font-weight: 500; }
 
-        /* ===== BOTTOM NAV (Floating iOS Tabbar Style) ===== */
+        /* ===== BOTTOM NAV (Solid Bottom Bar - Not Floating) ===== */
         .bottom-nav {
-            position: fixed; bottom: 16px; left: 16px; right: 16px; background: rgba(255, 255, 255, 0.85);
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(0,0,0,0.06); display: flex; justify-content: space-around;
-            padding: 8px 6px; z-index: 100; max-width: 580px; margin: 0 auto;
-            border-radius: 28px; box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+            z-index: 100; margin: 0; width: 100%;
+            box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.06);
         }
         .bottom-nav button {
-            flex: 1; background: transparent; border: none; font-size: 0.6rem; font-weight: 600;
+            flex: 1; background: transparent; border: none; font-size: 0.62rem; font-weight: 600;
             display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer;
-            color: var(--gray); transition: var(--transition); padding: 6px 0; border-radius: 18px;
+            color: var(--gray); transition: var(--transition); padding: 6px 2px; border-radius: 12px;
         }
         .bottom-nav button .nav-icon { font-size: 1.2rem; transition: var(--transition); }
         .bottom-nav button.active { color: var(--primary); background: rgba(0, 122, 255, 0.08); }
@@ -375,6 +378,10 @@
         .stok-low { color: var(--danger); font-weight: 700; }
         .stok-na { color: var(--gray); font-style: italic; }
         #restoreFileInput { padding: 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; background: white; width: 100%; }
+
+        /* Short version vs Full version styling */
+        .short-view-item { cursor: pointer; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; transition: var(--transition); }
+        .short-view-item:hover { border-color: var(--primary); background: rgba(0,122,255,0.02); }
     </style>
 <style>
 /* ===== HDRG CLEAN / DYNAMIC / RESPONSIVE UI LAYER ===== */
@@ -432,7 +439,6 @@ input:focus,select:focus,textarea:focus{
   box-shadow:0 0 0 4px rgba(0,122,255,.08)!important;
 }
 
-/* Responsive page containers */
 .container,.content,.main-content,.page-content{
   width:min(100% - 28px, 1240px);
   margin-inline:auto;
@@ -446,14 +452,6 @@ input:focus,select:focus,textarea:focus{
   }
 }
 
-/* Sticky mobile action area */
-.mobile-sticky-actions{
-  position:sticky;
-  bottom:calc(10px + env(safe-area-inset-bottom));
-  z-index:20;
-}
-
-/* Cards become full-width and comfortable on small screens */
 @media (max-width:720px){
   body{font-size:14px}
   .container,.content,.main-content,.page-content{
@@ -481,39 +479,18 @@ input:focus,select:focus,textarea:focus{
   .toolbar select{
     width:100%!important;
   }
-  .bottom-nav{
-    padding-bottom:env(safe-area-inset-bottom);
-  }
 }
 
-/* Compact touch targets */
 @media (pointer:coarse){
   button,.btn,[role="button"]{min-height:44px}
   .icon-btn{min-width:44px;min-height:44px}
 }
 
-/* Empty/loading states */
 .empty-state{
   padding:42px 18px;
   text-align:center;
   color:var(--ui-muted);
 }
-.skeleton{
-  position:relative;
-  overflow:hidden;
-  background:#eef0f3!important;
-}
-.skeleton:after{
-  content:"";
-  position:absolute;
-  inset:0;
-  transform:translateX(-100%);
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);
-  animation:skeleton 1.2s infinite;
-}
-@keyframes skeleton{to{transform:translateX(100%)}}
-
-/* Reduce motion for accessibility */
 @media (prefers-reduced-motion:reduce){
   *,*:before,*:after{
     animation-duration:.01ms!important;
@@ -665,10 +642,11 @@ input:focus,select:focus,textarea:focus{
         <div id="pageStok" class="page">
             <div class="card" id="productManagementCard">
                 <div class="card-title">
-                    <span><i class="fas fa-boxes"></i> Manajemen Produk</span>
+                    <span><i class="fas fa-boxes"></i> Manajemen Produk & Stok</span>
                     <div style="display:flex; gap:6px; align-items:center;">
+                        <button class="btn btn-outline btn-sm" onclick="toggleStockViewMode()" id="stockViewModeBtn">Versi Ringkas</button>
                         <button class="btn-minimize" onclick="toggleProductTable()" id="minimizeBtn" title="Minimalkan tabel"><i class="fas fa-chevron-up"></i></button>
-                        <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i> Tambah</button>
+                        <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i></button>
                     </div>
                 </div>
                 <div class="toggle-group" id="stokTypeToggle">
@@ -677,18 +655,21 @@ input:focus,select:focus,textarea:focus{
                     <button data-type="finished"><i class="fas fa-box"></i> Produk Jadi</button>
                     <button data-type="processed"><i class="fas fa-utensils"></i> Produk Olahan</button>
                 </div>
-                <div class="table-wrap table-collapsible" id="productTableWrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Produk</th>
-                                <th>Harga/Stok</th>
-                                <th>Jenis</th>
-                                <th style="text-align: center;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productTableBody"><tr><td colspan="4" class="empty">Belum ada produk</td></tr></tbody>
-                    </table>
+                <div id="stockContainerWrapper">
+                    <div class="table-wrap table-collapsible" id="productTableWrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Produk</th>
+                                    <th>Harga/Stok</th>
+                                    <th>Jenis</th>
+                                    <th style="text-align: center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody"><tr><td colspan="4" class="empty">Belum ada produk</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div id="productShortViewContainer" style="display:none; margin-top:8px;"></div>
                 </div>
             </div>
 
@@ -767,102 +748,141 @@ input:focus,select:focus,textarea:focus{
         <!-- LAPORAN -->
         <div id="pageLaporan" class="page">
             <div class="card">
-                <div class="card-title"><i class="fas fa-chart-bar"></i> Laporan Penjualan
-                    <button class="btn btn-success btn-sm" onclick="exportSales()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                <div class="card-title">
+                    <span><i class="fas fa-chart-bar"></i> Laporan Penjualan</span>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <button class="btn btn-success btn-sm" onclick="exportSales()"><i class="fas fa-file-excel"></i></button>
+                        <button class="btn-minimize" onclick="toggleReportSection(this, 'salesReportWrapper')"><i class="fas fa-chevron-up"></i></button>
+                    </div>
                 </div>
-                <div class="flex" style="margin-bottom:10px;">
-                    <button class="btn btn-outline btn-sm" onclick="setSalesFilter('today')">Hari Ini</button>
-                    <button class="btn btn-outline btn-sm" onclick="setSalesFilter('week')">Minggu</button>
-                    <button class="btn btn-outline btn-sm" onclick="setSalesFilter('month')">Bulan</button>
+                <div class="table-collapsible" id="salesReportWrapper">
+                    <div class="flex" style="margin-bottom:10px;">
+                        <button class="btn btn-outline btn-sm" onclick="setSalesFilter('today')">Hari Ini</button>
+                        <button class="btn btn-outline btn-sm" onclick="setSalesFilter('week')">Minggu</button>
+                        <button class="btn btn-outline btn-sm" onclick="setSalesFilter('month')">Bulan</button>
+                        <button class="btn btn-outline btn-sm" onclick="toggleReportViewMode('sales')" id="salesViewModeBtn">Versi Ringkas</button>
+                    </div>
+                    <div id="salesReportContainer">
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th style="text-align:center;">Aksi</th></tr></thead>
+                                <tbody id="salesReportBody"><tr><td colspan="4" class="empty">Belum ada transaksi</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="font-weight:700; text-align:right; margin-top:8px; font-size:0.95rem;" id="salesTotalReport">Total: Rp 0</div>
                 </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th style="text-align:center;">Aksi</th></tr></thead>
-                        <tbody id="salesReportBody"><tr><td colspan="4" class="empty">Belum ada transaksi</td></tr></tbody>
-                    </table>
-                </div>
-                <div style="font-weight:700; text-align:right; margin-top:8px; font-size:0.95rem;" id="salesTotalReport">Total: Rp 0</div>
             </div>
 
             <div id="ownerReportSection" style="display:none;">
                 <div class="card">
-                    <div class="card-title"><i class="fas fa-shopping-cart"></i> Laporan Pembelian
-                        <button class="btn btn-success btn-sm" onclick="exportPurchases()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                    <div class="card-title">
+                        <span><i class="fas fa-shopping-cart"></i> Laporan Pembelian</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button class="btn btn-success btn-sm" onclick="exportPurchases()"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn-minimize" onclick="toggleReportSection(this, 'purchaseReportWrapper')"><i class="fas fa-chevron-up"></i></button>
+                        </div>
                     </div>
-                    <div class="flex" style="margin-bottom:10px;">
-                        <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('today')">Hari Ini</button>
-                        <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('week')">Minggu</button>
-                        <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('month')">Bulan</button>
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>Waktu</th><th>Nama</th><th>Jml</th><th style="text-align:center;">Aksi</th></tr></thead>
-                            <tbody id="purchaseReportBody"><tr><td colspan="4" class="empty">Belum ada pembelian</td></tr></tbody>
-                        </table>
-                    </div>
-                    <div style="font-weight:700; text-align:right; margin-top:8px;" id="purchaseTotalReport">Total: Rp 0</div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-wallet"></i> Laporan Keuangan
-                        <button class="btn btn-success btn-sm" onclick="exportFinancial()"><i class="fas fa-file-excel"></i> Export Excel</button>
-                    </div>
-                    <div class="flex" style="margin-bottom:10px;">
-                        <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('today')">Hari Ini</button>
-                        <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('week')">Minggu</button>
-                        <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('month')">Bulan</button>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--bg); font-size:0.88rem;">
-                        <span>Total Penjualan</span> <span id="financialSales" style="font-weight:600;">Rp 0</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--bg); font-size:0.88rem;">
-                        <span>Total Pembelian</span> <span id="financialPurchases" style="font-weight:600;">Rp 0</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--bg); font-size:0.88rem;">
-                        <span>Total Biaya</span> <span id="financialCosts" style="font-weight:600;">Rp 0</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; padding:12px 0; font-weight:700; font-size:1.1rem; color:var(--primary);">
-                        <span>Laba Bersih</span> <span id="financialNet">Rp 0</span>
+                    <div class="table-collapsible" id="purchaseReportWrapper">
+                        <div class="flex" style="margin-bottom:10px;">
+                            <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('today')">Hari Ini</button>
+                            <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('week')">Minggu</button>
+                            <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('month')">Bulan</button>
+                            <button class="btn btn-outline btn-sm" onclick="toggleReportViewMode('purchase')" id="purchaseViewModeBtn">Versi Ringkas</button>
+                        </div>
+                        <div id="purchaseReportContainer">
+                            <div class="table-wrap">
+                                <table>
+                                    <thead><tr><th>Waktu</th><th>Nama</th><th>Jml</th><th style="text-align:center;">Aksi</th></tr></thead>
+                                    <tbody id="purchaseReportBody"><tr><td colspan="4" class="empty">Belum ada pembelian</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div style="font-weight:700; text-align:right; margin-top:8px;" id="purchaseTotalReport">Total: Rp 0</div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div class="card-title"><i class="fas fa-file-invoice-dollar"></i> Laporan Biaya
-                        <button class="btn btn-success btn-sm" onclick="exportCosts()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                    <div class="card-title">
+                        <span><i class="fas fa-wallet"></i> Laporan Keuangan</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button class="btn btn-success btn-sm" onclick="exportFinancial()"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn-minimize" onclick="toggleReportSection(this, 'financialReportWrapper')"><i class="fas fa-chevron-up"></i></button>
+                        </div>
                     </div>
-                    <div class="flex" style="margin-bottom:10px;">
-                        <button class="btn btn-outline btn-sm" onclick="setCostFilter('today')">Hari Ini</button>
-                        <button class="btn btn-outline btn-sm" onclick="setCostFilter('week')">Minggu</button>
-                        <button class="btn btn-outline btn-sm" onclick="setCostFilter('month')">Bulan</button>
+                    <div class="table-collapsible" id="financialReportWrapper">
+                        <div class="flex" style="margin-bottom:10px;">
+                            <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('today')">Hari Ini</button>
+                            <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('week')">Minggu</button>
+                            <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('month')">Bulan</button>
+                            <button class="btn btn-primary btn-sm" onclick="openDetailPopup('financial')"><i class="fas fa-info-circle"></i> Detail Pop-up</button>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--bg); font-size:0.88rem;">
+                            <span>Total Penjualan</span> <span id="financialSales" style="font-weight:600;">Rp 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--bg); font-size:0.88rem;">
+                            <span>Total Pembelian</span> <span id="financialPurchases" style="font-weight:600;">Rp 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--bg); font-size:0.88rem;">
+                            <span>Total Biaya</span> <span id="financialCosts" style="font-weight:600;">Rp 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:12px 0; font-weight:700; font-size:1.1rem; color:var(--primary);">
+                            <span>Laba Bersih</span> <span id="financialNet">Rp 0</span>
+                        </div>
                     </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>Waktu</th><th>Kategori</th><th style="text-align:center;">Aksi</th></tr></thead>
-                            <tbody id="costReportBody"><tr><td colspan="3" class="empty">Belum ada biaya</td></tr></tbody>
-                        </table>
-                    </div>
-                    <div style="font-weight:700; text-align:right; margin-top:8px;" id="costTotalReport">Total: Rp 0</div>
                 </div>
 
                 <div class="card">
-                    <div class="card-title"><i class="fas fa-trophy"></i> Best Seller</div>
-                    <div class="flex" style="margin-bottom:10px;">
-                        <button class="btn btn-outline btn-sm" onclick="setBestFilter('today')">Hari Ini</button>
-                        <button class="btn btn-outline btn-sm" onclick="setBestFilter('week')">Minggu</button>
-                        <button class="btn btn-outline btn-sm" onclick="setBestFilter('month')">Bulan</button>
+                    <div class="card-title">
+                        <span><i class="fas fa-file-invoice-dollar"></i> Laporan Biaya</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button class="btn btn-success btn-sm" onclick="exportCosts()"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn-minimize" onclick="toggleReportSection(this, 'costReportWrapper')"><i class="fas fa-chevron-up"></i></button>
+                        </div>
                     </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>Nama</th><th>Terjual</th><th>Omset</th></tr></thead>
-                            <tbody id="bestSellerBody"><tr><td colspan="3" class="empty">Belum ada data</td></tr></tbody>
-                        </table>
+                    <div class="table-collapsible" id="costReportWrapper">
+                        <div class="flex" style="margin-bottom:10px;">
+                            <button class="btn btn-outline btn-sm" onclick="setCostFilter('today')">Hari Ini</button>
+                            <button class="btn btn-outline btn-sm" onclick="setCostFilter('week')">Minggu</button>
+                            <button class="btn btn-outline btn-sm" onclick="setCostFilter('month')">Bulan</button>
+                            <button class="btn btn-outline btn-sm" onclick="toggleReportViewMode('cost')" id="costViewModeBtn">Versi Ringkas</button>
+                        </div>
+                        <div id="costReportContainer">
+                            <div class="table-wrap">
+                                <table>
+                                    <thead><tr><th>Waktu</th><th>Kategori</th><th style="text-align:center;">Aksi</th></tr></thead>
+                                    <tbody id="costReportBody"><tr><td colspan="3" class="empty">Belum ada biaya</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div style="font-weight:700; text-align:right; margin-top:8px;" id="costTotalReport">Total: Rp 0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span><i class="fas fa-trophy"></i> Best Seller</span>
+                        <button class="btn-minimize" onclick="toggleReportSection(this, 'bestReportWrapper')"><i class="fas fa-chevron-up"></i></button>
+                    </div>
+                    <div class="table-collapsible" id="bestReportWrapper">
+                        <div class="flex" style="margin-bottom:10px;">
+                            <button class="btn btn-outline btn-sm" onclick="setBestFilter('today')">Hari Ini</button>
+                            <button class="btn btn-outline btn-sm" onclick="setBestFilter('week')">Minggu</button>
+                            <button class="btn btn-outline btn-sm" onclick="setBestFilter('month')">Bulan</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Nama</th><th>Terjual</th><th>Omset</th></tr></thead>
+                                <tbody id="bestSellerBody"><tr><td colspan="3" class="empty">Belum ada data</td></tr></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- BOTTOM NAV -->
+    <!-- BOTTOM NAV (Solid Bar) -->
     <nav class="bottom-nav">
         <button class="active" onclick="switchPage('pagePenjualan')"><span class="nav-icon"><i class="fas fa-cash-register"></i></span>Penjualan</button>
         <button onclick="switchPage('pageTask')"><span class="nav-icon"><i class="fas fa-tasks"></i></span>Task Dapur</button>
@@ -925,6 +945,16 @@ input:focus,select:focus,textarea:focus{
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeProductModal()">Batal</button>
             <button class="btn btn-primary" onclick="saveProduct()"><i class="fas fa-save"></i> Simpan</button>
+        </div>
+    </div>
+</div>
+
+<div id="detailPopupModal" class="modal-overlay">
+    <div class="modal" style="max-width:520px;">
+        <h3 id="detailPopupTitle"><i class="fas fa-info-circle"></i> Detail Informasi</h3>
+        <div id="detailPopupContent" style="max-height:60vh; overflow-y:auto; margin-bottom:16px;"></div>
+        <div class="btn-row">
+            <button class="btn btn-primary btn-block" onclick="closeDetailPopup()">Tutup</button>
         </div>
     </div>
 </div>
@@ -1142,6 +1172,11 @@ input:focus,select:focus,textarea:focus{
     let tempRecipe = [];
     let productTableCollapsed = false;
     let taskModalItems = [];
+
+    let isStockShortView = false;
+    let salesReportShortView = false;
+    let purchaseReportShortView = false;
+    let costReportShortView = false;
 
     let activeMenu = null;
     let originalParent = null;
@@ -1555,13 +1590,52 @@ input:focus,select:focus,textarea:focus{
         });
     }
 
+    function toggleStockViewMode() {
+        isStockShortView = !isStockShortView;
+        const btn = document.getElementById('stockViewModeBtn');
+        btn.textContent = isStockShortView ? 'Versi Lengkap' : 'Versi Ringkas';
+        renderStok();
+    }
+
     function renderStok() {
         if (currentUser.role !== 'owner') return;
         const tbody = document.getElementById('productTableBody');
+        const shortContainer = document.getElementById('productShortViewContainer');
+        const tableWrapper = document.getElementById('productTableWrapper');
+
         let filtered = products;
         if (currentStokFilter === 'raw') filtered = products.filter(p => p.type === 'raw');
         else if (currentStokFilter === 'finished') filtered = products.filter(p => p.type === 'finished');
         else if (currentStokFilter === 'processed') filtered = products.filter(p => p.type === 'processed');
+
+        if (isStockShortView) {
+            tableWrapper.style.display = 'none';
+            shortContainer.style.display = 'block';
+            if (filtered.length === 0) {
+                shortContainer.innerHTML = '<div class="empty">Belum ada produk</div>';
+                return;
+            }
+            let shortHtml = '';
+            filtered.forEach(p => {
+                const unitStr = p.unit || 'pcs';
+                const stokDisplay = p.type === 'processed' ? 'Olahan' : `${p.stok} ${unitStr}`;
+                shortHtml += `<div class="short-view-item" onclick="openProductDetailModal('${p.id}')">
+                    <div>
+                        <strong>${p.name}</strong>
+                        <div style="font-size:0.75rem; color:var(--gray);">Rp ${formatNumber(p.price)}</div>
+                    </div>
+                    <div>
+                        <span class="badge badge-blue">Stok: ${stokDisplay}</span>
+                        <i class="fas fa-chevron-right" style="margin-left:6px; font-size:0.75rem; color:var(--gray);"></i>
+                    </div>
+                </div>`;
+            });
+            shortContainer.innerHTML = shortHtml;
+            return;
+        } else {
+            shortContainer.style.display = 'none';
+            tableWrapper.style.display = 'block';
+        }
         
         if (filtered.length === 0) { 
             tbody.innerHTML = `<tr><td colspan="4" class="empty">Belum ada produk</td></tr>`; 
@@ -1603,6 +1677,65 @@ input:focus,select:focus,textarea:focus{
         });
         tbody.innerHTML = html;
         populateProductSelect();
+    }
+
+    function openProductDetailModal(id) {
+        const p = products.find(x => x.id === id);
+        if (!p) return;
+        const unitStr = p.unit || 'pcs';
+        let content = `
+            <p><strong>Nama Produk:</strong> ${p.name}</p>
+            <p><strong>Kategori:</strong> ${p.category || '-'}</p>
+            <p><strong>Jenis:</strong> ${p.type === 'raw' ? 'Bahan Baku' : p.type === 'finished' ? 'Produk Jadi' : 'Produk Olahan'}</p>
+            <p><strong>Harga Jual:</strong> Rp ${formatNumber(p.price)}</p>
+            <p><strong>Stok:</strong> ${p.type === 'processed' ? 'Produk Olahan' : p.stok + ' ' + unitStr}</p>
+            <p><strong>Barcode:</strong> ${p.barcode || '-'}</p>
+        `;
+        if (p.recipe && p.recipe.length > 0) {
+            content += `<h4 style="margin-top:12px; font-size:0.95rem;">Resep / Komposisi:</h4><ul>`;
+            p.recipe.forEach(r => {
+                const raw = products.find(x => x.id === r.productId);
+                content += `<li>${raw ? raw.name : 'Bahan'} : ${r.qty} ${raw?.unit || 'pcs'}</li>`;
+            });
+            content += `</ul>`;
+        }
+        document.getElementById('detailPopupTitle').innerHTML = `<i class="fas fa-box"></i> Detail Produk: ${p.name}`;
+        document.getElementById('detailPopupContent').innerHTML = content;
+        document.getElementById('detailPopupModal').style.display = 'flex';
+    }
+
+    function closeDetailPopup() {
+        document.getElementById('detailPopupModal').style.display = 'none';
+    }
+
+    function openDetailPopup(type) {
+        let title = '';
+        let content = '';
+        const { start, end } = getDateRange(financialFilter);
+
+        if (type === 'financial') {
+            let totalSales = sales.filter(s => { const d = new Date(s.date); return d >= start && d < end; }).reduce((sum, s) => sum + s.total, 0);
+            let totalPurchases = purchases.filter(p => { const d = new Date(p.date); return d >= start && d < end; }).reduce((sum, p) => sum + p.total, 0);
+            let totalCosts = costs.filter(c => { const d = new Date(c.date); return d >= start && d < end; }).reduce((sum, c) => sum + c.amount, 0);
+            let net = totalSales - totalPurchases - totalCosts;
+
+            title = '<i class="fas fa-wallet"></i> Detail Laporan Keuangan';
+            content = `
+                <div style="font-size:0.9rem; line-height:1.6;">
+                    <p><strong>Periode Filter:</strong> ${financialFilter.toUpperCase()}</p>
+                    <hr style="margin:8px 0; border:0; border-top:1px solid var(--border);">
+                    <p><strong>Total Penjualan Kotor:</strong> Rp ${formatNumber(totalSales)}</p>
+                    <p><strong>Total Pembelian Bahan/Barang:</strong> Rp ${formatNumber(totalPurchases)}</p>
+                    <p><strong>Total Biaya Operasional:</strong> Rp ${formatNumber(totalCosts)}</p>
+                    <hr style="margin:8px 0; border:0; border-top:1px solid var(--border);">
+                    <p style="font-size:1.1rem; color:var(--primary);"><strong>Laba Bersih (Net Profit): Rp ${formatNumber(net)}</strong></p>
+                </div>
+            `;
+        }
+
+        document.getElementById('detailPopupTitle').innerHTML = title;
+        document.getElementById('detailPopupContent').innerHTML = content;
+        document.getElementById('detailPopupModal').style.display = 'flex';
     }
 
     function openProductModal(id = null) {
@@ -2718,98 +2851,256 @@ input:focus,select:focus,textarea:focus{
         return { start, end };
     }
 
+    function toggleReportSection(btn, wrapperId) {
+        const wrapper = document.getElementById(wrapperId);
+        if (!wrapper) return;
+        const icon = btn.querySelector('i');
+        if (wrapper.classList.contains('collapsed')) {
+            wrapper.classList.remove('collapsed');
+            icon.className = 'fas fa-chevron-up';
+        } else {
+            wrapper.classList.add('collapsed');
+            icon.className = 'fas fa-chevron-down';
+        }
+    }
+
+    function toggleReportViewMode(type) {
+        if (type === 'sales') {
+            salesReportShortView = !salesReportShortView;
+            document.getElementById('salesViewModeBtn').textContent = salesReportShortView ? 'Versi Lengkap' : 'Versi Ringkas';
+            renderSalesReport();
+        } else if (type === 'purchase') {
+            purchaseReportShortView = !purchaseReportShortView;
+            document.getElementById('purchaseViewModeBtn').textContent = purchaseReportShortView ? 'Versi Lengkap' : 'Versi Ringkas';
+            renderPurchaseReport();
+        } else if (type === 'cost') {
+            costReportShortView = !costReportShortView;
+            document.getElementById('costViewModeBtn').textContent = costReportShortView ? 'Versi Lengkap' : 'Versi Ringkas';
+            renderCostReport();
+        }
+    }
+
     function renderLaporan() {
         renderSalesReport();
         if (currentUser.role === 'owner') { renderPurchaseReport(); renderCostReport(); renderFinancialReport(); renderBestSeller(); }
     }
 
     function renderSalesReport() {
-        const tbody = document.getElementById('salesReportBody');
+        const container = document.getElementById('salesReportContainer');
         const totalSpan = document.getElementById('salesTotalReport');
         const { start, end } = getDateRange(salesFilter);
         let filtered = sales.filter(s => { const d = new Date(s.date); return d >= start && d < end; });
-        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="empty">Tidak ada data</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
-        let html = ''; let total = 0;
-        filtered.forEach(s => {
-            const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
-            total += s.total;
-            html += `<tr class="report-editable-row">
-                <td data-label="Waktu">${formatDate(s.date)}</td>
-                <td data-label="Item">${itemsStr}</td>
-                <td data-label="Total">Rp ${formatNumber(s.total)}</td>
-                <td data-label="Aksi" style="text-align: center;">
-                    <div class="action-dropdown">
-                        <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
-                        <div class="action-menu">
-                            <button onclick="openEditReportModal('sales', '${s.id}')"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="danger" onclick="deleteReportItem('sales', '${s.id}')"><i class="fas fa-trash"></i> Hapus</button>
-                        </div>
+        if (filtered.length === 0) { 
+            container.innerHTML = `<div class="empty">Tidak ada data</div>`; 
+            totalSpan.textContent = 'Total: Rp 0'; 
+            return; 
+        }
+
+        let total = filtered.reduce((sum, s) => sum + s.total, 0);
+
+        if (salesReportShortView) {
+            let html = '';
+            filtered.forEach(s => {
+                html += `<div class="short-view-item" onclick="openDetailSaleModal('${s.id}')">
+                    <div>
+                        <strong>${formatDate(s.date)}</strong>
+                        <div style="font-size:0.75rem; color:var(--gray);">Kasir: ${s.cashier} (${s.method})</div>
                     </div>
-                </td>
-            </tr>`;
-        });
-        tbody.innerHTML = html;
+                    <div>
+                        <span style="font-weight:700; color:var(--primary);">Rp ${formatNumber(s.total)}</span>
+                        <i class="fas fa-chevron-right" style="margin-left:6px; font-size:0.75rem; color:var(--gray);"></i>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        } else {
+            let html = `<div class="table-wrap"><table>
+                <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th style="text-align:center;">Aksi</th></tr></thead>
+                <tbody>`;
+            filtered.forEach(s => {
+                const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
+                html += `<tr class="report-editable-row">
+                    <td data-label="Waktu">${formatDate(s.date)}</td>
+                    <td data-label="Item">${itemsStr}</td>
+                    <td data-label="Total">Rp ${formatNumber(s.total)}</td>
+                    <td data-label="Aksi" style="text-align: center;">
+                        <div class="action-dropdown">
+                            <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
+                            <div class="action-menu">
+                                <button onclick="openEditReportModal('sales', '${s.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="danger" onclick="deleteReportItem('sales', '${s.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
         totalSpan.textContent = `Total: Rp ${formatNumber(total)}`;
+    }
+
+    function openDetailSaleModal(id) {
+        const s = sales.find(x => x.id === id);
+        if (!s) return;
+        let content = `<p><strong>Waktu:</strong> ${formatDate(s.date)}</p>
+        <p><strong>Kasir:</strong> ${s.cashier}</p>
+        <p><strong>Metode Pembayaran:</strong> ${s.method}</p>
+        <h4 style="margin-top:10px; font-size:0.9rem;">Daftar Item:</h4><ul>`;
+        s.items.forEach(i => {
+            content += `<li>${i.name} - ${i.qty} ${i.unit || 'pcs'} @ Rp ${formatNumber(i.price)} = Rp ${formatNumber(i.price * i.qty)}</li>`;
+        });
+        content += `</ul><hr style="margin:10px 0; border:0; border-top:1px solid var(--border);">
+        <p style="font-weight:700;">Total Transaksi: Rp ${formatNumber(s.total)}</p>`;
+        
+        document.getElementById('detailPopupTitle').innerHTML = `<i class="fas fa-receipt"></i> Detail Penjualan`;
+        document.getElementById('detailPopupContent').innerHTML = content;
+        document.getElementById('detailPopupModal').style.display = 'flex';
     }
 
     function setSalesFilter(f) { salesFilter = f; renderSalesReport(); }
 
     function renderPurchaseReport() {
-        const tbody = document.getElementById('purchaseReportBody');
+        const container = document.getElementById('purchaseReportContainer');
         const totalSpan = document.getElementById('purchaseTotalReport');
         const { start, end } = getDateRange(purchaseFilter);
         let filtered = purchases.filter(p => { const d = new Date(p.date); return d >= start && d < end; });
-        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="empty">Tidak ada data</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
-        let html = ''; let total = 0;
-        filtered.forEach(p => {
-            total += p.total;
-            const unitStr = p.unit || 'pcs';
-            html += `<tr class="report-editable-row">
-                <td data-label="Waktu">${formatDate(p.date)}</td>
-                <td data-label="Nama">${p.name}</td>
-                <td data-label="Jumlah">${formatNumber(p.qty)} ${unitStr}</td>
-                <td data-label="Aksi" style="text-align: center;">
-                    <div class="action-dropdown">
-                        <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
-                        <div class="action-menu">
-                            <button onclick="openEditReportModal('purchase', '${p.id}')"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="danger" onclick="deleteReportItem('purchase', '${p.id}')"><i class="fas fa-trash"></i> Hapus</button>
-                        </div>
+        if (filtered.length === 0) { 
+            container.innerHTML = `<div class="empty">Tidak ada data</div>`; 
+            totalSpan.textContent = 'Total: Rp 0'; 
+            return; 
+        }
+
+        let total = filtered.reduce((sum, p) => sum + p.total, 0);
+
+        if (purchaseReportShortView) {
+            let html = '';
+            filtered.forEach(p => {
+                const unitStr = p.unit || 'pcs';
+                html += `<div class="short-view-item" onclick="openDetailPurchaseModal('${p.id}')">
+                    <div>
+                        <strong>${p.name}</strong>
+                        <div style="font-size:0.75rem; color:var(--gray);">${formatDate(p.date)}</div>
                     </div>
-                </td>
-            </tr>`;
-        });
-        tbody.innerHTML = html;
+                    <div>
+                        <span style="font-weight:700;">${formatNumber(p.qty)} ${unitStr}</span>
+                        <i class="fas fa-chevron-right" style="margin-left:6px; font-size:0.75rem; color:var(--gray);"></i>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        } else {
+            let html = `<div class="table-wrap"><table>
+                <thead><tr><th>Waktu</th><th>Nama</th><th>Jml</th><th style="text-align:center;">Aksi</th></tr></thead>
+                <tbody>`;
+            filtered.forEach(p => {
+                const unitStr = p.unit || 'pcs';
+                html += `<tr class="report-editable-row">
+                    <td data-label="Waktu">${formatDate(p.date)}</td>
+                    <td data-label="Nama">${p.name}</td>
+                    <td data-label="Jumlah">${formatNumber(p.qty)} ${unitStr}</td>
+                    <td data-label="Aksi" style="text-align: center;">
+                        <div class="action-dropdown">
+                            <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
+                            <div class="action-menu">
+                                <button onclick="openEditReportModal('purchase', '${p.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="danger" onclick="deleteReportItem('purchase', '${p.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
         totalSpan.textContent = `Total: Rp ${formatNumber(total)}`;
+    }
+
+    function openDetailPurchaseModal(id) {
+        const p = purchases.find(x => x.id === id);
+        if (!p) return;
+        const unitStr = p.unit || 'pcs';
+        let content = `
+            <p><strong>Nama Barang:</strong> ${p.name}</p>
+            <p><strong>Tanggal:</strong> ${formatDate(p.date)}</p>
+            <p><strong>Jumlah Pembelian:</strong> ${formatNumber(p.qty)} ${unitStr}</p>
+            <p><strong>Jenis:</strong> ${p.type === 'raw' ? 'Bahan Baku' : p.type === 'finished' ? 'Produk Jadi' : 'Produk Olahan'}</p>
+            <hr style="margin:10px 0; border:0; border-top:1px solid var(--border);">
+            <p style="font-weight:700;">Total Biaya: Rp ${formatNumber(p.total)}</p>
+        `;
+        document.getElementById('detailPopupTitle').innerHTML = `<i class="fas fa-truck"></i> Detail Pembelian`;
+        document.getElementById('detailPopupContent').innerHTML = content;
+        document.getElementById('detailPopupModal').style.display = 'flex';
     }
 
     function setPurchaseFilter(f) { purchaseFilter = f; renderPurchaseReport(); }
 
     function renderCostReport() {
-        const tbody = document.getElementById('costReportBody');
+        const container = document.getElementById('costReportContainer');
         const totalSpan = document.getElementById('costTotalReport');
         const { start, end } = getDateRange(costFilter);
         let filtered = costs.filter(c => { const d = new Date(c.date); return d >= start && d < end; });
-        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="3" class="empty">Belum ada biaya</td></tr>`; totalSpan.textContent = 'Total: Rp 0'; return; }
-        let html = ''; let total = 0;
-        filtered.forEach(c => { 
-            total += c.amount; 
-            html += `<tr class="report-editable-row">
-                <td data-label="Waktu">${formatDate(c.date)}</td>
-                <td data-label="Kategori">${c.category}<br><small style="color:var(--gray);">${c.description}</small></td>
-                <td data-label="Aksi" style="text-align: center;">
-                    <div class="action-dropdown">
-                        <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
-                        <div class="action-menu">
-                            <button onclick="openEditReportModal('cost', '${c.id}')"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="danger" onclick="deleteReportItem('cost', '${c.id}')"><i class="fas fa-trash"></i> Hapus</button>
-                        </div>
+        if (filtered.length === 0) { 
+            container.innerHTML = `<div class="empty">Belum ada biaya</div>`; 
+            totalSpan.textContent = 'Total: Rp 0'; 
+            return; 
+        }
+
+        let total = filtered.reduce((sum, c) => sum + c.amount, 0);
+
+        if (costReportShortView) {
+            let html = '';
+            filtered.forEach(c => {
+                html += `<div class="short-view-item" onclick="openDetailCostModal('${c.id}')">
+                    <div>
+                        <strong>${c.category}</strong>
+                        <div style="font-size:0.75rem; color:var(--gray);">${c.description}</div>
                     </div>
-                </td>
-            </tr>`; 
-        });
-        tbody.innerHTML = html;
+                    <div>
+                        <span style="font-weight:700; color:var(--danger);">Rp ${formatNumber(c.amount)}</span>
+                        <i class="fas fa-chevron-right" style="margin-left:6px; font-size:0.75rem; color:var(--gray);"></i>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        } else {
+            let html = `<div class="table-wrap"><table>
+                <thead><tr><th>Waktu</th><th>Kategori</th><th style="text-align:center;">Aksi</th></tr></thead>
+                <tbody>`;
+            filtered.forEach(c => {
+                html += `<tr class="report-editable-row">
+                    <td data-label="Waktu">${formatDate(c.date)}</td>
+                    <td data-label="Kategori">${c.category}<br><small style="color:var(--gray);">${c.description}</small></td>
+                    <td data-label="Aksi" style="text-align: center;">
+                        <div class="action-dropdown">
+                            <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i> Aksi</button>
+                            <div class="action-menu">
+                                <button onclick="openEditReportModal('cost', '${c.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="danger" onclick="deleteReportItem('cost', '${c.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
         totalSpan.textContent = `Total: Rp ${formatNumber(total)}`;
+    }
+
+    function openDetailCostModal(id) {
+        const c = costs.find(x => x.id === id);
+        if (!c) return;
+        let content = `
+            <p><strong>Kategori:</strong> ${c.category}</p>
+            <p><strong>Deskripsi:</strong> ${c.description}</p>
+            <p><strong>Waktu:</strong> ${formatDate(c.date)}</p>
+            <hr style="margin:10px 0; border:0; border-top:1px solid var(--border);">
+            <p style="font-weight:700; color:var(--danger);">Jumlah Biaya: Rp ${formatNumber(c.amount)}</p>
+        `;
+        document.getElementById('detailPopupTitle').innerHTML = `<i class="fas fa-file-invoice-dollar"></i> Detail Biaya`;
+        document.getElementById('detailPopupContent').innerHTML = content;
+        document.getElementById('detailPopupModal').style.display = 'flex';
     }
 
     function setCostFilter(f) { costFilter = f; renderCostReport(); }
