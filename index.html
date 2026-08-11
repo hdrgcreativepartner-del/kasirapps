@@ -255,6 +255,23 @@
         .qty-select-wrapper select, .qty-select-wrapper input { flex: 1; padding: 10px; border: 2px solid #e8edf2; border-radius: 12px; font-size: 0.9rem; outline: none; background: white; }
         .qty-select-wrapper select:focus, .qty-select-wrapper input:focus { border-color: var(--primary); }
 
+        /* ===== UNPAID BILLS / TABUNGAN / BAYAR NANTI CARD ===== */
+        .unpaid-card {
+            background: #ffffff;
+            border: 1px solid #fed7aa;
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(245, 166, 35, 0.08);
+            transition: var(--transition);
+        }
+        .unpaid-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+        .unpaid-customer { font-weight: 700; font-size: 0.95rem; color: var(--primary-dark); }
+        .unpaid-time { font-size: 0.72rem; color: var(--gray); }
+        .unpaid-items-list { font-size: 0.82rem; margin-bottom: 10px; padding-left: 12px; border-left: 3px solid var(--accent); }
+        .unpaid-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px solid #f0f0f0; padding-top: 8px; }
+        .unpaid-total { font-size: 0.85rem; font-weight: 700; color: var(--primary); }
+
         /* ===== TASK CARD STYLES ===== */
         .task-card {
             background: #ffffff;
@@ -439,7 +456,17 @@
                         <button class="btn btn-accent" style="flex:1;" onclick="pay('cash')"><i class="fas fa-money-bill-wave"></i> Bayar Cash</button>
                         <button class="btn btn-primary" style="flex:1;" onclick="pay('qris')"><i class="fas fa-qrcode"></i> Bayar QRIS</button>
                     </div>
-                    <button class="btn btn-outline btn-block" onclick="payLater()"><i class="fas fa-clock"></i> Bayar Nanti (Masuk Task Dapur)</button>
+                    <button class="btn btn-outline btn-block" onclick="payLater()"><i class="fas fa-clock"></i> Bayar Nanti (Catat & Masuk Task Dapur)</button>
+                </div>
+            </div>
+
+            <!-- Page / Daftar Penjualan Belum Dibayar (Bayar Nanti) -->
+            <div class="card" style="border-color: #fed7aa;">
+                <div class="card-title" style="color: #9a3412;">
+                    <span><i class="fas fa-clock" style="color: var(--accent);"></i> Penjualan Belum Dibayar (Bayar Nanti)</span>
+                </div>
+                <div id="unpaidSalesContainer">
+                    <div class="empty">Tidak ada penjualan tertunda</div>
                 </div>
             </div>
 
@@ -974,6 +1001,7 @@
     let storeData = DB.get('store', { name: '', ownerPin: '' });
     let products = DB.get('products', []);
     let sales = DB.get('sales', []);
+    let unpaidSales = DB.get('unpaidSales', []);
     let purchases = DB.get('purchases', []);
     let employees = DB.get('employees', []);
     let costs = DB.get('costs', []);
@@ -1646,7 +1674,7 @@
         }
     });
 
-    function renderPenjualan() { renderCart(); renderRecentSales(); }
+    function renderPenjualan() { renderCart(); renderUnpaidSales(); renderRecentSales(); }
 
     function addToCart() {
         const sel = document.getElementById('productSelect');
@@ -1826,13 +1854,13 @@
         alert('Transaksi berhasil!');
     }
 
-    // Fitur Bayar Nanti (Masuk Task Dapur)
+    // Fitur Bayar Nanti (Masuk Daftar Penjualan Belum Dibayar)
     function payLater() {
         if (cart.length === 0) { alert('Keranjang kosong!'); return; }
         const customerName = prompt('Masukkan Nama Pemesan / Nomor Meja:', 'Meja 1');
         if (!customerName) return;
 
-        // Validasi stok sebelum masuk task dapur & kurangi stok
+        // Validasi stok sebelum masuk list belum dibayar & kurangi stok
         for (const c of cart) {
             const product = products.find(p => p.id === c.productId);
             if (!product) { alert(`Produk ${c.name} tidak ditemukan!`); return; }
@@ -1859,7 +1887,7 @@
         const items = cart.map(c => ({ productId: c.productId, name: c.name, qty: c.qty, price: c.price, type: c.type || 'raw' }));
         const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
 
-        // Kurangi stok saat masuk antrean task dapur
+        // Kurangi stok saat masuk ke belum dibayar
         for (const c of cart) {
             const product = products.find(p => p.id === c.productId);
             if (!product) continue;
@@ -1879,24 +1907,130 @@
             }
         }
 
-        const newTask = {
+        const unpaidItem = {
             id: Date.now().toString(),
             date: new Date().toISOString(),
             customer: customerName.trim(),
             items,
             total,
-            status: 'pending', // pending | done
             cashier: currentUser.name
         };
 
+        unpaidSales.push(unpaidItem);
+        
+        // Juga otomatis catat ke task dapur agar bisa dikerjakan
+        const newTask = {
+            id: 'task_' + unpaidItem.id,
+            date: unpaidItem.date,
+            customer: unpaidItem.customer,
+            items,
+            total,
+            status: 'pending',
+            cashier: currentUser.name
+        };
         tasks.push(newTask);
+
         DB.set('products', products);
+        DB.set('unpaidSales', unpaidSales);
         DB.set('tasks', tasks);
         cart = [];
         renderAll();
         populateProductSelect();
-        alert('Pesanan berhasil dicatat dan masuk Task Dapur!');
-        switchPage('pageTask');
+        alert('Penjualan dicatat sebagai "Bayar Nanti" dan masuk Task Dapur!');
+    }
+
+    // Render Daftar Penjualan Belum Dibayar di Page Penjualan
+    function renderUnpaidSales() {
+        const container = document.getElementById('unpaidSalesContainer');
+        if (!container) return;
+        if (unpaidSales.length === 0) {
+            container.innerHTML = '<div class="empty">Tidak ada penjualan tertunda</div>';
+            return;
+        }
+
+        let html = '';
+        const sorted = [...unpaidSales].reverse();
+        sorted.forEach(u => {
+            const itemsStr = u.items.map(i => `${i.name} x${i.qty}`).join(', ');
+            html += `<div class="unpaid-card">
+                <div class="unpaid-header">
+                    <div>
+                        <div class="unpaid-customer"><i class="fas fa-user-circle"></i> ${u.customer}</div>
+                        <div class="unpaid-time">${formatDate(u.date)} • Kasir: ${u.cashier}</div>
+                    </div>
+                    <span class="badge badge-yellow">Belum Dibayar</span>
+                </div>
+                <div class="unpaid-items-list">${itemsStr}</div>
+                <div class="unpaid-footer">
+                    <div class="unpaid-total">Total: Rp ${formatNumber(u.total)}</div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-sm btn-accent" onclick="payUnpaid('${u.id}', 'cash')"><i class="fas fa-money-bill-wave"></i> Cash</button>
+                        <button class="btn btn-sm btn-primary" onclick="payUnpaid('${u.id}', 'qris')"><i class="fas fa-qrcode"></i> QRIS</button>
+                        <button class="btn btn-sm btn-danger" onclick="cancelUnpaid('${u.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // Eksekusi Pembayaran dari List Belum Dibayar -> Masuk Riwayat Penjualan
+    function payUnpaid(unpaidId, method) {
+        const item = unpaidSales.find(x => x.id === unpaidId);
+        if (!item) return;
+
+        if (method === 'cash') {
+            const uang = prompt(`Total Tagihan (${item.customer}): Rp ${formatNumber(item.total)}\nUang tunai:`);
+            if (uang === null) return;
+            const received = parseCleanNumber(uang);
+            if (isNaN(received) || received < item.total) { alert('Uang kurang!'); return; }
+            alert(`Kembalian: Rp ${formatNumber(received - item.total)}`);
+        } else {
+            if (!confirm(`Konfirmasi pembayaran QRIS untuk ${item.customer} sebesar Rp ${formatNumber(item.total)}?`)) return;
+        }
+
+        // Pindahkan ke riwayat sales resmi
+        const sale = {
+            id: Date.now().toString(),
+            date: new Date().toISOString(),
+            items: item.items,
+            total: item.total,
+            method: method === 'cash' ? 'Cash' : 'QRIS',
+            cashier: item.cashier
+        };
+        sales.push(sale);
+
+        // Hapus dari list unpaid
+        unpaidSales = unpaidSales.filter(x => x.id !== unpaidId);
+
+        DB.set('sales', sales);
+        DB.set('unpaidSales', unpaidSales);
+        renderAll();
+        alert('Pembayaran berhasil! Transaksi dimasukkan ke Riwayat Penjualan.');
+    }
+
+    // Batalkan penjualan belum dibayar & kembalikan stok
+    function cancelUnpaid(unpaidId) {
+        if (!confirm('Batalkan transaksi ini dan kembalikan stok?')) return;
+        const item = unpaidSales.find(x => x.id === unpaidId);
+        if (item) {
+            item.items.forEach(i => {
+                const prod = products.find(p => p.id === i.productId);
+                if (prod && prod.type !== 'processed') {
+                    prod.stok += i.qty;
+                } else if (prod && prod.type === 'processed' && prod.recipe) {
+                    prod.recipe.forEach(ing => {
+                        const raw = products.find(r => r.id === ing.productId);
+                        if (raw) raw.stok += ing.qty * i.qty;
+                    });
+                }
+            });
+            DB.set('products', products);
+        }
+        unpaidSales = unpaidSales.filter(x => x.id !== unpaidId);
+        DB.set('unpaidSales', unpaidSales);
+        renderAll();
+        alert('Transaksi dibatalkan dan stok dikembalikan.');
     }
 
     // Render Task Dapur
@@ -1913,7 +2047,6 @@
         }
 
         let html = '';
-        // Urutkan dari yang terbaru
         const sorted = [...filtered].reverse();
         sorted.forEach(t => {
             const isDone = t.status === 'done';
@@ -1954,26 +2087,9 @@
 
     function deleteTask(taskId) {
         if (!confirm('Hapus task pesanan ini?')) return;
-        const t = tasks.find(x => x.id === taskId);
-        if (t && t.status === 'pending') {
-            // Jika dihapus saat belum selesai, kembalikan stok
-            t.items.forEach(i => {
-                const prod = products.find(p => p.id === i.productId);
-                if (prod && prod.type !== 'processed') {
-                    prod.stok += i.qty;
-                } else if (prod && prod.type === 'processed' && prod.recipe) {
-                    prod.recipe.forEach(ing => {
-                        const raw = products.find(r => r.id === ing.productId);
-                        if (raw) raw.stok += ing.qty * i.qty;
-                    });
-                }
-            });
-            DB.set('products', products);
-        }
         tasks = tasks.filter(x => x.id !== taskId);
         DB.set('tasks', tasks);
         renderTask();
-        renderStok();
     }
 
     function openTaskModal(taskId = null) {
@@ -2055,7 +2171,7 @@
             }
         } else {
             const newTask = {
-                id: Date.now().toString(),
+                id: 'task_' + Date.now(),
                 date: new Date().toISOString(),
                 customer,
                 items: taskModalItems,
