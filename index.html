@@ -127,14 +127,37 @@
         .btn-sm { padding: 6px 12px; font-size: 0.72rem; border-radius: 10px; }
         .btn-block { width: 100%; justify-content: center; }
 
-        /* ===== TABLES ===== */
+        /* ===== TABLES & RESPONSIVE STACKING ===== */
         .table-wrap {
-            width: 100%; margin-top: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: #ffffff; 
-            overflow-x: auto; overflow-y: visible; position: relative;
+            width: 100%; margin-top: 8px; border-radius: var(--radius-sm); border: none; background: transparent; 
+            overflow-x: visible; overflow-y: visible; position: relative;
         }
-        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; table-layout: fixed; }
-        th, td { padding: 10px 8px; border-bottom: 1px solid var(--bg); text-align: left; word-break: break-word; overflow-wrap: break-word; white-space: normal; vertical-align: middle; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; table-layout: auto; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid var(--bg); text-align: left; vertical-align: middle; }
         th { background: #FAFAFC; font-weight: 700; color: var(--gray); text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; }
+
+        /* Mobile Responsive Table (Card View - No Horizontal Scroll) */
+        @media (max-width: 768px) {
+            .table-wrap table, .table-wrap thead, .table-wrap tbody, .table-wrap th, .table-wrap td, .table-wrap tr {
+                display: block; width: 100%;
+            }
+            .table-wrap thead { display: none; }
+            .table-wrap tr {
+                background: white; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+                margin-bottom: 12px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+                position: relative;
+            }
+            .table-wrap td {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 6px 0; border-bottom: 1px solid var(--bg); text-align: right; word-break: break-word;
+            }
+            .table-wrap td:last-child { border-bottom: none; padding-top: 10px; justify-content: flex-end; }
+            .table-wrap td::before {
+                content: attr(data-label); font-weight: 600; color: var(--gray); font-size: 0.75rem; text-align: left;
+                margin-right: 12px; flex-shrink: 0;
+            }
+            .table-wrap td:last-child::before { display: none; }
+        }
 
         .settings-section.reset-section .header { color: var(--danger); }
         .settings-section.reset-section .body { border-top: 1px solid #fee2e2; }
@@ -157,7 +180,7 @@
             position: fixed; background: white;
             border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); border: 1.5px solid var(--border);
             display: none; flex-direction: column; min-width: 140px; 
-            z-index: 999999; /* Z-Index sangat ekstrem agar di atas segalanya */
+            z-index: 999999;
             overflow: hidden;
             animation: fadeInMenu 0.15s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -343,24 +366,6 @@ input:focus,select:focus,textarea:focus{
   border-color:rgba(0,122,255,.42)!important;
   box-shadow:0 0 0 4px rgba(0,122,255,.08)!important;
 }
-table{border-collapse:separate!important;border-spacing:0 7px!important}
-thead th{
-  position:sticky;
-  top:0;
-  z-index:2;
-  background:rgba(248,249,251,.94)!important;
-  backdrop-filter:blur(12px);
-}
-tbody tr{
-  transition:box-shadow var(--ui-transition),background var(--ui-transition);
-}
-tbody tr:hover{
-  box-shadow:0 6px 18px rgba(0,0,0,.05);
-  background: rgba(0,0,0,0.012);
-}
-tbody td{background:rgba(255,255,255,.72); position:relative;}
-tbody tr td:first-child{border-radius:12px 0 0 12px}
-tbody tr td:last-child{border-radius:0 12px 12px 0}
 
 /* Responsive page containers */
 .container,.content,.main-content,.page-content{
@@ -410,15 +415,6 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
   .toolbar input,
   .toolbar select{
     width:100%!important;
-  }
-  table{
-    min-width:680px;
-  }
-  .table-wrap,.table-responsive,.report-table-wrap{
-    overflow-x:auto!important;
-    overflow-y:visible!important;
-    -webkit-overflow-scrolling:touch;
-    border-radius:14px;
   }
   .modal,.modal-overlay{
     align-items:flex-end!important;
@@ -590,12 +586,6 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
                 <div id="recentSalesContainer">
                     <div class="table-wrap">
                         <table>
-                            <colgroup>
-                                <col style="width: 24%;">
-                                <col style="width: 38%;">
-                                <col style="width: 26%;">
-                                <col style="width: 12%;">
-                            </colgroup>
                             <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th style="text-align:center;">Aksi</th></tr></thead>
                             <tbody id="recentSalesBody"><tr><td colspan="4" class="empty">Belum ada transaksi</td></tr></tbody>
                         </table>
@@ -639,12 +629,6 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
                 </div>
                 <div class="table-wrap table-collapsible" id="productTableWrapper">
                     <table>
-                        <colgroup>
-                            <col style="width: 38%;">
-                            <col style="width: 28%;">
-                            <col style="width: 20%;">
-                            <col style="width: 14%;">
-                        </colgroup>
                         <thead>
                             <tr>
                                 <th>Produk</th>
@@ -743,12 +727,6 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <colgroup>
-                            <col style="width: 24%;">
-                            <col style="width: 40%;">
-                            <col style="width: 24%;">
-                            <col style="width: 12%;">
-                        </colgroup>
                         <thead><tr><th>Waktu</th><th>Item</th><th>Total</th><th style="text-align:center;">Aksi</th></tr></thead>
                         <tbody id="salesReportBody"><tr><td colspan="4" class="empty">Belum ada transaksi</td></tr></tbody>
                     </table>
@@ -768,12 +746,6 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
                     </div>
                     <div class="table-wrap">
                         <table>
-                            <colgroup>
-                                <col style="width: 24%;">
-                                <col style="width: 34%;">
-                                <col style="width: 22%;">
-                                <col style="width: 20%;">
-                            </colgroup>
                             <thead><tr><th>Waktu</th><th>Nama</th><th>Jml</th><th style="text-align:center;">Aksi</th></tr></thead>
                             <tbody id="purchaseReportBody"><tr><td colspan="4" class="empty">Belum ada pembelian</td></tr></tbody>
                         </table>
@@ -815,11 +787,6 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
                     </div>
                     <div class="table-wrap">
                         <table>
-                            <colgroup>
-                                <col style="width: 26%;">
-                                <col style="width: 42%;">
-                                <col style="width: 32%;">
-                            </colgroup>
                             <thead><tr><th>Waktu</th><th>Kategori</th><th style="text-align:center;">Aksi</th></tr></thead>
                             <tbody id="costReportBody"><tr><td colspan="3" class="empty">Belum ada biaya</td></tr></tbody>
                         </table>
@@ -836,11 +803,6 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
                     </div>
                     <div class="table-wrap">
                         <table>
-                            <colgroup>
-                                <col style="width: 44%;">
-                                <col style="width: 24%;">
-                                <col style="width: 32%;">
-                            </colgroup>
                             <thead><tr><th>Nama</th><th>Terjual</th><th>Omset</th></tr></thead>
                             <tbody id="bestSellerBody"><tr><td colspan="3" class="empty">Belum ada data</td></tr></tbody>
                         </table>
@@ -1582,10 +1544,10 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
             else if (p.type === 'processed') typeLabel = '<span class="badge badge-orange">Olahan</span>';
             
             html += `<tr>
-                <td><strong>${p.name}</strong><br><small style="color:var(--gray);">${p.category || '-'}</small></td>
-                <td>Rp ${formatNumber(p.price)}<br><span class="${stokClass}">${stokDisplay}</span></td>
-                <td>${typeLabel}</td>
-                <td style="text-align: center;">
+                <td data-label="Produk"><strong>${p.name}</strong><br><small style="color:var(--gray);">${p.category || '-'}</small></td>
+                <td data-label="Harga/Stok">Rp ${formatNumber(p.price)}<br><span class="${stokClass}">${stokDisplay}</span></td>
+                <td data-label="Jenis">${typeLabel}</td>
+                <td data-label="Aksi" style="text-align: center;">
                     <div class="action-dropdown">
                         <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
                         <div class="action-menu">
@@ -1965,10 +1927,10 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
         recent.forEach(s => {
             const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
             html += `<tr class="report-editable-row">
-                <td>${formatDate(s.date)}</td>
-                <td>${itemsStr}</td>
-                <td>Rp ${formatNumber(s.total)}</td>
-                <td style="text-align: center;">
+                <td data-label="Waktu">${formatDate(s.date)}</td>
+                <td data-label="Item">${itemsStr}</td>
+                <td data-label="Total">Rp ${formatNumber(s.total)}</td>
+                <td data-label="Aksi" style="text-align: center;">
                     <div class="action-dropdown">
                         <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
                         <div class="action-menu">
@@ -2731,10 +2693,10 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
             const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
             total += s.total;
             html += `<tr class="report-editable-row">
-                <td>${formatDate(s.date)}</td>
-                <td>${itemsStr}</td>
-                <td>Rp ${formatNumber(s.total)}</td>
-                <td style="text-align: center;">
+                <td data-label="Waktu">${formatDate(s.date)}</td>
+                <td data-label="Item">${itemsStr}</td>
+                <td data-label="Total">Rp ${formatNumber(s.total)}</td>
+                <td data-label="Aksi" style="text-align: center;">
                     <div class="action-dropdown">
                         <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
                         <div class="action-menu">
@@ -2762,10 +2724,10 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
             total += p.total;
             const unitStr = p.unit || 'pcs';
             html += `<tr class="report-editable-row">
-                <td>${formatDate(p.date)}</td>
-                <td>${p.name}</td>
-                <td>${formatNumber(p.qty)} ${unitStr}</td>
-                <td style="text-align: center;">
+                <td data-label="Waktu">${formatDate(p.date)}</td>
+                <td data-label="Nama">${p.name}</td>
+                <td data-label="Jumlah">${formatNumber(p.qty)} ${unitStr}</td>
+                <td data-label="Aksi" style="text-align: center;">
                     <div class="action-dropdown">
                         <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
                         <div class="action-menu">
@@ -2792,9 +2754,9 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
         filtered.forEach(c => { 
             total += c.amount; 
             html += `<tr class="report-editable-row">
-                <td>${formatDate(c.date)}</td>
-                <td>${c.category}<br><small style="color:var(--gray);">${c.description}</small></td>
-                <td style="text-align: center;">
+                <td data-label="Waktu">${formatDate(c.date)}</td>
+                <td data-label="Kategori">${c.category}<br><small style="color:var(--gray);">${c.description}</small></td>
+                <td data-label="Aksi" style="text-align: center;">
                     <div class="action-dropdown">
                         <button class="action-dots-btn" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
                         <div class="action-menu">
@@ -2843,7 +2805,7 @@ tbody tr td:last-child{border-radius:0 12px 12px 0}
         sorted.forEach(([name, qty]) => {
             const revenue = productRevenue[name] || 0;
             const unit = productUnit[name] || 'pcs';
-            html += `<tr><td><strong>${name}</strong></td><td>${formatNumber(qty)} ${unit}</td><td>Rp ${formatNumber(revenue)}</td></tr>`;
+            html += `<tr><td data-label="Nama"><strong>${name}</strong></td><td data-label="Terjual">${formatNumber(qty)} ${unit}</td><td data-label="Omset">Rp ${formatNumber(revenue)}</td></tr>`;
         });
         tbody.innerHTML = html;
     }
