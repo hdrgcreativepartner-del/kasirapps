@@ -1634,7 +1634,7 @@
         let html = '';
         recent.forEach(s => {
             const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
-            html += `<tr>
+            html += `<tr class="report-editable-row">
                 <td>${formatDate(s.date)}</td>
                 <td>${itemsStr}</td>
                 <td>Rp ${formatNumber(s.total)}</td>
@@ -2076,7 +2076,20 @@
     function printNota() {
         const content = document.getElementById('notaContent').innerHTML;
         const win = window.open('', '_blank', 'width=400,height=600');
-        win.document.write(`<html><head><title>Nota</title><style>body{font-family:'Courier New',monospace;font-size:12px;padding:20px;}.nota-header{text-align:center;}.nota-divider{border-top:1px dashed #000;margin:8px 0;}.nota-item{display:flex;justify-content:space-between;padding:2px 0;}.nota-total{display:flex;justify-content:space-between;font-weight:700;margin-top:8px;}.nota-footer{text-align:center;margin-top:12px;}</style></head><body>${content}</body></html>`);
+        win.document.write(`<html><head><title>Nota</title><style>body{font-family:'Courier New',monospace;font-size:12px;padding:20px;}.nota-header{text-align:center;}.nota-divider{border-top:1px dashed #000;margin:8px 0;}.nota-item{display:flex;justify-content:space-between;padding:2px 0;}.nota-total{display:flex;justify-content:space-between;font-weight:700;margin-top:8px;}.nota-footer{text-align:center;margin-top:12px;}
+        /* HDRG REPORT EDIT + APPLE POLISH */
+        .report-editable-row { transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+        .report-editable-row:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.06); }
+        #editReportModal .modal { animation: hdrgModalIn .22s cubic-bezier(.22,.61,.36,1); }
+        @keyframes hdrgModalIn { from { opacity:0; transform:translateY(12px) scale(.98); } to { opacity:1; transform:none; } }
+        #editReportFields { display:grid; gap:10px; }
+        .edit-report-section { padding:12px; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.72); }
+        .edit-report-item { display:grid; grid-template-columns:minmax(0,2fr) 1fr 1.3fr; gap:8px; align-items:end; padding:10px 0; border-bottom:1px solid var(--bg); }
+        .edit-report-item:last-child { border-bottom:0; }
+        .edit-report-label { display:block; margin-bottom:5px; font-size:.72rem; font-weight:700; color:var(--gray); }
+        .unit-sync-note { margin-top:6px; font-size:.72rem; color:var(--gray); line-height:1.4; }
+        @media(max-width:600px){ .edit-report-item{grid-template-columns:1fr 1fr;} .edit-report-item > div:first-child{grid-column:1/-1;} }
+</style></head><body>${content}</body></html>`);
         win.document.close();
         win.print();
     }
@@ -2166,67 +2179,40 @@
         let sellPrice = parseCleanNumber(document.getElementById('purchaseSellPrice').value) || 0;
         const discount = parseCleanNumber(document.getElementById('purchaseDiscount').value) || 0;
         const type = document.getElementById('purchaseType').value;
-        
-        if (!name || isNaN(qty) || qty < 1) { alert('Nama dan jumlah wajib!'); return; }
+        if (!name || isNaN(qty) || qty <= 0) { alert('Nama dan jumlah wajib!'); return; }
 
         const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
         const selUnit = document.getElementById('purchaseUnit');
         const customUnit = document.getElementById('purchaseUnitCustom');
-        let finalUnit = '';
-        
-        if (selUnit.value === 'lainnya') {
-            finalUnit = customUnit.value.trim();
-        } else if (selUnit.value !== '') {
-            finalUnit = selUnit.value;
-        }
-        
-        if (!finalUnit) {
-            finalUnit = (existing && existing.unit) ? existing.unit : 'pcs';
-        }
+        let finalUnit = selUnit.value === 'lainnya' ? customUnit.value.trim() : selUnit.value;
+        if (!finalUnit) finalUnit = existing?.unit || 'pcs';
 
         if (buyPrice > 0 && margin > 0) {
             sellPrice = buyPrice * (1 + margin / 100);
-            if (discount > 0 && discount <= 100) sellPrice = sellPrice * (1 - discount / 100);
+            if (discount > 0 && discount <= 100) sellPrice *= (1 - discount / 100);
             sellPrice = Math.round(sellPrice);
-        } else {
-            sellPrice = sellPrice > 0 ? sellPrice : 0;
         }
 
         if (existing) {
-            if (existing.type !== 'processed') existing.stok += qty;
-            else { alert('Produk olahan tidak memiliki stok langsung.'); return; }
+            if (existing.type === 'processed') { alert('Produk olahan tidak memiliki stok langsung.'); return; }
+            const converted = convertUnitQty(qty, finalUnit, existing.unit || finalUnit);
+            if (converted === null) {
+                alert(`Satuan pembelian ${finalUnit} tidak dapat dikonversi otomatis ke ${existing.unit || 'pcs'}. Gunakan satuan yang sama atau gram/ons/kg.`);
+                return;
+            }
+            existing.stok = Number(existing.stok || 0) + converted;
             existing.price = sellPrice > 0 ? sellPrice : existing.price;
             existing.category = category || existing.category;
-            existing.unit = finalUnit;
         } else {
-            const newStok = (type === 'processed') ? 0 : qty;
-            const newProduct = {
-                id: Date.now().toString(),
-                name, barcode: '', category, type, unit: finalUnit,
-                price: sellPrice > 0 ? sellPrice : 0,
-                stok: newStok, recipe: []
-            };
-            products.push(newProduct);
+            products.push({ id: Date.now().toString(), name, barcode:'', category, type, unit:finalUnit, price:sellPrice>0?sellPrice:0, stok:type==='processed'?0:qty, recipe:[] });
         }
 
-        purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name, type, qty, unit: finalUnit, total: qty * buyPrice });
-        DB.set('products', products);
-        DB.set('purchases', purchases);
-
-        document.getElementById('purchaseProduct').value = '';
-        document.getElementById('purchaseQty').value = '';
-        document.getElementById('purchasePrice').value = '';
-        document.getElementById('purchaseMargin').value = '';
-        document.getElementById('purchaseSellPrice').value = '';
-        document.getElementById('purchaseDiscount').value = '';
-        document.getElementById('purchaseUnit').value = '';
-        document.getElementById('purchaseUnitCustom').value = '';
-        document.getElementById('purchaseUnitCustom').style.display = 'none';
-
-        renderAll();
-        renderPurchaseHistoryList();
-        populateProductSelect();
-        alert('Pembelian dicatat!');
+        purchases.push({ id: 'purchase_' + Date.now(), date:new Date().toISOString(), name, type, qty, unit:finalUnit, total:qty*buyPrice });
+        DB.set('products', products); DB.set('purchases', purchases);
+        ['purchaseProduct','purchaseQty','purchasePrice','purchaseMargin','purchaseSellPrice','purchaseDiscount','purchaseUnit','purchaseUnitCustom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+        document.getElementById('purchaseUnitCustom').style.display='none';
+        renderAll(); renderPurchaseHistoryList(); populateProductSelect();
+        alert('Pembelian dicatat dan satuan disinkronkan.');
     }
 
     function autoCalculateSellPrice() {
@@ -2246,36 +2232,16 @@
     function editPurchase(id) {
         const p = purchases.find(x => x.id === id);
         if (!p) return;
-        const name = prompt('Edit nama:', p.name); if (name === null) return;
-        const qty = prompt('Edit jumlah:', p.qty); if (qty === null) return;
-        const price = prompt('Edit harga beli:', p.total / p.qty); if (price === null) return;
-        const parsedQty = parseInt(qty);
-        const parsedPrice = parseInt(price);
-        if (isNaN(parsedQty) || parsedQty < 1 || isNaN(parsedPrice) || parsedPrice < 0) { alert('Data tidak valid!'); return; }
-        const prod = products.find(prod => prod.name.toLowerCase() === p.name.toLowerCase());
-        if (prod && prod.type !== 'processed') prod.stok -= p.qty;
-        p.name = name.trim();
-        p.qty = parsedQty;
-        p.total = parsedQty * parsedPrice;
-        p.date = new Date().toISOString();
-        const newProd = products.find(prod => prod.name.toLowerCase() === p.name.toLowerCase());
-        if (newProd && newProd.type !== 'processed') newProd.stok += parsedQty;
-        else if (!newProd) products.push({ id: Date.now().toString(), name: p.name, barcode: '', category: '', type: 'raw', unit: p.unit || 'pcs', price: 0, stok: parsedQty, recipe: [] });
-        DB.set('products', products);
-        DB.set('purchases', purchases);
-        renderAll();
-        renderPurchaseHistoryList();
-        alert('Pembelian diperbarui!');
+        openEditReportModal('purchase', id);
     }
 
     function deletePurchase(id) {
-        if (!confirm('Hapus pembelian?')) return;
+        if (!confirm('Hapus pembelian? Stok yang berasal dari pembelian ini juga akan disesuaikan.')) return;
         const p = purchases.find(x => x.id === id);
-        if (p) { const prod = products.find(prod => prod.name.toLowerCase() === p.name.toLowerCase()); if (prod && prod.type !== 'processed') { prod.stok = Math.max(0, prod.stok - p.qty); DB.set('products', products); } }
+        if (p) applyPurchaseStock(p, -1);
         purchases = purchases.filter(x => x.id !== id);
-        DB.set('purchases', purchases);
-        renderAll();
-        renderPurchaseHistoryList();
+        DB.set('products', products); DB.set('purchases', purchases);
+        renderAll(); renderPurchaseHistoryList();
     }
 
     function renderCostHistoryList() {
@@ -2335,6 +2301,75 @@
         renderCostHistoryList();
     }
 
+    // ===== SATUAN & KONSISTENSI DATA =====
+    const HDRG_MASS_UNITS = { gram: 1, ons: 100, kg: 1000 };
+    function normalizeUnit(unit) {
+        return String(unit || 'pcs').trim().toLowerCase();
+    }
+    function convertUnitQty(qty, fromUnit, toUnit) {
+        const from = normalizeUnit(fromUnit);
+        const to = normalizeUnit(toUnit);
+        if (from === to) return Number(qty);
+        if (HDRG_MASS_UNITS[from] && HDRG_MASS_UNITS[to]) {
+            return Number(qty) * HDRG_MASS_UNITS[from] / HDRG_MASS_UNITS[to];
+        }
+        return null;
+    }
+    function formatQtySmart(qty) {
+        const n = Number(qty);
+        return Number.isInteger(n) ? formatNumber(n) : n.toLocaleString('id-ID', { maximumFractionDigits: 3 });
+    }
+    function applyPurchaseStock(purchase, direction) {
+        const product = products.find(p => p.name.toLowerCase() === String(purchase.name || '').toLowerCase());
+        if (!product || product.type === 'processed') return true;
+        const converted = convertUnitQty(Number(purchase.qty) || 0, purchase.unit || product.unit || 'pcs', product.unit || 'pcs');
+        if (converted === null) {
+            if (normalizeUnit(purchase.unit) !== normalizeUnit(product.unit)) return false;
+            return true;
+        }
+        product.stok = Math.max(0, Number(product.stok) + direction * converted);
+        if (direction > 0 && product.stok < 0) product.stok = 0;
+        return true;
+    }
+    function canApplySaleItems(items) {
+        const needed = {};
+        (items || []).forEach(i => {
+            const product = products.find(p => p.id === i.productId);
+            if (!product) return;
+            if (product.type === 'processed') {
+                (product.recipe || []).forEach(ing => {
+                    needed[ing.productId] = (needed[ing.productId] || 0) + Number(ing.qty || 0) * Number(i.qty || 0);
+                });
+            } else {
+                const key = product.id;
+                needed[key] = (needed[key] || 0) + Number(i.qty || 0);
+            }
+        });
+        return Object.entries(needed).every(([id, qty]) => {
+            const p = products.find(x => x.id === id);
+            return !p || Number(p.stok) >= qty;
+        });
+    }
+    function applySaleStock(items, direction) {
+        (items || []).forEach(i => {
+            const product = products.find(p => p.id === i.productId);
+            if (!product) return;
+            if (product.type === 'processed') {
+                (product.recipe || []).forEach(ing => {
+                    const raw = products.find(r => r.id === ing.productId);
+                    if (raw) raw.stok = Math.max(0, Number(raw.stok) - direction * Number(ing.qty || 0) * Number(i.qty || 0));
+                });
+            } else {
+                product.stok = Math.max(0, Number(product.stok) - direction * Number(i.qty || 0));
+            }
+        });
+    }
+    function toLocalDateTimeInput(iso) {
+        const d = new Date(iso);
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
     function getDateRange(filter) {
         const now = new Date();
         let start, end;
@@ -2359,7 +2394,7 @@
         filtered.forEach(s => {
             const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
             total += s.total;
-            html += `<tr>
+            html += `<tr class="report-editable-row">
                 <td>${formatDate(s.date)}</td>
                 <td>${itemsStr}</td>
                 <td>Rp ${formatNumber(s.total)}</td>
@@ -2387,7 +2422,7 @@
         filtered.forEach(p => {
             total += p.total;
             const unitStr = p.unit || 'pcs';
-            html += `<tr>
+            html += `<tr class="report-editable-row">
                 <td>${formatDate(p.date)}</td>
                 <td>${p.name}</td>
                 <td>${formatNumber(p.qty)} ${unitStr}</td>
@@ -2415,7 +2450,7 @@
         let html = ''; let total = 0;
         filtered.forEach(c => { 
             total += c.amount; 
-            html += `<tr>
+            html += `<tr class="report-editable-row">
                 <td>${formatDate(c.date)}</td>
                 <td>${c.category}<br><small style="color:var(--gray);">${c.description}</small></td>
                 <td style="text-align: right;">
@@ -2476,48 +2511,37 @@
     function openEditReportModal(type, id) {
         document.getElementById('editReportType').value = type;
         document.getElementById('editReportId').value = id;
-        const fieldsContainer = document.getElementById('editReportFields');
-        fieldsContainer.innerHTML = '';
+        const fields = document.getElementById('editReportFields');
+        fields.innerHTML = '';
 
         if (type === 'sales') {
+            const item = sales.find(s => s.id === id); if (!item) return;
             document.getElementById('editReportTitle').textContent = 'Edit Transaksi Penjualan';
-            const item = sales.find(s => s.id === id);
-            if (!item) return;
-            let itemsHtml = '';
-            item.items.forEach((i, idx) => {
-                itemsHtml += `<div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
-                    <input type="text" value="${i.name}" disabled style="flex:2; margin-bottom:0; background:#eee;">
-                    <input type="number" id="editSalesQty_${idx}" value="${i.qty}" min="1" style="flex:1; margin-bottom:0;" placeholder="Jml">
-                    <input type="text" id="editSalesPrice_${idx}" value="${formatNumber(i.price)}" style="flex:1.5; margin-bottom:0;" placeholder="Harga">
-                </div>`;
-            });
-            fieldsContainer.innerHTML = `<label style="font-size:0.8rem; font-weight:600; color:var(--gray);">Daftar Item:</label>${itemsHtml}`;
+            let itemsHtml = item.items.map((i,idx)=>`<div class="edit-report-item">
+                <div><span class="edit-report-label">Produk</span><input type="text" value="${String(i.name).replace(/\"/g,'&quot;')}" disabled></div>
+                <div><span class="edit-report-label">Jumlah (${i.unit || 'pcs'})</span><input type="number" id="editSalesQty_${idx}" value="${i.qty}" min="1"></div>
+                <div><span class="edit-report-label">Harga Satuan</span><input type="text" id="editSalesPrice_${idx}" value="${formatNumber(i.price)}" class="rupiah-input" oninput="formatRupiahInput(this)"></div>
+            </div>`).join('');
+            fields.innerHTML = `<div class="edit-report-section"><label class="edit-report-label">Tanggal & waktu</label><input type="datetime-local" id="editSalesDate" value="${toLocalDateTimeInput(item.date)}"><label class="edit-report-label" style="margin-top:10px">Metode pembayaran</label><select id="editSalesMethod"><option value="Cash">Cash</option><option value="QRIS">QRIS</option></select></div><div class="edit-report-section"><label class="edit-report-label">Item transaksi</label>${itemsHtml}</div>`;
+            document.getElementById('editSalesMethod').value = item.method || 'Cash';
         } else if (type === 'purchase') {
+            const item = purchases.find(p => p.id === id); if (!item) return;
             document.getElementById('editReportTitle').textContent = 'Edit Laporan Pembelian';
-            const item = purchases.find(p => p.id === id);
-            if (!item) return;
-            fieldsContainer.innerHTML = `
-                <label style="font-size:0.8rem; font-weight:600; color:var(--gray);">Nama Barang:</label>
-                <input type="text" id="editPurchaseName" value="${item.name}">
-                <label style="font-size:0.8rem; font-weight:600; color:var(--gray);">Jumlah (${item.unit || 'pcs'}):</label>
-                <input type="number" id="editPurchaseQty" value="${item.qty}" min="1">
-                <label style="font-size:0.8rem; font-weight:600; color:var(--gray);">Total Biaya (Rp):</label>
-                <input type="text" id="editPurchaseTotal" value="${formatNumber(item.total)}" class="rupiah-input" oninput="formatRupiahInput(this)">
-            `;
+            const product = products.find(x => x.name.toLowerCase() === String(item.name).toLowerCase());
+            const currentUnit = item.unit || product?.unit || 'pcs';
+            fields.innerHTML = `<div class="edit-report-section"><label class="edit-report-label">Tanggal & waktu</label><input type="datetime-local" id="editPurchaseDate" value="${toLocalDateTimeInput(item.date)}"></div>
+            <div class="edit-report-section"><label class="edit-report-label">Nama Barang</label><input type="text" id="editPurchaseName" value="${String(item.name).replace(/\"/g,'&quot;')}"><label class="edit-report-label" style="margin-top:10px">Jumlah</label><input type="number" id="editPurchaseQty" value="${item.qty}" min="0.001" step="any"><label class="edit-report-label" style="margin-top:10px">Satuan</label><select id="editPurchaseUnit"><option value="gram">gram</option><option value="ons">Ons</option><option value="kg">Kilogram (kg)</option><option value="ml">Milliliter (ml)</option><option value="liter">Liter</option><option value="pcs">pcs</option><option value="biji">biji</option><option value="pack">pack</option><option value="botol">botol</option><option value="lainnya">Lainnya</option></select><input type="text" id="editPurchaseUnitCustom" placeholder="Satuan custom" style="display:none;margin-top:8px"><div class="unit-sync-note">Satuan gram, ons, dan kg dapat dikonversi otomatis. Satuan custom hanya dapat disinkronkan jika sama.</div></div>
+            <div class="edit-report-section"><label class="edit-report-label">Total Biaya (Rp)</label><input type="text" id="editPurchaseTotal" value="${formatNumber(item.total)}" class="rupiah-input" oninput="formatRupiahInput(this)"></div>`;
+            const unitSel=document.getElementById('editPurchaseUnit'); const custom=document.getElementById('editPurchaseUnitCustom');
+            const standard=['gram','ons','kg','ml','liter','pcs','biji','pack','botol'];
+            if(standard.includes(currentUnit)) unitSel.value=currentUnit; else { unitSel.value='lainnya'; custom.value=currentUnit; custom.style.display='block'; }
+            unitSel.onchange=()=>{ custom.style.display=unitSel.value==='lainnya'?'block':'none'; };
         } else if (type === 'cost') {
+            const item = costs.find(c => c.id === id); if (!item) return;
             document.getElementById('editReportTitle').textContent = 'Edit Laporan Biaya';
-            const item = costs.find(c => c.id === id);
-            if (!item) return;
-            fieldsContainer.innerHTML = `
-                <label style="font-size:0.8rem; font-weight:600; color:var(--gray);">Kategori:</label>
-                <input type="text" id="editCostCategory" value="${item.category}">
-                <label style="font-size:0.8rem; font-weight:600; color:var(--gray);">Deskripsi:</label>
-                <input type="text" id="editCostDesc" value="${item.description}">
-                <label style="font-size:0.8rem; font-weight:600; color:var(--gray);">Jumlah (Rp):</label>
-                <input type="text" id="editCostAmount" value="${formatNumber(item.amount)}" class="rupiah-input" oninput="formatRupiahInput(this)">
-            `;
+            fields.innerHTML = `<div class="edit-report-section"><label class="edit-report-label">Tanggal & waktu</label><input type="datetime-local" id="editCostDate" value="${toLocalDateTimeInput(item.date)}"></div><div class="edit-report-section"><label class="edit-report-label">Kategori</label><input type="text" id="editCostCategory" value="${String(item.category).replace(/\"/g,'&quot;')}"><label class="edit-report-label" style="margin-top:10px">Deskripsi</label><input type="text" id="editCostDesc" value="${String(item.description).replace(/\"/g,'&quot;')}"><label class="edit-report-label" style="margin-top:10px">Jumlah (Rp)</label><input type="text" id="editCostAmount" value="${formatNumber(item.amount)}" class="rupiah-input" oninput="formatRupiahInput(this)"></div>`;
         }
-        document.getElementById('editReportModal').style.display = 'flex';
+        document.getElementById('editReportModal').style.display='flex';
     }
 
     function closeEditReportModal() {
@@ -2529,45 +2553,46 @@
         const id = document.getElementById('editReportId').value;
 
         if (type === 'sales') {
-            const item = sales.find(s => s.id === id);
-            if (!item) return;
-            let newTotal = 0;
-            item.items.forEach((i, idx) => {
-                const q = parseInt(document.getElementById(`editSalesQty_${idx}`).value) || i.qty;
-                const pr = parseCleanNumber(document.getElementById(`editSalesPrice_${idx}`).value) || i.price;
-                i.qty = q;
-                i.price = pr;
-                newTotal += q * pr;
+            const sale = sales.find(s => s.id === id); if (!sale) return;
+            const oldItems = JSON.parse(JSON.stringify(sale.items));
+            applySaleStock(oldItems, -1);
+            const newItems = sale.items.map((i,idx)=>{
+                const q=Number(document.getElementById(`editSalesQty_${idx}`).value);
+                const pr=parseCleanNumber(document.getElementById(`editSalesPrice_${idx}`).value);
+                return {...i, qty:q>0?q:i.qty, price:pr>=0?pr:i.price};
             });
-            item.total = newTotal;
-            DB.set('sales', sales);
+            if (!canApplySaleItems(newItems)) {
+                applySaleStock(oldItems, 1);
+                alert('Perubahan tidak dapat disimpan karena stok tidak mencukupi.'); return;
+            }
+            applySaleStock(newItems, 1);
+            sale.items=newItems; sale.total=newItems.reduce((sum,i)=>sum+i.price*i.qty,0);
+            sale.method=document.getElementById('editSalesMethod').value;
+            const dateVal=document.getElementById('editSalesDate').value; if(dateVal) sale.date=new Date(dateVal).toISOString();
+            DB.set('products',products); DB.set('sales',sales);
         } else if (type === 'purchase') {
-            const item = purchases.find(p => p.id === id);
-            if (!item) return;
-            const newName = document.getElementById('editPurchaseName').value.trim();
-            const newQty = parseInt(document.getElementById('editPurchaseQty').value) || item.qty;
-            const newTotal = parseCleanNumber(document.getElementById('editPurchaseTotal').value);
-            if (!newName || isNaN(newQty) || newQty < 1) { alert('Data tidak valid!'); return; }
-            item.name = newName;
-            item.qty = newQty;
-            item.total = newTotal;
-            DB.set('purchases', purchases);
+            const item=purchases.find(p=>p.id===id); if(!item) return;
+            const old={...item}; applyPurchaseStock(old,-1);
+            const name=document.getElementById('editPurchaseName').value.trim();
+            const qty=Number(document.getElementById('editPurchaseQty').value);
+            const unitSel=document.getElementById('editPurchaseUnit');
+            const unit=unitSel.value==='lainnya'?document.getElementById('editPurchaseUnitCustom').value.trim():unitSel.value;
+            const total=parseCleanNumber(document.getElementById('editPurchaseTotal').value);
+            if(!name||!unit||!Number.isFinite(qty)||qty<=0||!Number.isFinite(total)||total<0){ applyPurchaseStock(old,1); alert('Data pembelian tidak valid.'); return; }
+            const target=products.find(p=>p.name.toLowerCase()===name.toLowerCase());
+            if(target && target.type==='processed'){ applyPurchaseStock(old,1); alert('Produk olahan tidak memiliki stok langsung.'); return; }
+            const converted=target?convertUnitQty(qty,unit,target.unit||unit):qty;
+            if(converted===null){ applyPurchaseStock(old,1); alert(`Satuan ${unit} tidak dapat dikonversi ke ${target.unit}. Gunakan satuan yang sama atau gram/ons/kg.`); return; }
+            if(target){ target.stok=Number(target.stok||0)+converted; } else { products.push({id:Date.now().toString(),name,barcode:'',category:'',type:item.type||'raw',unit,price:0,stok:item.type==='processed'?0:qty,recipe:[]}); }
+            item.name=name; item.qty=qty; item.unit=unit; item.total=total; const dateVal=document.getElementById('editPurchaseDate').value; if(dateVal)item.date=new Date(dateVal).toISOString();
+            DB.set('products',products); DB.set('purchases',purchases);
         } else if (type === 'cost') {
-            const item = costs.find(c => c.id === id);
-            if (!item) return;
-            const newCat = document.getElementById('editCostCategory').value.trim();
-            const newDesc = document.getElementById('editCostDesc').value.trim();
-            const newAmt = parseCleanNumber(document.getElementById('editCostAmount').value);
-            if (!newCat || !newDesc || isNaN(newAmt) || newAmt <= 0) { alert('Data tidak valid!'); return; }
-            item.category = newCat;
-            item.description = newDesc;
-            item.amount = newAmt;
-            DB.set('costs', costs);
+            const item=costs.find(c=>c.id===id); if(!item)return;
+            const cat=document.getElementById('editCostCategory').value.trim(); const desc=document.getElementById('editCostDesc').value.trim(); const amt=parseCleanNumber(document.getElementById('editCostAmount').value);
+            if(!cat||!desc||amt<=0){alert('Data biaya tidak valid.');return;}
+            item.category=cat; item.description=desc; item.amount=amt; const dateVal=document.getElementById('editCostDate').value; if(dateVal)item.date=new Date(dateVal).toISOString(); DB.set('costs',costs);
         }
-
-        closeEditReportModal();
-        renderAll();
-        alert('Laporan berhasil diperbarui!');
+        closeEditReportModal(); renderAll(); renderPurchaseHistoryList(); renderCostHistoryList(); populateProductSelect(); alert('Laporan berhasil diperbarui dan data terkait disinkronkan.');
     }
 
     function deleteReportItem(type, id) {
