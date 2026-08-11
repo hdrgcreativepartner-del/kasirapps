@@ -423,8 +423,8 @@
                     <button class="btn btn-outline btn-sm" onclick="openCategoryModal()"><i class="fas fa-tag"></i></button>
                 </div>
                 <div style="margin-bottom:8px;">
-                    <div class="suggest-container">
-                        <input type="text" id="purchaseProduct" placeholder="Nama barang" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.85rem;" oninput="suggestProduct(this.value)">
+                    <div class="suggest-container" style="position:relative;">
+                        <input type="text" id="purchaseProduct" placeholder="Nama barang (Ketik untuk cari)" style="width:100%; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.85rem;" oninput="suggestProduct(this.value)">
                         <div class="suggest-list" id="productSuggestList" style="display:none; background:white; border:1px solid #ddd; border-radius:0 0 12px 12px; max-height:150px; overflow-y:auto; position:absolute; width:100%; z-index:10;"></div>
                     </div>
                 </div>
@@ -447,7 +447,7 @@
                     </select>
                     <select id="purchaseUnit" style="flex:1; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.85rem;" onchange="togglePurchaseUnitCustom()">
                         <option value="">Pilih Satuan</option>
-                        <option value="gr">gram (gr)</option>
+                        <option value="gram">gram</option>
                         <option value="kg">Kilogram (kg)</option>
                         <option value="ons">Ons</option>
                         <option value="ml">Milliliter (ml)</option>
@@ -635,7 +635,7 @@
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <select id="modalProductUnitSelect" style="flex:2; padding:12px; border:2px solid #e8edf2; border-radius:14px; font-size:0.85rem; margin-bottom:8px;" onchange="toggleUnitCustom()">
                 <option value="">Pilih Satuan</option>
-                <option value="gr">gram (gr)</option>
+                <option value="gram">gram</option>
                 <option value="kg">Kilogram (kg)</option>
                 <option value="ons">Ons</option>
                 <option value="ml">Milliliter (ml)</option>
@@ -1269,7 +1269,7 @@
                 document.getElementById('modalProductBarcode').value = p.barcode || '';
                 document.getElementById('modalProductCategory').value = p.category || '';
                 document.getElementById('modalProductType').value = p.type || 'raw';
-                const unitOptions = ['gr','kg','ons','ml','liter','pcs','biji','pack','botol'];
+                const unitOptions = ['gram','kg','ons','ml','liter','pcs','biji','pack','botol'];
                 if (unitOptions.includes(p.unit)) {
                     document.getElementById('modalProductUnitSelect').value = p.unit;
                 } else if (p.unit) {
@@ -1501,8 +1501,15 @@
 
     document.addEventListener('click', function(e) {
         const container = document.querySelector('.autocomplete-container');
-        if (!container.contains(e.target)) {
-            document.getElementById('autocompleteList').style.display = 'none';
+        if (container && !container.contains(e.target)) {
+            const list = document.getElementById('autocompleteList');
+            if(list) list.style.display = 'none';
+        }
+        
+        const suggestContainer = document.querySelector('.suggest-container');
+        if (suggestContainer && !suggestContainer.contains(e.target)) {
+            const suggestList = document.getElementById('productSuggestList');
+            if(suggestList) suggestList.style.display = 'none';
         }
     });
 
@@ -1582,7 +1589,7 @@
             html += `<div class="cart-item">
                 <div class="info">
                     <div class="name">${c.name}</div>
-                    <div class="meta">${typeLabel} ${recipeLabel} Rp ${formatNumber(c.price)} x ${c.qty} (${unitStr})</div>
+                    <div class="meta">${typeLabel} ${recipeLabel} Rp ${formatNumber(c.price)} x ${c.qty} ${unitStr}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <span style="font-weight:600;">Rp ${formatNumber(subtotal)}</span>
@@ -1600,7 +1607,7 @@
         const recent = [...sales].reverse().slice(0, 5);
         let html = '';
         recent.forEach(s => {
-            const itemsStr = s.items.map(i => `${i.name} ${i.qty} (${i.unit || 'pcs'})`).join(', ');
+            const itemsStr = s.items.map(i => `${i.name} ${i.qty} ${i.unit || 'pcs'}`).join(', ');
             html += `<tr>
                 <td>${formatDate(s.date)}</td>
                 <td>${itemsStr}</td>
@@ -2080,6 +2087,7 @@
         container.innerHTML = html;
     }
 
+    // ====== PERBAIKAN: AUTO-FILL SATUAN ======
     function suggestProduct(query) {
         const list = document.getElementById('productSuggestList');
         if (!query.trim()) { list.style.display = 'none'; return; }
@@ -2093,7 +2101,29 @@
         list.style.display = 'block';
     }
 
-    function selectProductSuggestion(name) { document.getElementById('purchaseProduct').value = name; document.getElementById('productSuggestList').style.display = 'none'; }
+    function selectProductSuggestion(name) { 
+        document.getElementById('purchaseProduct').value = name; 
+        document.getElementById('productSuggestList').style.display = 'none'; 
+        
+        // Auto-fill Kategori, Tipe, dan Satuan saat item diklik!
+        const p = products.find(x => x.name.toLowerCase() === name.toLowerCase());
+        if (p) {
+            if (p.category) document.getElementById('purchaseCategory').value = p.category;
+            if (p.type) document.getElementById('purchaseType').value = p.type;
+            if (p.unit) {
+                const sel = document.getElementById('purchaseUnit');
+                const opts = Array.from(sel.options).map(o => o.value);
+                if (opts.includes(p.unit)) {
+                    sel.value = p.unit;
+                    document.getElementById('purchaseUnitCustom').style.display = 'none';
+                } else {
+                    sel.value = 'lainnya';
+                    document.getElementById('purchaseUnitCustom').value = p.unit;
+                    document.getElementById('purchaseUnitCustom').style.display = 'block';
+                }
+            }
+        }
+    }
 
     function togglePurchaseUnitCustom() {
         const sel = document.getElementById('purchaseUnit');
@@ -2102,13 +2132,7 @@
         else custom.style.display = 'none';
     }
 
-    function getPurchaseUnit() {
-        const sel = document.getElementById('purchaseUnit');
-        const custom = document.getElementById('purchaseUnitCustom');
-        if (sel.value === 'lainnya') return custom.value.trim() || 'pcs';
-        return sel.value || 'pcs';
-    }
-
+    // ====== PERBAIKAN: ADD PURCHASE SAFETY FALLBACK ======
     function addPurchase() {
         if (currentUser.role !== 'owner') return;
         const category = document.getElementById('purchaseCategory').value;
@@ -2119,9 +2143,26 @@
         let sellPrice = parseCleanNumber(document.getElementById('purchaseSellPrice').value) || 0;
         const discount = parseCleanNumber(document.getElementById('purchaseDiscount').value) || 0;
         const type = document.getElementById('purchaseType').value;
-        const unit = getPurchaseUnit();
-
+        
         if (!name || isNaN(qty) || qty < 1) { alert('Nama dan jumlah wajib!'); return; }
+
+        const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
+        
+        // Tentukan Unit dengan Fallback agar tidak overwrite 'pcs' sembarangan
+        const selUnit = document.getElementById('purchaseUnit');
+        const customUnit = document.getElementById('purchaseUnitCustom');
+        let finalUnit = '';
+        
+        if (selUnit.value === 'lainnya') {
+            finalUnit = customUnit.value.trim();
+        } else if (selUnit.value !== '') {
+            finalUnit = selUnit.value;
+        }
+        
+        // Jika form kosong (Pilih Satuan), tetap pakai satuan lama (misal 'gram')
+        if (!finalUnit) {
+            finalUnit = (existing && existing.unit) ? existing.unit : 'pcs';
+        }
 
         if (buyPrice > 0 && margin > 0) {
             sellPrice = buyPrice * (1 + margin / 100);
@@ -2131,28 +2172,28 @@
             sellPrice = sellPrice > 0 ? sellPrice : 0;
         }
 
-        const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
         if (existing) {
             if (existing.type !== 'processed') existing.stok += qty;
             else { alert('Produk olahan tidak memiliki stok langsung.'); return; }
             existing.price = sellPrice > 0 ? sellPrice : existing.price;
             existing.category = category || existing.category;
-            if (unit) existing.unit = unit;
+            existing.unit = finalUnit;
         } else {
             const newStok = (type === 'processed') ? 0 : qty;
             const newProduct = {
                 id: Date.now().toString(),
-                name, barcode: '', category, type, unit,
+                name, barcode: '', category, type, unit: finalUnit,
                 price: sellPrice > 0 ? sellPrice : 0,
                 stok: newStok, recipe: []
             };
             products.push(newProduct);
         }
 
-        purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name, type, qty, unit, total: qty * buyPrice });
+        purchases.push({ id: Date.now().toString(), date: new Date().toISOString(), name, type, qty, unit: finalUnit, total: qty * buyPrice });
         DB.set('products', products);
         DB.set('purchases', purchases);
 
+        // Reset form
         document.getElementById('purchaseProduct').value = '';
         document.getElementById('purchaseQty').value = '';
         document.getElementById('purchasePrice').value = '';
