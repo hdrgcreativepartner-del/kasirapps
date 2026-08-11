@@ -161,16 +161,22 @@
             transform: translateY(0) scale(1);
         }
 
-        /* ===== CARDS ===== */
+        /* ===== CARDS & CONSISTENT LEFT-ALIGNED HEADERS ===== */
         .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 18px; box-shadow: var(--shadow); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.03); transition: var(--transition); }
         .card:hover { box-shadow: 0 14px 40px rgba(0,0,0,0.06); }
-        .card-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; letter-spacing: -0.3px; color: var(--text); }
+        .card-title { 
+            font-weight: 700; font-size: 1.1rem; margin-bottom: 16px; 
+            display: flex; align-items: center; justify-content: flex-start; 
+            flex-wrap: wrap; gap: 12px; letter-spacing: -0.3px; color: var(--text); 
+        }
         .card-title i { margin-right: 8px; color: var(--primary); }
 
         /* ===== FLEX & INPUT ===== */
         .flex { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         .btn { padding: 10px 16px; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; transition: var(--transition); font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
         .btn:active { transform: scale(0.96); }
+        .btn i { color: white !important; }
+        .btn-outline i { color: var(--primary) !important; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 6px 16px rgba(0,122,255,0.25); }
         .btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
@@ -578,7 +584,7 @@ input:focus,select:focus,textarea:focus{
                         </select>
                         <input type="number" id="qtyInput" value="1" min="1" placeholder="Jumlah" oninput="syncQtyDropdown()">
                     </div>
-                    <button class="btn btn-primary" onclick="addToCart()"><i class="fas fa-plus" style="color: white !important;"></i> Tambah</button>
+                    <button class="btn btn-primary" onclick="addToCart()"><i class="fas fa-plus"></i> Tambah</button>
                 </div>
                 <div style="max-height:200px; overflow-y:auto; border:1.5px solid var(--bg); border-radius:var(--radius-sm); padding:6px 10px; background: #fafafa;">
                     <div id="cartItems"><div class="empty">Keranjang kosong</div></div>
@@ -623,8 +629,9 @@ input:focus,select:focus,textarea:focus{
         <!-- TASK / DAPUR -->
         <div id="pageTask" class="page">
             <div class="card">
-                <div class="card-title"><i class="fas fa-tasks"></i> Task Pesanan (Dapur)
-                    <button class="btn btn-primary btn-sm" onclick="openTaskModal()"><i class="fas fa-plus" style="color: white !important;"></i> Pesanan Manual</button>
+                <div class="card-title">
+                    <span><i class="fas fa-tasks"></i> Task Pesanan (Dapur)</span>
+                    <button class="btn btn-primary btn-sm" onclick="openTaskModal()"><i class="fas fa-plus"></i> Pesanan Manual</button>
                 </div>
                 <div class="toggle-group" id="taskStatusToggle" style="margin-bottom:14px;">
                     <button class="active" data-status="all"><i class="fas fa-layer-group"></i> Semua</button>
@@ -642,10 +649,10 @@ input:focus,select:focus,textarea:focus{
             <div class="card" id="productManagementCard">
                 <div class="card-title">
                     <span><i class="fas fa-boxes"></i> Manajemen Produk & Stok</span>
-                    <div style="display:flex; gap:6px; align-items:center;">
+                    <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
                         <button class="btn btn-outline btn-sm" onclick="toggleStockViewMode()" id="stockViewModeBtn">Versi Ringkas</button>
                         <button class="btn-minimize" onclick="toggleProductTable()" id="minimizeBtn" title="Minimalkan tabel"><i class="fas fa-chevron-up"></i></button>
-                        <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus" style="color: white !important;"></i> Tambah</button>
+                        <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i> Tambah</button>
                     </div>
                 </div>
                 <div class="toggle-group" id="stokTypeToggle">
@@ -678,7 +685,7 @@ input:focus,select:focus,textarea:focus{
                     <select id="purchaseCategory" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                         <option value="">-- Kategori --</option>
                     </select>
-                    <button class="btn btn-outline btn-sm" onclick="openCategoryModal()"><i class="fas fa-tag"></i></button>
+                    <button class="btn btn-outline btn-sm" onclick="openCategoryModal()"><i class="fas fa-tag"></i> Kategori</button>
                 </div>
                 <div style="margin-bottom:8px;">
                     <div class="suggest-container" style="position:relative;">
@@ -686,24 +693,14 @@ input:focus,select:focus,textarea:focus{
                         <div class="suggest-list" id="productSuggestList" style="display:none; background:white; border:1.5px solid var(--border); border-radius:0 0 var(--radius-sm) var(--radius-sm); max-height:150px; overflow-y:auto; position:absolute; width:100%; z-index:10;"></div>
                     </div>
                 </div>
-                <div class="flex" style="margin-bottom:8px;">
-                    <input type="text" id="purchaseQty" placeholder="Jumlah" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
-                    <input type="text" id="purchasePrice" placeholder="Harga Beli" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
-                </div>
-                <div class="flex" style="margin-bottom:8px;">
-                    <input type="text" id="purchaseMargin" placeholder="Untung %" class="rupiah-input" oninput="formatRupiahInput(this); autoCalculateSellPrice();" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
-                    <input type="text" id="purchaseSellPrice" placeholder="Harga Jual" class="rupiah-input" oninput="formatRupiahInput(this); manualSellPrice();" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
-                </div>
-                <div style="margin-bottom:8px;">
-                    <input type="text" id="purchaseDiscount" placeholder="Diskon %" class="rupiah-input" oninput="formatRupiahInput(this); autoCalculateSellPrice();" style="width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
-                </div>
+                <!-- Satuan & Jenis dipindah ke Awal Input Pembelian -->
                 <div class="flex" style="margin-bottom:8px;">
                     <select id="purchaseType" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                         <option value="raw">Bahan Baku</option>
                         <option value="finished">Produk Jadi</option>
                         <option value="processed">Produk Olahan</option>
                     </select>
-                    <select id="purchaseUnit" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);" onchange="togglePurchaseUnitCustom()">
+                    <select id="purchaseUnit" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);" onchange="togglePurchaseUnitCustom(); updatePricePlaceholder();">
                         <option value="">Pilih Satuan</option>
                         <option value="gram">gram</option>
                         <option value="kg">Kilogram (kg)</option>
@@ -716,7 +713,18 @@ input:focus,select:focus,textarea:focus{
                         <option value="botol">Botol</option>
                         <option value="lainnya">Lainnya</option>
                     </select>
-                    <input type="text" id="purchaseUnitCustom" placeholder="Satuan custom" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; display:none; background: var(--bg);">
+                    <input type="text" id="purchaseUnitCustom" placeholder="Satuan custom" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; display:none; background: var(--bg);" oninput="updatePricePlaceholder()">
+                </div>
+                <div class="flex" style="margin-bottom:8px;">
+                    <input type="text" id="purchaseQty" placeholder="Jumlah" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
+                    <input type="text" id="purchasePrice" placeholder="Harga Beli (Rp/satuan)" class="rupiah-input" oninput="formatRupiahInput(this)" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
+                </div>
+                <div class="flex" style="margin-bottom:8px;">
+                    <input type="text" id="purchaseMargin" placeholder="Untung %" class="rupiah-input" oninput="formatRupiahInput(this); autoCalculateSellPrice();" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
+                    <input type="text" id="purchaseSellPrice" placeholder="Harga Jual" class="rupiah-input" oninput="formatRupiahInput(this); manualSellPrice();" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
+                </div>
+                <div style="margin-bottom:8px;">
+                    <input type="text" id="purchaseDiscount" placeholder="Diskon %" class="rupiah-input" oninput="formatRupiahInput(this); autoCalculateSellPrice();" style="width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                 </div>
                 <button class="btn btn-primary btn-block" onclick="addPurchase()"><i class="fas fa-save"></i> Catat Pembelian</button>
                 <div style="margin-top:12px;">
@@ -749,7 +757,7 @@ input:focus,select:focus,textarea:focus{
             <div class="card">
                 <div class="card-title">
                     <span><i class="fas fa-chart-bar"></i> Laporan Penjualan</span>
-                    <div style="display:flex; gap:6px; align-items:center;">
+                    <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
                         <button class="btn btn-success btn-sm" onclick="exportSales()"><i class="fas fa-file-excel"></i></button>
                         <button class="btn-minimize" onclick="toggleReportSection(this, 'salesReportWrapper')"><i class="fas fa-chevron-up"></i></button>
                     </div>
@@ -777,7 +785,7 @@ input:focus,select:focus,textarea:focus{
                 <div class="card">
                     <div class="card-title">
                         <span><i class="fas fa-shopping-cart"></i> Laporan Pembelian</span>
-                        <div style="display:flex; gap:6px; align-items:center;">
+                        <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
                             <button class="btn btn-success btn-sm" onclick="exportPurchases()"><i class="fas fa-file-excel"></i></button>
                             <button class="btn-minimize" onclick="toggleReportSection(this, 'purchaseReportWrapper')"><i class="fas fa-chevron-up"></i></button>
                         </div>
@@ -804,7 +812,7 @@ input:focus,select:focus,textarea:focus{
                 <div class="card">
                     <div class="card-title">
                         <span><i class="fas fa-wallet"></i> Laporan Keuangan</span>
-                        <div style="display:flex; gap:6px; align-items:center;">
+                        <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
                             <button class="btn btn-success btn-sm" onclick="exportFinancial()"><i class="fas fa-file-excel"></i></button>
                             <button class="btn-minimize" onclick="toggleReportSection(this, 'financialReportWrapper')"><i class="fas fa-chevron-up"></i></button>
                         </div>
@@ -834,7 +842,7 @@ input:focus,select:focus,textarea:focus{
                 <div class="card">
                     <div class="card-title">
                         <span><i class="fas fa-file-invoice-dollar"></i> Laporan Biaya</span>
-                        <div style="display:flex; gap:6px; align-items:center;">
+                        <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
                             <button class="btn btn-success btn-sm" onclick="exportCosts()"><i class="fas fa-file-excel"></i></button>
                             <button class="btn-minimize" onclick="toggleReportSection(this, 'costReportWrapper')"><i class="fas fa-chevron-up"></i></button>
                         </div>
@@ -861,7 +869,7 @@ input:focus,select:focus,textarea:focus{
                 <div class="card">
                     <div class="card-title">
                         <span><i class="fas fa-trophy"></i> Best Seller</span>
-                        <button class="btn-minimize" onclick="toggleReportSection(this, 'bestReportWrapper')"><i class="fas fa-chevron-up"></i></button>
+                        <button class="btn-minimize" onclick="toggleReportSection(this, 'bestReportWrapper')" style="margin-left:auto;"><i class="fas fa-chevron-up"></i></button>
                     </div>
                     <div class="table-collapsible" id="bestReportWrapper">
                         <div class="flex" style="margin-bottom:10px;">
@@ -936,7 +944,7 @@ input:focus,select:focus,textarea:focus{
                     <option value="">-- Pilih Bahan Baku --</option>
                 </select>
                 <input type="number" id="modalRecipeQty" placeholder="Jumlah" min="1" value="1" style="flex:1; padding:10px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
-                <button class="btn btn-primary btn-sm" onclick="addModalRecipe()"><i class="fas fa-plus" style="color: white !important;"></i></button>
+                <button class="btn btn-primary btn-sm" onclick="addModalRecipe()"><i class="fas fa-plus"></i></button>
             </div>
             <div style="font-size:0.7rem; color:var(--gray);">* Satuan mengikuti satuan bahan baku yang dipilih.</div>
         </div>
@@ -981,7 +989,7 @@ input:focus,select:focus,textarea:focus{
         </select>
         <div class="flex" style="margin-bottom:8px;">
             <input type="number" id="taskItemQty" placeholder="Jumlah" min="1" value="1" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm);">
-            <button class="btn btn-primary" onclick="addTaskItem()"><i class="fas fa-plus" style="color: white !important;"></i> Tambah Item</button>
+            <button class="btn btn-primary" onclick="addTaskItem()"><i class="fas fa-plus"></i> Tambah Item</button>
         </div>
         <div style="max-height:120px; overflow-y:auto; border:1.5px solid var(--bg); border-radius:var(--radius-sm); padding:6px; margin-bottom:8px; background: #fafafa;">
             <div id="taskItemList"><div class="empty">Belum ada item pesanan</div></div>
@@ -1002,7 +1010,7 @@ input:focus,select:focus,textarea:focus{
         </div>
         <div class="btn-row">
             <button class="btn btn-outline" onclick="closeCategoryModal()">Tutup</button>
-            <button class="btn btn-primary" onclick="addCategory()"><i class="fas fa-plus" style="color: white !important;"></i> Tambah</button>
+            <button class="btn btn-primary" onclick="addCategory()"><i class="fas fa-plus"></i> Tambah</button>
         </div>
     </div>
 </div>
@@ -1035,7 +1043,7 @@ input:focus,select:focus,textarea:focus{
                 <option value="">-- Pilih Bahan Baku --</option>
             </select>
             <input type="number" id="recipeQty" placeholder="Jumlah" min="1" value="1" style="flex:1; padding:10px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
-            <button class="btn btn-primary btn-sm" onclick="addRecipeIngredient()"><i class="fas fa-plus" style="color: white !important;"></i></button>
+            <button class="btn btn-primary btn-sm" onclick="addRecipeIngredient()"><i class="fas fa-plus"></i></button>
         </div>
         <div style="font-size:0.7rem; color:var(--gray); margin-bottom:8px;">* Satuan mengikuti satuan bahan baku yang dipilih.</div>
         <div class="btn-row">
@@ -1285,6 +1293,7 @@ input:focus,select:focus,textarea:focus{
         renderTask();
         renderLaporan();
         document.getElementById('purchaseUnit').addEventListener('change', togglePurchaseUnitCustom);
+        updatePricePlaceholder();
     }
 
     function setupToggles() {
@@ -1567,6 +1576,22 @@ input:focus,select:focus,textarea:focus{
         const custom = document.getElementById('modalProductUnitCustom');
         if (sel.value === 'lainnya') return custom.value.trim() || 'pcs';
         return sel.value || 'pcs';
+    }
+
+    function getPurchaseUnitValue() {
+        const sel = document.getElementById('purchaseUnit');
+        const custom = document.getElementById('purchaseUnitCustom');
+        if (!sel) return 'pcs';
+        if (sel.value === 'lainnya') return custom.value.trim() || 'pcs';
+        return sel.value || 'pcs';
+    }
+
+    function updatePricePlaceholder() {
+        const unit = getPurchaseUnitValue();
+        const priceInput = document.getElementById('purchasePrice');
+        if (priceInput) {
+            priceInput.placeholder = `Harga Beli (Rp/${unit})`;
+        }
     }
 
     function populateProductSelect() {
@@ -2624,6 +2649,7 @@ input:focus,select:focus,textarea:focus{
                     document.getElementById('purchaseUnitCustom').value = p.unit;
                     document.getElementById('purchaseUnitCustom').style.display = 'block';
                 }
+                updatePricePlaceholder();
             }
         }
     }
@@ -2633,6 +2659,7 @@ input:focus,select:focus,textarea:focus{
         const custom = document.getElementById('purchaseUnitCustom');
         if (sel.value === 'lainnya') custom.style.display = 'block';
         else custom.style.display = 'none';
+        updatePricePlaceholder();
     }
 
     function addPurchase() {
@@ -2647,11 +2674,12 @@ input:focus,select:focus,textarea:focus{
         const type = document.getElementById('purchaseType').value;
         if (!name || isNaN(qty) || qty <= 0) { alert('Nama dan jumlah wajib!'); return; }
 
-        const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
         const selUnit = document.getElementById('purchaseUnit');
         const customUnit = document.getElementById('purchaseUnitCustom');
         let finalUnit = selUnit.value === 'lainnya' ? customUnit.value.trim() : selUnit.value;
-        if (!finalUnit) finalUnit = existing?.unit || 'pcs';
+        if (!finalUnit) finalUnit = 'pcs';
+
+        const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
 
         if (buyPrice > 0 && margin > 0) {
             sellPrice = buyPrice * (1 + margin / 100);
@@ -2677,6 +2705,7 @@ input:focus,select:focus,textarea:focus{
         DB.set('products', products); DB.set('purchases', purchases);
         ['purchaseProduct','purchaseQty','purchasePrice','purchaseMargin','purchaseSellPrice','purchaseDiscount','purchaseUnit','purchaseUnitCustom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
         document.getElementById('purchaseUnitCustom').style.display='none';
+        updatePricePlaceholder();
         renderAll(); renderPurchaseHistoryList(); populateProductSelect();
         alert('Pembelian dicatat dan satuan disinkronkan.');
     }
