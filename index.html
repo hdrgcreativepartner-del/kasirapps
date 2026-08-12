@@ -695,7 +695,6 @@ input:focus,select:focus,textarea:focus{
                     </div>
                 </div>
                 
-                <!-- SATUAN & JENIS DI AWAL INPUT PEMBELIAN -->
                 <div class="flex" style="margin-bottom:8px;">
                     <select id="purchaseType" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
                         <option value="raw">Bahan Baku</option>
@@ -767,6 +766,7 @@ input:focus,select:focus,textarea:focus{
                 </div>
                 <div class="table-collapsible" id="salesReportWrapper">
                     <div class="flex" style="margin-bottom:10px;">
+                        <button class="btn btn-outline btn-sm" onclick="setSalesFilter('all')">Semua</button>
                         <button class="btn btn-outline btn-sm" onclick="setSalesFilter('today')">Hari Ini</button>
                         <button class="btn btn-outline btn-sm" onclick="setSalesFilter('week')">Minggu</button>
                         <button class="btn btn-outline btn-sm" onclick="setSalesFilter('month')">Bulan</button>
@@ -795,6 +795,7 @@ input:focus,select:focus,textarea:focus{
                     </div>
                     <div class="table-collapsible" id="purchaseReportWrapper">
                         <div class="flex" style="margin-bottom:10px;">
+                            <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('all')">Semua</button>
                             <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('today')">Hari Ini</button>
                             <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('week')">Minggu</button>
                             <button class="btn btn-outline btn-sm" onclick="setPurchaseFilter('month')">Bulan</button>
@@ -822,6 +823,7 @@ input:focus,select:focus,textarea:focus{
                     </div>
                     <div class="table-collapsible" id="financialReportWrapper">
                         <div class="flex" style="margin-bottom:10px;">
+                            <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('all')">Semua</button>
                             <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('today')">Hari Ini</button>
                             <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('week')">Minggu</button>
                             <button class="btn btn-outline btn-sm" onclick="setFinancialFilter('month')">Bulan</button>
@@ -852,6 +854,7 @@ input:focus,select:focus,textarea:focus{
                     </div>
                     <div class="table-collapsible" id="costReportWrapper">
                         <div class="flex" style="margin-bottom:10px;">
+                            <button class="btn btn-outline btn-sm" onclick="setCostFilter('all')">Semua</button>
                             <button class="btn btn-outline btn-sm" onclick="setCostFilter('today')">Hari Ini</button>
                             <button class="btn btn-outline btn-sm" onclick="setCostFilter('week')">Minggu</button>
                             <button class="btn btn-outline btn-sm" onclick="setCostFilter('month')">Bulan</button>
@@ -876,6 +879,7 @@ input:focus,select:focus,textarea:focus{
                     </div>
                     <div class="table-collapsible" id="bestReportWrapper">
                         <div class="flex" style="margin-bottom:10px;">
+                            <button class="btn btn-outline btn-sm" onclick="setBestFilter('all')">Semua</button>
                             <button class="btn btn-outline btn-sm" onclick="setBestFilter('today')">Hari Ini</button>
                             <button class="btn btn-outline btn-sm" onclick="setBestFilter('week')">Minggu</button>
                             <button class="btn btn-outline btn-sm" onclick="setBestFilter('month')">Bulan</button>
@@ -973,10 +977,11 @@ input:focus,select:focus,textarea:focus{
     <div class="modal" style="max-width:450px;">
         <h3><i class="fas fa-receipt"></i> Nota Penjualan</h3>
         <div id="notaContent" class="nota-container"></div>
-        <div class="nota-actions" style="display:flex; gap:10px; margin-top:16px;">
-            <button class="btn btn-primary" onclick="printNota()"><i class="fas fa-print" style="color: white !important;"></i> Print</button>
-            <button class="btn btn-accent" onclick="shareNotaWA()"><i class="fab fa-whatsapp" style="color: white !important;"></i> WA</button>
-            <button class="btn btn-outline" onclick="closeNotaModal()">Tutup</button>
+        <div class="nota-actions" style="display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;">
+            <button class="btn btn-primary" style="flex:1;" onclick="printNota()"><i class="fas fa-print" style="color: white !important;"></i> Print</button>
+            <button class="btn btn-success" style="flex:1;" onclick="printBluetoothNota()"><i class="fab fa-bluetooth-b" style="color: white !important;"></i> BT Print</button>
+            <button class="btn btn-accent" style="flex:1;" onclick="shareNotaWA()"><i class="fab fa-whatsapp" style="color: white !important;"></i> WA</button>
+            <button class="btn btn-outline" style="flex:1;" onclick="closeNotaModal()">Tutup</button>
         </div>
     </div>
 </div>
@@ -1167,11 +1172,11 @@ input:focus,select:focus,textarea:focus{
     let cart = [];
 
     let currentUser = { role: 'owner' };
-    let salesFilter = 'today';
-    let purchaseFilter = 'today';
-    let costFilter = 'today';
-    let financialFilter = 'today';
-    let bestFilter = 'today';
+    let salesFilter = 'all';
+    let purchaseFilter = 'all';
+    let costFilter = 'all';
+    let financialFilter = 'all';
+    let bestFilter = 'all';
     let currentTheme = DB.get('theme', { primary: '#007AFF', light: '#5AC8FA', name: 'blue' });
     let currentNotaSale = null;
     let currentTypeFilter = 'all';
@@ -2582,6 +2587,105 @@ input:focus,select:focus,textarea:focus{
         win.print();
     }
 
+    async function printBluetoothNota() {
+        if (!currentNotaSale) return;
+        if (!navigator.bluetooth) {
+            alert('Web Bluetooth tidak didukung pada browser ini. Gunakan Chrome di Android atau browser yang mendukung Web Bluetooth.');
+            return;
+        }
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [
+                    '000018f0-0000-1000-8000-00805f9b34fb',
+                    '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+                    'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+                    '0000ff00-0000-1000-8000-00805f9b34fb'
+                ]
+            });
+            const server = await device.gatt.connect();
+            const services = await server.getPrimaryServices();
+            let targetCharacteristic = null;
+            for (const service of services) {
+                const characteristics = await service.getCharacteristics();
+                for (const characteristic of characteristics) {
+                    if (characteristic.properties.write || characteristic.properties.writeWithoutResponse) {
+                        targetCharacteristic = characteristic;
+                        break;
+                    }
+                }
+                if (targetCharacteristic) break;
+            }
+            if (!targetCharacteristic) {
+                alert('Tidak ditemukan karakteristik printer Bluetooth yang dapat ditulisi.');
+                return;
+            }
+
+            const profileName = profile.name || storeData.name || 'Toko';
+            const address = profile.address || '';
+            const phone = profile.phone || '';
+            const social = profile.social || '';
+
+            let encoder = new TextEncoder();
+            let commands = [];
+
+            // ESC/POS commands
+            commands.push(new Uint8Array([0x1B, 0x40])); // Init
+            commands.push(new Uint8Array([0x1B, 0x61, 0x01])); // Align center
+            commands.push(new Uint8Array([0x1B, 0x45, 0x01])); // Bold on
+            commands.push(encoder.encode(profileName + '\n'));
+            commands.push(new Uint8Array([0x1B, 0x45, 0x00])); // Bold off
+            if (address) commands.push(encoder.encode(address + '\n'));
+            if (phone) commands.push(encoder.encode('Telp: ' + phone + '\n'));
+            if (social) commands.push(encoder.encode(social + '\n'));
+            commands.push(encoder.encode('--------------------------------\n'));
+
+            // Align left
+            commands.push(new Uint8Array([0x1B, 0x61, 0x00]));
+            commands.push(encoder.encode(formatDate(currentNotaSale.date) + ' | ' + currentNotaSale.cashier + '\n'));
+            commands.push(encoder.encode('--------------------------------\n'));
+
+            currentNotaSale.items.forEach(i => {
+                let line = `${i.name} (${i.qty} ${i.unit || 'pcs'})\n  Rp ${formatNumber(i.price * i.qty)}\n`;
+                commands.push(encoder.encode(line));
+            });
+
+            commands.push(encoder.encode('--------------------------------\n'));
+            // Align center for total
+            commands.push(new Uint8Array([0x1B, 0x61, 0x01]));
+            commands.push(new Uint8Array([0x1B, 0x45, 0x01]));
+            commands.push(encoder.encode(`TOTAL: Rp ${formatNumber(currentNotaSale.total)}\n`));
+            commands.push(new Uint8Array([0x1B, 0x45, 0x00]));
+            commands.push(encoder.encode(`Metode: ${currentNotaSale.method}\n`));
+            commands.push(encoder.encode('--------------------------------\n'));
+            commands.push(encoder.encode('Terima Kasih!\n\n\n'));
+
+            let totalLength = commands.reduce((sum, arr) => sum + arr.length, 0);
+            let payload = new Uint8Array(totalLength);
+            let offset = 0;
+            for (let arr of commands) {
+                payload.set(arr, offset);
+                offset += arr.length;
+            }
+
+            const CHUNK_SIZE = 512;
+            for (let i = 0; i < payload.length; i += CHUNK_SIZE) {
+                let chunk = payload.slice(i, i + CHUNK_SIZE);
+                if (targetCharacteristic.properties.writeWithoutResponse) {
+                    await targetCharacteristic.writeValueWithoutResponse(chunk);
+                } else {
+                    await targetCharacteristic.writeValue(chunk);
+                }
+            }
+            alert('✅ Berhasil mencetak nota ke printer Bluetooth!');
+        } catch (err) {
+            console.error('Bluetooth print error:', err);
+            if (err.name !== 'NotFoundError') {
+                alert('Gagal mencetak: ' + (err.message || err));
+            }
+        }
+    }
+
     function shareNotaWA() {
         if (!currentNotaSale) return;
         const profileName = profile.name || storeData.name || 'Toko';
@@ -2879,6 +2983,7 @@ input:focus,select:focus,textarea:focus{
         if (filter === 'today') { start = new Date(now.getFullYear(), now.getMonth(), now.getDate()); end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1); }
         else if (filter === 'week') { const day = now.getDay(); const diff = now.getDate() - day + (day === 0 ? -6 : 1); start = new Date(now.setDate(diff)); start.setHours(0, 0, 0, 0); end = new Date(start); end.setDate(end.getDate() + 7); }
         else if (filter === 'month') { start = new Date(now.getFullYear(), now.getMonth(), 1); end = new Date(now.getFullYear(), now.getMonth() + 1, 1); }
+        else if (filter === 'all' || !filter) { start = new Date(2000, 0, 1); end = new Date(2100, 0, 1); }
         return { start, end };
     }
 
