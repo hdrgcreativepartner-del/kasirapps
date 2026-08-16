@@ -6,7 +6,6 @@
     <title>HDRG Kasir Apps</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<!-- ========== BARCODE SCANNER (IIFE) ========== -->
 <script>
 (function () {
     'use strict';
@@ -544,7 +543,6 @@
         requestMedianBarcodeScan(handleScannedPurchaseBarcode);
     };
 
-    // ===== PERBAIKAN: scan barcode di penjualan TIDAK LANGSUNG TAMBAH KERANJANG =====
     window.scanBarcodeForSale = function () {
         requestMedianBarcodeScan(function (barcode) {
             const product = findProductByBarcode(barcode);
@@ -557,31 +555,37 @@
                 return;
             }
 
-            // Pilih produk di dropdown
+            // Hasil scan hanya MEMILIH produk. Jangan langsung memasukkannya ke keranjang.
             const sel = document.getElementById('productSelect');
             if (sel) {
                 sel.value = product.id;
+                // Jika option belum tersedia karena halaman baru dirender, tambahkan sementara.
+                if (sel.value !== product.id) {
+                    const opt = document.createElement('option');
+                    opt.value = product.id;
+                    opt.textContent = product.name;
+                    sel.appendChild(opt);
+                    sel.value = product.id;
+                }
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
-            // Set qty ke 1 dan fokus ke input jumlah
             const qtyInput = document.getElementById('qtyInput');
+            const qtySelect = document.getElementById('qtySelect');
             if (qtyInput) {
                 qtyInput.value = '1';
-                document.getElementById('qtySelect').value = '1';
+                if (qtySelect) qtySelect.value = '1';
                 qtyInput.focus();
                 qtyInput.select();
             }
 
-            // Kosongkan search field
             const search = document.getElementById('searchProduct');
             if (search) {
                 search.value = '';
                 search.blur();
             }
 
-            showScanToast(
-                '✓ ' + product.name + ' ditemukan — atur jumlah lalu tambah'
-            );
+            showScanToast('✓ ' + product.name + ' dipilih — atur jumlah lalu tekan Tambah');
         });
     };
 
@@ -2723,7 +2727,56 @@ input:focus,select:focus,textarea:focus{
         renderCart();
     }
 
-    function removeCart(idx) { cart.splice(idx, 1); renderCart(); }
+    function removeCart(idx) {
+        if (idx < 0 || idx >= cart.length) return;
+        closeActiveMenu();
+        cart.splice(idx, 1);
+        renderCart();
+    }
+
+    function canSetCartQty(item, qty) {
+        qty = Number(qty);
+        if (!item || !Number.isFinite(qty) || qty < 1) return false;
+        const p = products.find(x => x.id === item.productId);
+        if (!p) return false;
+
+        if (p.type === 'processed') {
+            if (p.recipe && p.recipe.length) {
+                for (const ing of p.recipe) {
+                    const raw = products.find(r => r.id === ing.productId);
+                    if (!raw) return false;
+                    const needed = Number(ing.qty) * qty;
+                    if (Number(raw.stok || 0) < needed) return false;
+                }
+            }
+        } else if (Number(p.stok || 0) < qty) {
+            return false;
+        }
+        return true;
+    }
+
+    function editCartQty(idx) {
+        closeActiveMenu();
+        const item = cart[idx];
+        if (!item) return;
+
+        const rawValue = prompt('Edit jumlah ' + item.name + ':', String(item.qty));
+        if (rawValue === null) return;
+
+        const qty = Number(String(rawValue).replace(/[^0-9.]/g, ''));
+        if (!Number.isFinite(qty) || qty < 1 || !Number.isInteger(qty)) {
+            alert('Jumlah harus berupa angka bulat minimal 1.');
+            return;
+        }
+        if (!canSetCartQty(item, qty)) {
+            const p = products.find(x => x.id === item.productId);
+            alert('Jumlah tidak dapat disimpan. Stok ' + (p ? p.name : item.name) + ' tidak mencukupi.');
+            return;
+        }
+
+        item.qty = qty;
+        renderCart();
+    }
 
     function renderCart() {
         const container = document.getElementById('cartItems');
@@ -2747,7 +2800,13 @@ input:focus,select:focus,textarea:focus{
                 </div>
                 <div style="display:flex;align-items:center;gap:8px; flex-shrink:0; margin-left:8px;">
                     <span style="font-weight:600;">Rp ${formatNumber(subtotal)}</span>
-                    <button class="btn btn-danger btn-sm" onclick="removeCart(${idx})"><i class="fas fa-times"></i></button>
+                    <div class="action-dropdown">
+                        <button type="button" class="action-dots-btn" aria-label="Aksi ${c.name}" onclick="toggleActionMenu(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="action-menu">
+                            <button type="button" onclick="editCartQty(${idx})"><i class="fas fa-pen"></i> Edit jumlah</button>
+                            <button type="button" class="danger" onclick="removeCart(${idx})"><i class="fas fa-trash"></i> Hapus produk</button>
+                        </div>
+                    </div>
                 </div>
             </div>`;
         });
@@ -3399,100 +3458,214 @@ input:focus,select:focus,textarea:focus{
         updatePricePlaceholder();
     }
 
-    // ===== FUNGSI addPurchase yang sudah diperbaiki (tidak bergantung normalizeBarcode) =====
     function addPurchase() {
-        if (currentUser.role !== 'owner') return;
-
-        const category = document.getElementById('purchaseCategory').value;
-        const name = document.getElementById('purchaseProduct').value.trim();
-        const qty = parseCleanNumber(document.getElementById('purchaseQty').value);
-        const buyPrice = parseCleanNumber(document.getElementById('purchasePrice').value) || 0;
-        const margin = parseCleanNumber(document.getElementById('purchaseMargin').value) || 0;
-        let sellPrice = parseCleanNumber(document.getElementById('purchaseSellPrice').value) || 0;
-        const discount = parseCleanNumber(document.getElementById('purchaseDiscount').value) || 0;
-        const type = document.getElementById('purchaseType').value;
-
-        if (!name || isNaN(qty) || qty <= 0) {
-            alert('Nama dan jumlah wajib!');
-            return;
-        }
-
-        const selUnit = document.getElementById('purchaseUnit');
-        const customUnit = document.getElementById('purchaseUnitCustom');
-        let finalUnit = selUnit.value === 'lainnya' ? customUnit.value.trim() : selUnit.value;
-        if (!finalUnit) finalUnit = 'pcs';
-
-        // Barcode dari input, tidak perlu normalizeBarcode
-        const barcodeInput = document.getElementById('purchaseBarcode');
-        const barcode = barcodeInput ? barcodeInput.value.trim() : '';
-
-        // Cari produk berdasarkan barcode atau nama
-        const existing = barcode
-            ? products.find(p => (p.barcode || '').trim() === barcode)
-            : products.find(p => p.name.toLowerCase() === name.toLowerCase());
-
-        if (buyPrice > 0 && margin > 0) {
-            sellPrice = buyPrice * (1 + margin / 100);
-            if (discount > 0 && discount <= 100) sellPrice *= (1 - discount / 100);
-            sellPrice = Math.round(sellPrice);
-        }
-
-        if (existing) {
-            if (existing.type === 'processed') {
-                alert('Produk olahan tidak memiliki stok langsung.');
-                return;
+        try {
+            // Pastikan user valid. Jika currentUser belum tersedia, jangan diam-diam gagal.
+            if (typeof currentUser === 'undefined' || currentUser.role !== 'owner') {
+                alert('Hanya Owner yang dapat mencatat pembelian.');
+                return false;
             }
-            const converted = convertUnitQty(qty, finalUnit, existing.unit || finalUnit);
-            if (converted === null) {
-                alert(`Satuan pembelian ${finalUnit} tidak dapat dikonversi ke ${existing.unit || 'pcs'}. Gunakan satuan yang sama atau gram/ons/kg.`);
-                return;
+
+            const get = (id) => document.getElementById(id);
+            const barcodeEl = get('purchaseBarcode');
+            const nameEl = get('purchaseProduct');
+            const qtyEl = get('purchaseQty');
+            const buyPriceEl = get('purchasePrice');
+            const marginEl = get('purchaseMargin');
+            const sellPriceEl = get('purchaseSellPrice');
+            const discountEl = get('purchaseDiscount');
+            const categoryEl = get('purchaseCategory');
+            const typeEl = get('purchaseType');
+            const unitEl = get('purchaseUnit');
+            const customUnitEl = get('purchaseUnitCustom');
+
+            if (!nameEl || !qtyEl || !unitEl || !typeEl) {
+                alert('Form pembelian tidak lengkap. Silakan muat ulang halaman.');
+                return false;
             }
-            existing.stok = Number(existing.stok || 0) + converted;
-            existing.price = sellPrice > 0 ? sellPrice : existing.price;
-            existing.category = category || existing.category;
-            if (barcode) existing.barcode = barcode;
-        } else {
-            const newProduct = {
-                id: Date.now().toString(),
-                name,
-                barcode,
-                category,
-                type,
-                unit: finalUnit,
-                price: sellPrice > 0 ? sellPrice : 0,
-                stok: type === 'processed' ? 0 : qty,
-                recipe: []
-            };
-            products.push(newProduct);
+
+            const name = String(nameEl.value || '').trim();
+            const barcode = normalizeBarcode(barcodeEl ? barcodeEl.value : '');
+            const qty = Number(parseCleanNumber(qtyEl.value));
+            const buyPrice = Number(parseCleanNumber(buyPriceEl ? buyPriceEl.value : '')) || 0;
+            const margin = Number(parseCleanNumber(marginEl ? marginEl.value : '')) || 0;
+            let sellPrice = Number(parseCleanNumber(sellPriceEl ? sellPriceEl.value : '')) || 0;
+            const discount = Number(parseCleanNumber(discountEl ? discountEl.value : '')) || 0;
+            const category = categoryEl ? String(categoryEl.value || '').trim() : '';
+            const type = String(typeEl.value || 'raw').trim();
+
+            if (!name) {
+                alert('Nama barang wajib diisi.');
+                nameEl.focus();
+                return false;
+            }
+
+            if (!Number.isFinite(qty) || qty <= 0) {
+                alert('Jumlah pembelian harus lebih dari 0.');
+                qtyEl.focus();
+                return false;
+            }
+
+            if (!Number.isFinite(buyPrice) || buyPrice < 0) {
+                alert('Harga beli tidak valid.');
+                if (buyPriceEl) buyPriceEl.focus();
+                return false;
+            }
+
+            let finalUnit = unitEl.value === 'lainnya'
+                ? String(customUnitEl ? customUnitEl.value : '').trim()
+                : String(unitEl.value || '').trim();
+
+            if (!finalUnit) {
+                alert('Satuan pembelian wajib dipilih.');
+                unitEl.focus();
+                return false;
+            }
+
+            // Cari produk dengan barcode terlebih dahulu. Ini penting setelah scan.
+            let existing = null;
+            if (barcode && typeof products !== 'undefined') {
+                existing = products.find(p =>
+                    normalizeBarcode(p && p.barcode) === barcode
+                ) || null;
+            }
+
+            // Fallback ke nama bila barcode tidak ada / produk tidak ditemukan.
+            if (!existing && typeof products !== 'undefined') {
+                existing = products.find(p =>
+                    String(p && p.name || '').trim().toLowerCase() === name.toLowerCase()
+                ) || null;
+            }
+
+            // Hitung harga jual bila margin diisi.
+            if (buyPrice > 0 && margin > 0) {
+                sellPrice = buyPrice * (1 + margin / 100);
+                if (discount > 0 && discount <= 100) {
+                    sellPrice *= (1 - discount / 100);
+                }
+                sellPrice = Math.round(sellPrice);
+            }
+
+            // Jika produk hasil scan ditemukan, selalu gunakan identitas produk tersebut.
+            // Jangan biarkan perubahan nama/type/unit pada form membuat transaksi gagal.
+            if (existing) {
+                const productUnit = String(existing.unit || finalUnit || 'pcs').trim();
+                const stockUnit = productUnit || 'pcs';
+
+                if (existing.type !== 'processed') {
+                    const converted = convertUnitQty(qty, finalUnit, stockUnit);
+
+                    if (converted === null || !Number.isFinite(converted)) {
+                        alert(
+                            'Satuan pembelian "' + finalUnit +
+                            '" berbeda dengan satuan stok "' + stockUnit +
+                            '". Pilih satuan yang sama, atau gunakan gram/ons/kg.'
+                        );
+                        unitEl.focus();
+                        return false;
+                    }
+
+                    existing.stok = Number(existing.stok || 0) + converted;
+                }
+
+                if (sellPrice > 0) existing.price = sellPrice;
+                if (category) existing.category = category;
+                if (barcode) existing.barcode = barcode;
+
+                // Pertahankan tipe produk yang sudah terdaftar.
+                // Jangan overwrite menjadi "processed" hanya karena dropdown berubah.
+                existing.type = existing.type || type;
+
+                // Simpan transaksi dengan ID produk agar riwayat tidak ambigu.
+                const purchaseId = 'purchase_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+                purchases.push({
+                    id: purchaseId,
+                    productId: existing.id,
+                    barcode: existing.barcode || barcode || '',
+                    date: new Date().toISOString(),
+                    name: existing.name,
+                    type: existing.type || type,
+                    qty: qty,
+                    unit: finalUnit,
+                    buyPrice: buyPrice,
+                    total: qty * buyPrice
+                });
+            } else {
+                // Barcode belum terdaftar: buat produk baru dari data form.
+                const newId = Date.now().toString();
+                const newProduct = {
+                    id: newId,
+                    name: name,
+                    barcode: barcode,
+                    category: category,
+                    type: type,
+                    unit: finalUnit,
+                    price: sellPrice > 0 ? sellPrice : 0,
+                    stok: type === 'processed' ? 0 : qty,
+                    recipe: []
+                };
+
+                products.push(newProduct);
+
+                purchases.push({
+                    id: 'purchase_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+                    productId: newId,
+                    barcode: barcode,
+                    date: new Date().toISOString(),
+                    name: name,
+                    type: type,
+                    qty: qty,
+                    unit: finalUnit,
+                    buyPrice: buyPrice,
+                    total: qty * buyPrice
+                });
+            }
+
+            // Simpan DB SEBELUM render. Jadi transaksi tidak dianggap gagal
+            // hanya karena salah satu fungsi tampilan mengalami error.
+            DB.set('products', products);
+            DB.set('purchases', purchases);
+
+            // Bersihkan form.
+            [
+                'purchaseBarcode',
+                'purchaseProduct',
+                'purchaseQty',
+                'purchasePrice',
+                'purchaseMargin',
+                'purchaseSellPrice',
+                'purchaseDiscount',
+                'purchaseUnitCustom'
+            ].forEach(id => {
+                const el = get(id);
+                if (el) el.value = '';
+            });
+
+            if (customUnitEl) customUnitEl.style.display = 'none';
+            if (unitEl) unitEl.value = '';
+            if (typeEl) typeEl.value = 'raw';
+
+            // Render tidak boleh membatalkan transaksi yang sudah tersimpan.
+            try {
+                if (typeof updatePricePlaceholder === 'function') updatePricePlaceholder();
+                if (typeof renderAll === 'function') renderAll();
+                if (typeof renderPurchaseHistoryList === 'function') renderPurchaseHistoryList();
+                if (typeof populateProductSelect === 'function') populateProductSelect();
+            } catch (renderError) {
+                console.error('Purchase saved, render error:', renderError);
+            }
+
+            alert('✓ Pembelian berhasil dicatat.\n' + name + ' — ' + qty + ' ' + finalUnit);
+            return true;
+
+        } catch (error) {
+            console.error('addPurchase error:', error);
+            alert(
+                'Gagal mencatat pembelian.\n\n' +
+                'Detail: ' + (error && error.message ? error.message : String(error))
+            );
+            return false;
         }
-
-        purchases.push({
-            id: 'purchase_' + Date.now(),
-            date: new Date().toISOString(),
-            name,
-            type,
-            qty,
-            unit: finalUnit,
-            total: qty * buyPrice
-        });
-
-        DB.set('products', products);
-        DB.set('purchases', purchases);
-
-        // Reset form
-        ['purchaseBarcode', 'purchaseProduct', 'purchaseQty', 'purchasePrice',
-         'purchaseMargin', 'purchaseSellPrice', 'purchaseDiscount',
-         'purchaseUnit', 'purchaseUnitCustom'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.value = '';
-        });
-        document.getElementById('purchaseUnitCustom').style.display = 'none';
-        updatePricePlaceholder();
-
-        renderAll();
-        renderPurchaseHistoryList();
-        populateProductSelect();
-        alert('Pembelian dicatat dan satuan disinkronkan.');
     }
 
     function autoCalculateSellPrice() {
