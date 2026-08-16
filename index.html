@@ -73,22 +73,165 @@
 
     function findProductByBarcode(barcode) {
         const normalized = normalizeBarcode(barcode);
+        if (!normalized) return null;
         return products.find(product => normalizeBarcode(product.barcode) === normalized) || null;
+    }
+
+    // Scanner barcode terpadu untuk Penjualan & Pembelian.
+    // Menggunakan native Median/HDRGBarcodeScanner bila tersedia.
+    function requestMedianBarcodeScan(onBarcode) {
+        const scanner =
+            (window.Median && window.Median.plugins && window.Median.plugins.barcodeScanner) ||
+            (window.median && window.median.plugins && window.median.plugins.barcodeScanner) ||
+            window.HDRGBarcodeScanner;
+
+        if (!scanner || typeof scanner.scan !== 'function') {
+            alert('Scanner barcode tidak tersedia. Pastikan aplikasi dijalankan melalui Median dan plugin barcode scanner sudah aktif.');
+            return;
+        }
+
+        let completed = false;
+
+        const finish = (result) => {
+            if (completed) return;
+
+            let barcode = '';
+            if (typeof result === 'string' || typeof result === 'number') {
+                barcode = String(result);
+            } else if (result && typeof result === 'object') {
+                barcode =
+                    result.barcode ||
+                    result.content ||
+                    result.text ||
+                    result.data ||
+                    result.value ||
+                    '';
+            }
+
+            barcode = normalizeBarcode(barcode);
+            if (!barcode) {
+                completed = true;
+                alert('Barcode tidak terbaca. Silakan coba scan lagi.');
+                return;
+            }
+
+            completed = true;
+            onBarcode(barcode);
+        };
+
+        const fail = (error) => {
+            if (completed) return;
+            completed = true;
+
+            const message = String(
+                error && (error.message || error.error || error) || ''
+            );
+
+            // Cancel dari user bukan error.
+            if (/cancel|dismiss|close|back/i.test(message)) return;
+
+            alert('Pemindaian barcode gagal. Periksa izin kamera dan konfigurasi plugin Median.');
+        };
+
+        try {
+            const result = scanner.scan(finish, fail);
+            if (result && typeof result.then === 'function') {
+                result.then(finish).catch(fail);
+            } else if (
+                typeof result === 'string' ||
+                typeof result === 'number' ||
+                (result && typeof result === 'object')
+            ) {
+                finish(result);
+            }
+        } catch (error) {
+            fail(error);
+        }
+    }
+
+    // Notifikasi ringan agar proses scan tidak terganggu popup alert.
+    function showBarcodeScanNotice(message, type = 'success') {
+        let notice = document.getElementById('barcodeScanNotice');
+
+        if (!notice) {
+            notice = document.createElement('div');
+            notice.id = 'barcodeScanNotice';
+            notice.style.cssText = `
+                position: fixed;
+                left: 50%;
+                bottom: 28px;
+                transform: translateX(-50%) translateY(20px);
+                z-index: 99999;
+                min-width: 280px;
+                max-width: min(92vw, 520px);
+                padding: 12px 16px;
+                border-radius: 12px;
+                box-shadow: 0 8px 30px rgba(0,0,0,.18);
+                color: #fff;
+                font-size: 14px;
+                font-weight: 600;
+                text-align: center;
+                opacity: 0;
+                transition: opacity .18s ease, transform .18s ease;
+                pointer-events: none;
+            `;
+            document.body.appendChild(notice);
+        }
+
+        notice.style.background =
+            type === 'error' ? '#FF3B30' :
+            type === 'warning' ? '#FF9500' :
+            '#34C759';
+
+        notice.textContent = message;
+        notice.style.opacity = '1';
+        notice.style.transform = 'translateX(-50%) translateY(0)';
+
+        clearTimeout(window.__barcodeNoticeTimer);
+        window.__barcodeNoticeTimer = setTimeout(() => {
+            notice.style.opacity = '0';
+            notice.style.transform = 'translateX(-50%) translateY(20px)';
+        }, 1800);
     }
 
     function scanBarcodeForPurchase() {
         requestMedianBarcodeScan((barcode) => {
             const barcodeInput = document.getElementById('purchaseBarcode');
             if (barcodeInput) barcodeInput.value = barcode;
+
             const product = findProductByBarcode(barcode);
+
             if (product) {
+                // Isi seluruh data produk yang sudah dikenal.
                 selectProductSuggestion(product.name);
+
                 if (barcodeInput) barcodeInput.value = barcode;
-                alert('Produk ditemukan: ' + product.name + '. Data pembelian telah diisi.');
-            } else {
+
                 const nameInput = document.getElementById('purchaseProduct');
-                if (nameInput) nameInput.focus();
-                alert('Barcode ' + barcode + ' belum terdaftar. Isi nama dan data produk baru, lalu catat pembelian.');
+                if (nameInput) nameInput.value = product.name;
+
+                const qtyInput = document.getElementById('purchaseQty');
+                if (qtyInput) {
+                    qtyInput.focus();
+                    qtyInput.select();
+                }
+
+                showBarcodeScanNotice(
+                    `✓ ${product.name} ditemukan — data pembelian siap diisi`
+                );
+            } else {
+                // Barcode baru: tetap dipertahankan sehingga bisa
+                // langsung digunakan saat membuat produk baru.
+                const nameInput = document.getElementById('purchaseProduct');
+                if (nameInput) {
+                    nameInput.focus();
+                    nameInput.select();
+                }
+
+                showBarcodeScanNotice(
+                    `Barcode ${barcode} belum terdaftar — isi data produk baru`,
+                    'warning'
+                );
             }
         });
     }
@@ -96,19 +239,93 @@
     function scanBarcodeForSale() {
         requestMedianBarcodeScan((barcode) => {
             const product = findProductByBarcode(barcode);
+
             if (!product) {
-                alert('Produk dengan barcode ' + barcode + ' tidak ditemukan. Daftarkan barcode tersebut terlebih dahulu pada data produk.');
+                showBarcodeScanNotice(
+                    `Barcode ${barcode} belum terdaftar`,
+                    'error'
+                );
                 return;
             }
-            const before = (cart.find(item => item.productId === product.id) || { qty: 0 }).qty;
+
+            const beforeItem =
+                cart.find(item => item.productId === product.id);
+
+            const beforeQty = beforeItem ? beforeItem.qty : 0;
+
+            // Satu kali scan = satu unit.
             addToCartById(product.id, 1);
-            const after = (cart.find(item => item.productId === product.id) || { qty: 0 }).qty;
-            if (after > before) {
+
+            const afterItem =
+                cart.find(item => item.productId === product.id);
+
+            const afterQty = afterItem ? afterItem.qty : 0;
+
+            if (afterQty > beforeQty) {
                 const search = document.getElementById('searchProduct');
-                if (search) search.value = '';
-                alert(product.name + ' ditambahkan ke keranjang. Qty: ' + after);
+                if (search) {
+                    search.value = '';
+                    search.blur();
+                }
+
+                showBarcodeScanNotice(
+                    `✓ ${product.name} ditambahkan — Qty ${afterQty}`
+                );
             }
         });
+    }
+
+    // Memungkinkan scanner hardware/USB yang bekerja seperti keyboard.
+    // Fokus pada field barcode Pembelian akan menangkap Enter dari scanner.
+    function setupHardwareBarcodeInput() {
+        const input = document.getElementById('purchaseBarcode');
+        if (!input || input.dataset.barcodeKeyboardReady === '1') return;
+
+        input.dataset.barcodeKeyboardReady = '1';
+
+        input.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter') return;
+
+            const barcode = normalizeBarcode(input.value);
+            if (!barcode) return;
+
+            event.preventDefault();
+
+            const product = findProductByBarcode(barcode);
+
+            if (product) {
+                selectProductSuggestion(product.name);
+                input.value = barcode;
+
+                const qtyInput = document.getElementById('purchaseQty');
+                if (qtyInput) {
+                    qtyInput.focus();
+                    qtyInput.select();
+                }
+
+                showBarcodeScanNotice(
+                    `✓ ${product.name} ditemukan — data pembelian siap diisi`
+                );
+            } else {
+                const nameInput = document.getElementById('purchaseProduct');
+                if (nameInput) {
+                    nameInput.focus();
+                    nameInput.select();
+                }
+
+                showBarcodeScanNotice(
+                    `Barcode ${barcode} belum terdaftar — isi data produk baru`,
+                    'warning'
+                );
+            }
+        });
+    }
+
+    // Pastikan listener barcode hardware terpasang setelah DOM siap.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupHardwareBarcodeInput);
+    } else {
+        setupHardwareBarcodeInput();
     }
 
 </script>
