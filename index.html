@@ -544,6 +544,7 @@
         requestMedianBarcodeScan(handleScannedPurchaseBarcode);
     };
 
+    // ===== PERBAIKAN: scan barcode di penjualan TIDAK LANGSUNG TAMBAH KERANJANG =====
     window.scanBarcodeForSale = function () {
         requestMedianBarcodeScan(function (barcode) {
             const product = findProductByBarcode(barcode);
@@ -556,36 +557,31 @@
                 return;
             }
 
-            const beforeItem = (typeof cart !== 'undefined')
-                ? cart.find(function (item) { return item.productId === product.id; })
-                : null;
-
-            const beforeQty = beforeItem ? Number(beforeItem.qty) : 0;
-
-            if (typeof addToCartById !== 'function') {
-                showScanToast('Fungsi keranjang belum siap. Muat ulang halaman.', 'error');
-                return;
+            // Pilih produk di dropdown
+            const sel = document.getElementById('productSelect');
+            if (sel) {
+                sel.value = product.id;
             }
 
-            addToCartById(product.id, 1);
-
-            const afterItem = (typeof cart !== 'undefined')
-                ? cart.find(function (item) { return item.productId === product.id; })
-                : null;
-
-            const afterQty = afterItem ? Number(afterItem.qty) : 0;
-
-            if (afterQty > beforeQty) {
-                const search = document.getElementById('searchProduct');
-                if (search) {
-                    search.value = '';
-                    search.blur();
-                }
-
-                showScanToast(
-                    '✓ ' + product.name + ' — Qty ' + afterQty
-                );
+            // Set qty ke 1 dan fokus ke input jumlah
+            const qtyInput = document.getElementById('qtyInput');
+            if (qtyInput) {
+                qtyInput.value = '1';
+                document.getElementById('qtySelect').value = '1';
+                qtyInput.focus();
+                qtyInput.select();
             }
+
+            // Kosongkan search field
+            const search = document.getElementById('searchProduct');
+            if (search) {
+                search.value = '';
+                search.blur();
+            }
+
+            showScanToast(
+                '✓ ' + product.name + ' ditemukan — atur jumlah lalu tambah'
+            );
         });
     };
 
@@ -3403,7 +3399,7 @@ input:focus,select:focus,textarea:focus{
         updatePricePlaceholder();
     }
 
-    // ===== PERBAIKAN UTAMA: fungsi addPurchase yang sudah diperbaiki =====
+    // ===== FUNGSI addPurchase yang sudah diperbaiki (tidak bergantung normalizeBarcode) =====
     function addPurchase() {
         if (currentUser.role !== 'owner') return;
 
@@ -3426,7 +3422,7 @@ input:focus,select:focus,textarea:focus{
         let finalUnit = selUnit.value === 'lainnya' ? customUnit.value.trim() : selUnit.value;
         if (!finalUnit) finalUnit = 'pcs';
 
-        // === PERBAIKAN: Ambil barcode tanpa normalizeBarcode (langsung dari input) ===
+        // Barcode dari input, tidak perlu normalizeBarcode
         const barcodeInput = document.getElementById('purchaseBarcode');
         const barcode = barcodeInput ? barcodeInput.value.trim() : '';
 
