@@ -4,21 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>HDRG Kasir Apps</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
-    /*
-     * Median barcode bridge contract
-     * Configure the native Median plugin to expose window.HDRGBarcodeScanner.scan.
-     * It may either return a Promise/string/object, or call scan(onSuccess, onError).
-     */
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+(function () {
+    'use strict';
+
     function normalizeBarcode(value) {
         return String(value == null ? '' : value).trim();
     }
 
     function barcodeFromNativeResult(result) {
-        if (typeof result === 'string' || typeof result === 'number') return normalizeBarcode(result);
+        if (typeof result === 'string' || typeof result === 'number') {
+            return normalizeBarcode(result);
+        }
         if (!result || typeof result !== 'object') return '';
-        return normalizeBarcode(result.barcode || result.text || result.data || result.value ||
-            (result.result && (result.result.barcode || result.result.text || result.result.data)));
+
+        const nested = result.result || result.data || result.value || result.response || result;
+        return normalizeBarcode(
+            (typeof nested === 'object' && nested
+                ? (nested.barcode || nested.text || nested.rawValue || nested.content || nested.value)
+                : nested) ||
+            result.barcode ||
+            result.text ||
+            result.rawValue ||
+            result.content ||
+            result.value
+        );
     }
 
     function getMedianBarcodeScanner() {
@@ -26,240 +38,299 @@
             window.HDRGBarcodeScanner,
             window.MedianBarcodeScanner,
             window.Median && window.Median.barcodeScanner,
-            window.median && window.median.barcodeScanner
+            window.Median && window.Median.plugins && window.Median.plugins.barcodeScanner,
+            window.median && window.median.barcodeScanner,
+            window.median && window.median.plugins && window.median.plugins.barcodeScanner,
+            window.plugins && window.plugins.barcodeScanner
         ];
-        return candidates.find(scanner => scanner && typeof scanner.scan === 'function') || null;
+
+        return candidates.find(function (scanner) {
+            return scanner && typeof scanner.scan === 'function';
+        }) || null;
     }
 
-    function showBarcodeScannerSetupMessage() {
-        alert('Pemindai barcode native belum tersedia. Konfigurasikan plugin Barcode Scanner di Median agar menyediakan HDRGBarcodeScanner.scan(), lalu build APK baru. Pemindaian kamera browser tidak digunakan.');
+    function showScanToast(message, type) {
+        let el = document.getElementById('barcodeScanToast');
+
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'barcodeScanToast';
+            el.style.cssText =
+                'position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);' +
+                'z-index:2147483647;max-width:90vw;padding:12px 16px;border-radius:12px;' +
+                'font:600 14px/1.35 Arial,sans-serif;color:#fff;text-align:center;' +
+                'box-shadow:0 8px 30px rgba(0,0,0,.22);opacity:0;pointer-events:none;' +
+                'transition:.18s ease;';
+            document.body.appendChild(el);
+        }
+
+        el.style.background =
+            type === 'error' ? '#d93025' :
+            type === 'warning' ? '#f29900' : '#188038';
+
+        el.textContent = message;
+        el.style.opacity = '1';
+        el.style.transform = 'translate(-50%,0)';
+
+        clearTimeout(window.__barcodeToastTimer);
+        window.__barcodeToastTimer = setTimeout(function () {
+            el.style.opacity = '0';
+            el.style.transform = 'translate(-50%,20px)';
+        }, 1800);
+    }
+
+    function closeCameraScanner() {
+        const modal = document.getElementById('barcodeCameraModal');
+        if (!modal) return;
+
+        const video = modal.querySelector('video');
+        if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach(function (track) { track.stop(); });
+            video.srcObject = null;
+        }
+
+        if (window.__barcodeDetectorTimer) {
+            clearTimeout(window.__barcodeDetectorTimer);
+            window.__barcodeDetectorTimer = null;
+        }
+
+        modal.remove();
+    }
+
+    async function openBrowserBarcodeScanner(onBarcode) {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showScanToast('Kamera tidak tersedia di perangkat ini.', 'error');
+            return;
+        }
+
+        if (!('BarcodeDetector' in window)) {
+            alert(
+                'Native Barcode Scanner Median tidak ditemukan dan browser ini tidak mendukung BarcodeDetector.\n\n' +
+                'Jika aplikasi dijalankan sebagai APK Median, aktifkan plugin Barcode Scanner dan expose fungsi HDRGBarcodeScanner.scan().'
+            );
+            return;
+        }
+
+        let formats = [
+            'ean_13', 'ean_8', 'upc_a', 'upc_e',
+            'code_128', 'code_39', 'code_93',
+            'itf', 'codabar', 'qr_code'
+        ];
+
+        let detector;
+        try {
+            const supported = await BarcodeDetector.getSupportedFormats();
+            formats = formats.filter(function (f) { return supported.indexOf(f) >= 0; });
+            detector = new BarcodeDetector({ formats: formats });
+        } catch (e) {
+            try {
+                detector = new BarcodeDetector();
+            } catch (e2) {
+                alert('Scanner barcode tidak didukung browser ini.');
+                return;
+            }
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'barcodeCameraModal';
+        modal.style.cssText =
+            'position:fixed;inset:0;z-index:2147483646;background:#000;display:flex;' +
+            'flex-direction:column;align-items:center;justify-content:center;';
+
+        modal.innerHTML =
+            '<video autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;"></video>' +
+            '<div style="position:absolute;top:20px;left:0;right:0;text-align:center;color:#fff;font:600 16px Arial;">' +
+            'Arahkan barcode ke dalam kamera</div>' +
+            '<div style="position:absolute;width:min(78vw,360px);height:150px;border:3px solid #fff;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.28);"></div>' +
+            '<button type="button" id="closeBarcodeCamera" style="position:absolute;bottom:28px;padding:12px 24px;border:0;border-radius:999px;font:600 15px Arial;">Tutup</button>';
+
+        document.body.appendChild(modal);
+
+        modal.querySelector('#closeBarcodeCamera').addEventListener('click', closeCameraScanner);
+
+        const video = modal.querySelector('video');
+
+        try {
+            video.srcObject = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: 'environment' } },
+                audio: false
+            });
+            await video.play();
+        } catch (error) {
+            closeCameraScanner();
+            alert('Tidak dapat membuka kamera. Berikan izin kamera pada aplikasi/browser.');
+            return;
+        }
+
+        let scanning = true;
+
+        async function detect() {
+            if (!scanning || !document.getElementById('barcodeCameraModal')) return;
+
+            try {
+                const results = await detector.detect(video);
+                if (results && results.length) {
+                    const value = normalizeBarcode(
+                        results[0].rawValue ||
+                        results[0].displayValue ||
+                        results[0].value
+                    );
+
+                    if (value) {
+                        scanning = false;
+                        closeCameraScanner();
+                        onBarcode(value);
+                        return;
+                    }
+                }
+            } catch (e) {
+                // Continue scanning; transient camera frames can fail detection.
+            }
+
+            window.__barcodeDetectorTimer = setTimeout(detect, 120);
+        }
+
+        detect();
     }
 
     function requestMedianBarcodeScan(onBarcode) {
         const scanner = getMedianBarcodeScanner();
-        if (!scanner) {
-            showBarcodeScannerSetupMessage();
-            return;
-        }
 
-        let completed = false;
-        const finish = (result) => {
-            if (completed) return;
-            const barcode = barcodeFromNativeResult(result);
-            if (!barcode) {
+        // 1. Prefer the native Median scanner.
+        if (scanner) {
+            let completed = false;
+
+            function finish(result) {
+                if (completed) return;
+
+                const barcode = barcodeFromNativeResult(result);
+                if (!barcode) {
+                    completed = true;
+                    showScanToast('Barcode tidak terbaca. Coba scan lagi.', 'error');
+                    return;
+                }
+
                 completed = true;
-                alert('Barcode tidak terbaca. Coba pindai lagi.');
+                onBarcode(barcode);
+            }
+
+            function fail(error) {
+                if (completed) return;
+                completed = true;
+
+                const message = String(
+                    error && (error.message || error.error || error) || ''
+                );
+
+                if (/cancel|dismiss|closed|back/i.test(message)) return;
+
+                showScanToast('Scanner gagal. Mencoba scanner kamera...', 'warning');
+                openBrowserBarcodeScanner(onBarcode);
+            }
+
+            try {
+                const result = scanner.scan(finish, fail);
+
+                if (result && typeof result.then === 'function') {
+                    result.then(finish).catch(fail);
+                } else if (
+                    typeof result === 'string' ||
+                    typeof result === 'number' ||
+                    (result && typeof result === 'object')
+                ) {
+                    finish(result);
+                }
+                return;
+            } catch (error) {
+                fail(error);
                 return;
             }
-            completed = true;
-            onBarcode(barcode);
-        };
-        const fail = (error) => {
-            if (completed) return;
-            completed = true;
-            if (error && /cancel/i.test(String(error.message || error))) return;
-            alert('Pemindaian barcode gagal. Periksa izin kamera dan konfigurasi plugin Median.');
-        };
-
-        try {
-            const result = scanner.scan(finish, fail);
-            if (result && typeof result.then === 'function') result.then(finish).catch(fail);
-            else if (typeof result === 'string' || typeof result === 'number' ||
-                     (result && typeof result === 'object')) finish(result);
-        } catch (error) {
-            fail(error);
         }
+
+        // 2. Browser fallback, useful for testing the HTML directly.
+        openBrowserBarcodeScanner(onBarcode);
     }
 
     function findProductByBarcode(barcode) {
         const normalized = normalizeBarcode(barcode);
-        if (!normalized) return null;
-        return products.find(product => normalizeBarcode(product.barcode) === normalized) || null;
+        if (!normalized || typeof products === 'undefined') return null;
+
+        return products.find(function (product) {
+            return normalizeBarcode(product.barcode) === normalized;
+        }) || null;
     }
 
-    // Scanner barcode terpadu untuk Penjualan & Pembelian.
-    // Menggunakan native Median/HDRGBarcodeScanner bila tersedia.
-    function requestMedianBarcodeScan(onBarcode) {
-        const scanner =
-            (window.Median && window.Median.plugins && window.Median.plugins.barcodeScanner) ||
-            (window.median && window.median.plugins && window.median.plugins.barcodeScanner) ||
-            window.HDRGBarcodeScanner;
+    function handleScannedPurchaseBarcode(barcode) {
+        const barcodeInput = document.getElementById('purchaseBarcode');
+        if (barcodeInput) barcodeInput.value = barcode;
 
-        if (!scanner || typeof scanner.scan !== 'function') {
-            alert('Scanner barcode tidak tersedia. Pastikan aplikasi dijalankan melalui Median dan plugin barcode scanner sudah aktif.');
-            return;
-        }
+        const product = findProductByBarcode(barcode);
 
-        let completed = false;
-
-        const finish = (result) => {
-            if (completed) return;
-
-            let barcode = '';
-            if (typeof result === 'string' || typeof result === 'number') {
-                barcode = String(result);
-            } else if (result && typeof result === 'object') {
-                barcode =
-                    result.barcode ||
-                    result.content ||
-                    result.text ||
-                    result.data ||
-                    result.value ||
-                    '';
+        if (product) {
+            if (typeof selectProductSuggestion === 'function') {
+                selectProductSuggestion(product.name);
             }
 
-            barcode = normalizeBarcode(barcode);
-            if (!barcode) {
-                completed = true;
-                alert('Barcode tidak terbaca. Silakan coba scan lagi.');
-                return;
-            }
-
-            completed = true;
-            onBarcode(barcode);
-        };
-
-        const fail = (error) => {
-            if (completed) return;
-            completed = true;
-
-            const message = String(
-                error && (error.message || error.error || error) || ''
-            );
-
-            // Cancel dari user bukan error.
-            if (/cancel|dismiss|close|back/i.test(message)) return;
-
-            alert('Pemindaian barcode gagal. Periksa izin kamera dan konfigurasi plugin Median.');
-        };
-
-        try {
-            const result = scanner.scan(finish, fail);
-            if (result && typeof result.then === 'function') {
-                result.then(finish).catch(fail);
-            } else if (
-                typeof result === 'string' ||
-                typeof result === 'number' ||
-                (result && typeof result === 'object')
-            ) {
-                finish(result);
-            }
-        } catch (error) {
-            fail(error);
-        }
-    }
-
-    // Notifikasi ringan agar proses scan tidak terganggu popup alert.
-    function showBarcodeScanNotice(message, type = 'success') {
-        let notice = document.getElementById('barcodeScanNotice');
-
-        if (!notice) {
-            notice = document.createElement('div');
-            notice.id = 'barcodeScanNotice';
-            notice.style.cssText = `
-                position: fixed;
-                left: 50%;
-                bottom: 28px;
-                transform: translateX(-50%) translateY(20px);
-                z-index: 99999;
-                min-width: 280px;
-                max-width: min(92vw, 520px);
-                padding: 12px 16px;
-                border-radius: 12px;
-                box-shadow: 0 8px 30px rgba(0,0,0,.18);
-                color: #fff;
-                font-size: 14px;
-                font-weight: 600;
-                text-align: center;
-                opacity: 0;
-                transition: opacity .18s ease, transform .18s ease;
-                pointer-events: none;
-            `;
-            document.body.appendChild(notice);
-        }
-
-        notice.style.background =
-            type === 'error' ? '#FF3B30' :
-            type === 'warning' ? '#FF9500' :
-            '#34C759';
-
-        notice.textContent = message;
-        notice.style.opacity = '1';
-        notice.style.transform = 'translateX(-50%) translateY(0)';
-
-        clearTimeout(window.__barcodeNoticeTimer);
-        window.__barcodeNoticeTimer = setTimeout(() => {
-            notice.style.opacity = '0';
-            notice.style.transform = 'translateX(-50%) translateY(20px)';
-        }, 1800);
-    }
-
-    function scanBarcodeForPurchase() {
-        requestMedianBarcodeScan((barcode) => {
-            const barcodeInput = document.getElementById('purchaseBarcode');
             if (barcodeInput) barcodeInput.value = barcode;
 
-            const product = findProductByBarcode(barcode);
+            const nameInput = document.getElementById('purchaseProduct');
+            if (nameInput) nameInput.value = product.name;
 
-            if (product) {
-                // Isi seluruh data produk yang sudah dikenal.
-                selectProductSuggestion(product.name);
-
-                if (barcodeInput) barcodeInput.value = barcode;
-
-                const nameInput = document.getElementById('purchaseProduct');
-                if (nameInput) nameInput.value = product.name;
-
-                const qtyInput = document.getElementById('purchaseQty');
-                if (qtyInput) {
-                    qtyInput.focus();
-                    qtyInput.select();
-                }
-
-                showBarcodeScanNotice(
-                    `✓ ${product.name} ditemukan — data pembelian siap diisi`
-                );
-            } else {
-                // Barcode baru: tetap dipertahankan sehingga bisa
-                // langsung digunakan saat membuat produk baru.
-                const nameInput = document.getElementById('purchaseProduct');
-                if (nameInput) {
-                    nameInput.focus();
-                    nameInput.select();
-                }
-
-                showBarcodeScanNotice(
-                    `Barcode ${barcode} belum terdaftar — isi data produk baru`,
-                    'warning'
-                );
+            const qtyInput = document.getElementById('purchaseQty');
+            if (qtyInput) {
+                qtyInput.focus();
+                qtyInput.select();
             }
-        });
+
+            showScanToast('✓ ' + product.name + ' ditemukan');
+        } else {
+            const nameInput = document.getElementById('purchaseProduct');
+            if (nameInput) {
+                nameInput.focus();
+                nameInput.select();
+            }
+
+            showScanToast(
+                'Barcode ' + barcode + ' belum terdaftar',
+                'warning'
+            );
+        }
     }
 
-    function scanBarcodeForSale() {
-        requestMedianBarcodeScan((barcode) => {
+    window.scanBarcodeForPurchase = function () {
+        requestMedianBarcodeScan(handleScannedPurchaseBarcode);
+    };
+
+    window.scanBarcodeForSale = function () {
+        requestMedianBarcodeScan(function (barcode) {
             const product = findProductByBarcode(barcode);
 
             if (!product) {
-                showBarcodeScanNotice(
-                    `Barcode ${barcode} belum terdaftar`,
+                showScanToast(
+                    'Barcode ' + barcode + ' belum terdaftar',
                     'error'
                 );
                 return;
             }
 
-            const beforeItem =
-                cart.find(item => item.productId === product.id);
+            const beforeItem = (typeof cart !== 'undefined')
+                ? cart.find(function (item) { return item.productId === product.id; })
+                : null;
 
-            const beforeQty = beforeItem ? beforeItem.qty : 0;
+            const beforeQty = beforeItem ? Number(beforeItem.qty) : 0;
 
-            // Satu kali scan = satu unit.
+            if (typeof addToCartById !== 'function') {
+                showScanToast('Fungsi keranjang belum siap. Muat ulang halaman.', 'error');
+                return;
+            }
+
             addToCartById(product.id, 1);
 
-            const afterItem =
-                cart.find(item => item.productId === product.id);
+            const afterItem = (typeof cart !== 'undefined')
+                ? cart.find(function (item) { return item.productId === product.id; })
+                : null;
 
-            const afterQty = afterItem ? afterItem.qty : 0;
+            const afterQty = afterItem ? Number(afterItem.qty) : 0;
 
             if (afterQty > beforeQty) {
                 const search = document.getElementById('searchProduct');
@@ -268,67 +339,56 @@
                     search.blur();
                 }
 
-                showBarcodeScanNotice(
-                    `✓ ${product.name} ditambahkan — Qty ${afterQty}`
+                showScanToast(
+                    '✓ ' + product.name + ' — Qty ' + afterQty
                 );
             }
         });
-    }
+    };
 
-    // Memungkinkan scanner hardware/USB yang bekerja seperti keyboard.
-    // Fokus pada field barcode Pembelian akan menangkap Enter dari scanner.
+    // Barcode scanner USB/Bluetooth yang bertindak seperti keyboard.
     function setupHardwareBarcodeInput() {
         const input = document.getElementById('purchaseBarcode');
         if (!input || input.dataset.barcodeKeyboardReady === '1') return;
 
         input.dataset.barcodeKeyboardReady = '1';
 
-        input.addEventListener('keydown', (event) => {
+        input.addEventListener('keydown', function (event) {
             if (event.key !== 'Enter') return;
 
             const barcode = normalizeBarcode(input.value);
             if (!barcode) return;
 
             event.preventDefault();
-
-            const product = findProductByBarcode(barcode);
-
-            if (product) {
-                selectProductSuggestion(product.name);
-                input.value = barcode;
-
-                const qtyInput = document.getElementById('purchaseQty');
-                if (qtyInput) {
-                    qtyInput.focus();
-                    qtyInput.select();
-                }
-
-                showBarcodeScanNotice(
-                    `✓ ${product.name} ditemukan — data pembelian siap diisi`
-                );
-            } else {
-                const nameInput = document.getElementById('purchaseProduct');
-                if (nameInput) {
-                    nameInput.focus();
-                    nameInput.select();
-                }
-
-                showBarcodeScanNotice(
-                    `Barcode ${barcode} belum terdaftar — isi data produk baru`,
-                    'warning'
-                );
-            }
+            handleScannedPurchaseBarcode(barcode);
         });
     }
 
-    // Pastikan listener barcode hardware terpasang setelah DOM siap.
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupHardwareBarcodeInput);
-    } else {
+    function initBarcodeSystem() {
         setupHardwareBarcodeInput();
     }
 
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBarcodeSystem);
+    } else {
+        initBarcodeSystem();
+    }
+
+    // Re-bind after the app switches/render pages dynamically.
+    const observer = new MutationObserver(function () {
+        setupHardwareBarcodeInput();
+    });
+
+    if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true });
+    } else {
+        document.addEventListener('DOMContentLoaded', function () {
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    }
+})();
 </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
