@@ -81,116 +81,358 @@
 
     function closeCameraScanner() {
         const modal = document.getElementById('barcodeCameraModal');
-        if (!modal) return;
 
-        const video = modal.querySelector('video');
-        if (video && video.srcObject) {
-            video.srcObject.getTracks().forEach(function (track) { track.stop(); });
-            video.srcObject = null;
+        if (window.__zxingReader) {
+            try {
+                if (typeof window.__zxingReader.reset === 'function') {
+                    window.__zxingReader.reset();
+                }
+            } catch (e) {}
+            window.__zxingReader = null;
         }
+
+        if (modal) {
+            const video = modal.querySelector('video');
+
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(function(track) {
+                    try { track.stop(); } catch (e) {}
+                });
+                video.srcObject = null;
+            }
+
+            modal.remove();
+        }
+
+        const style = document.getElementById('barcodeCameraStyle');
+        if (style) style.remove();
 
         if (window.__barcodeDetectorTimer) {
             clearTimeout(window.__barcodeDetectorTimer);
             window.__barcodeDetectorTimer = null;
         }
+    }
 
-        modal.remove();
+    async function loadZXingLibrary() {
+        if (window.ZXingBrowser) return window.ZXingBrowser;
+
+        if (window.__zxingLoading) return window.__zxingLoading;
+
+        window.__zxingLoading = new Promise(function(resolve, reject) {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js';
+            script.onload = function() {
+                if (window.ZXingBrowser) resolve(window.ZXingBrowser);
+                else reject(new Error('ZXing gagal dimuat'));
+            };
+            script.onerror = function() {
+                reject(new Error('Tidak dapat memuat ZXing'));
+            };
+            document.head.appendChild(script);
+        });
+
+        return window.__zxingLoading;
+    }
+
+    function createCameraScannerUI() {
+        const old = document.getElementById('barcodeCameraModal');
+        if (old) closeCameraScanner();
+
+        const modal = document.createElement('div');
+        modal.id = 'barcodeCameraModal';
+        modal.innerHTML = `
+            <div class="barcode-camera-wrap">
+                <video id="barcodeCameraVideo" autoplay playsinline muted></video>
+
+                <div class="barcode-camera-top">
+                    <strong>Scan Produk</strong>
+                    <span>Arahkan barcode ke dalam kotak</span>
+                </div>
+
+                <div class="barcode-camera-frame">
+                    <div class="barcode-corner tl"></div>
+                    <div class="barcode-corner tr"></div>
+                    <div class="barcode-corner bl"></div>
+                    <div class="barcode-corner br"></div>
+                    <div class="barcode-scan-line"></div>
+                </div>
+
+                <div class="barcode-camera-bottom">
+                    <button type="button" id="barcodeCameraClose">Tutup</button>
+                    <div id="barcodeCameraStatus">Menyiapkan kamera...</div>
+                </div>
+            </div>
+        `;
+
+        const style = document.createElement('style');
+        style.id = 'barcodeCameraStyle';
+        style.textContent = `
+            #barcodeCameraModal {
+                position: fixed;
+                inset: 0;
+                z-index: 2147483647;
+                background: #000;
+            }
+            .barcode-camera-wrap {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background: #000;
+            }
+            #barcodeCameraVideo {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                background: #000;
+            }
+            .barcode-camera-top {
+                position: absolute;
+                top: max(22px, env(safe-area-inset-top));
+                left: 0;
+                right: 0;
+                text-align: center;
+                color: #fff;
+                padding: 12px;
+                text-shadow: 0 2px 5px #000;
+                font-family: Arial, sans-serif;
+            }
+            .barcode-camera-top strong {
+                display: block;
+                font-size: 20px;
+                margin-bottom: 5px;
+            }
+            .barcode-camera-top span {
+                font-size: 13px;
+                opacity: .9;
+            }
+            .barcode-camera-frame {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                width: min(82vw, 380px);
+                height: 145px;
+                transform: translate(-50%, -50%);
+                border-radius: 16px;
+                box-shadow: 0 0 0 9999px rgba(0,0,0,.48);
+            }
+            .barcode-corner {
+                position: absolute;
+                width: 30px;
+                height: 30px;
+                border-color: #fff;
+                border-style: solid;
+            }
+            .barcode-corner.tl {
+                left: 0; top: 0;
+                border-width: 4px 0 0 4px;
+                border-radius: 12px 0 0 0;
+            }
+            .barcode-corner.tr {
+                right: 0; top: 0;
+                border-width: 4px 4px 0 0;
+                border-radius: 0 12px 0 0;
+            }
+            .barcode-corner.bl {
+                left: 0; bottom: 0;
+                border-width: 0 0 4px 4px;
+                border-radius: 0 0 0 12px;
+            }
+            .barcode-corner.br {
+                right: 0; bottom: 0;
+                border-width: 0 4px 4px 0;
+                border-radius: 0 0 12px 0;
+            }
+            .barcode-scan-line {
+                position: absolute;
+                left: 8px;
+                right: 8px;
+                top: 50%;
+                height: 2px;
+                background: #fff;
+                box-shadow: 0 0 8px #fff;
+                animation: barcodeScanLine 1.4s ease-in-out infinite;
+            }
+            @keyframes barcodeScanLine {
+                0%,100% { transform: translateY(-55px); opacity: .45; }
+                50% { transform: translateY(55px); opacity: 1; }
+            }
+            .barcode-camera-bottom {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: max(20px, env(safe-area-inset-bottom));
+                text-align: center;
+                color: #fff;
+                font-family: Arial, sans-serif;
+            }
+            #barcodeCameraStatus {
+                font-size: 13px;
+                margin: 0 auto 14px;
+                padding: 0 20px;
+                text-shadow: 0 2px 5px #000;
+            }
+            #barcodeCameraClose {
+                border: 0;
+                border-radius: 999px;
+                padding: 11px 25px;
+                background: rgba(255,255,255,.95);
+                color: #111;
+                font-weight: 700;
+                font-size: 14px;
+            }
+        `;
+
+        document.head.appendChild(style);
+        document.body.appendChild(modal);
+
+        document.getElementById('barcodeCameraClose')
+            .addEventListener('click', closeCameraScanner);
+
+        return {
+            modal: modal,
+            video: document.getElementById('barcodeCameraVideo'),
+            status: document.getElementById('barcodeCameraStatus')
+        };
     }
 
     async function openBrowserBarcodeScanner(onBarcode) {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            showScanToast('Kamera tidak tersedia di perangkat ini.', 'error');
-            return;
-        }
-
-        if (!('BarcodeDetector' in window)) {
             alert(
-                'Native Barcode Scanner Median tidak ditemukan dan browser ini tidak mendukung BarcodeDetector.\n\n' +
-                'Jika aplikasi dijalankan sebagai APK Median, aktifkan plugin Barcode Scanner dan expose fungsi HDRGBarcodeScanner.scan().'
+                'Kamera tidak tersedia. Pastikan halaman dibuka melalui HTTPS ' +
+                'atau aplikasi Median/WebView yang mengizinkan akses kamera.'
             );
             return;
         }
 
-        let formats = [
-            'ean_13', 'ean_8', 'upc_a', 'upc_e',
-            'code_128', 'code_39', 'code_93',
-            'itf', 'codabar', 'qr_code'
-        ];
+        const ui = createCameraScannerUI();
+        let finished = false;
+        let stream = null;
+        let detector = null;
+        let zxingReader = null;
 
-        let detector;
-        try {
-            const supported = await BarcodeDetector.getSupportedFormats();
-            formats = formats.filter(function (f) { return supported.indexOf(f) >= 0; });
-            detector = new BarcodeDetector({ formats: formats });
-        } catch (e) {
-            try {
-                detector = new BarcodeDetector();
-            } catch (e2) {
-                alert('Scanner barcode tidak didukung browser ini.');
-                return;
-            }
+        function finish(barcode) {
+            if (finished) return;
+
+            barcode = normalizeBarcode(barcode);
+            if (!barcode) return;
+
+            finished = true;
+            closeCameraScanner();
+            onBarcode(barcode);
         }
 
-        const modal = document.createElement('div');
-        modal.id = 'barcodeCameraModal';
-        modal.style.cssText =
-            'position:fixed;inset:0;z-index:2147483646;background:#000;display:flex;' +
-            'flex-direction:column;align-items:center;justify-content:center;';
-
-        modal.innerHTML =
-            '<video autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;"></video>' +
-            '<div style="position:absolute;top:20px;left:0;right:0;text-align:center;color:#fff;font:600 16px Arial;">' +
-            'Arahkan barcode ke dalam kamera</div>' +
-            '<div style="position:absolute;width:min(78vw,360px);height:150px;border:3px solid #fff;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.28);"></div>' +
-            '<button type="button" id="closeBarcodeCamera" style="position:absolute;bottom:28px;padding:12px 24px;border:0;border-radius:999px;font:600 15px Arial;">Tutup</button>';
-
-        document.body.appendChild(modal);
-
-        modal.querySelector('#closeBarcodeCamera').addEventListener('click', closeCameraScanner);
-
-        const video = modal.querySelector('video');
+        function setStatus(message) {
+            const el = document.getElementById('barcodeCameraStatus');
+            if (el) el.textContent = message;
+        }
 
         try {
-            video.srcObject = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { ideal: 'environment' } },
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
                 audio: false
             });
-            await video.play();
-        } catch (error) {
-            closeCameraScanner();
-            alert('Tidak dapat membuka kamera. Berikan izin kamera pada aplikasi/browser.');
-            return;
-        }
 
-        let scanning = true;
+            ui.video.srcObject = stream;
+            await ui.video.play();
 
-        async function detect() {
-            if (!scanning || !document.getElementById('barcodeCameraModal')) return;
+            // Modern Android Chrome / compatible WebView.
+            if ('BarcodeDetector' in window) {
+                try {
+                    let supported = await BarcodeDetector.getSupportedFormats();
+                    const wanted = [
+                        'ean_13', 'ean_8',
+                        'upc_a', 'upc_e',
+                        'code_128', 'code_39', 'code_93',
+                        'itf', 'codabar', 'qr_code'
+                    ];
 
-            try {
-                const results = await detector.detect(video);
-                if (results && results.length) {
-                    const value = normalizeBarcode(
-                        results[0].rawValue ||
-                        results[0].displayValue ||
-                        results[0].value
-                    );
+                    const formats = wanted.filter(function(f) {
+                        return supported.indexOf(f) !== -1;
+                    });
 
-                    if (value) {
-                        scanning = false;
-                        closeCameraScanner();
-                        onBarcode(value);
-                        return;
-                    }
+                    detector = formats.length
+                        ? new BarcodeDetector({ formats: formats })
+                        : new BarcodeDetector();
+
+                    setStatus('Arahkan barcode ke dalam kotak');
+
+                    const detectLoop = async function() {
+                        if (finished || !document.getElementById('barcodeCameraModal')) return;
+
+                        try {
+                            const results = await detector.detect(ui.video);
+
+                            if (results && results.length) {
+                                const result = results[0];
+                                finish(
+                                    result.rawValue ||
+                                    result.displayValue ||
+                                    result.value
+                                );
+                                if (finished) return;
+                            }
+                        } catch (e) {
+                            // Continue scanning.
+                        }
+
+                        setTimeout(detectLoop, 100);
+                    };
+
+                    detectLoop();
+                    return;
+                } catch (e) {
+                    // Continue to ZXing fallback.
                 }
-            } catch (e) {
-                // Continue scanning; transient camera frames can fail detection.
             }
 
-            window.__barcodeDetectorTimer = setTimeout(detect, 120);
-        }
+            // Compatible fallback for many Android/iOS browsers and WebViews.
+            setStatus('Menyiapkan scanner kompatibilitas...');
 
-        detect();
+            const ZX = await loadZXingLibrary();
+
+            if (finished) return;
+
+            zxingReader = new ZX.BrowserMultiFormatReader();
+            window.__zxingReader = zxingReader;
+
+            setStatus('Arahkan barcode ke dalam kotak');
+
+            const videoId = 'barcodeCameraVideo';
+
+            zxingReader.decodeFromVideoDevice(
+                undefined,
+                videoId,
+                function(result, error) {
+                    if (result) {
+                        const value =
+                            typeof result.getText === 'function'
+                                ? result.getText()
+                                : result.text;
+
+                        if (value) finish(value);
+                    }
+                }
+            );
+
+        } catch (error) {
+            closeCameraScanner();
+
+            let message = 'Tidak dapat membuka kamera.';
+            if (error && error.name === 'NotAllowedError') {
+                message = 'Izin kamera ditolak. Izinkan kamera untuk aplikasi/browser ini lalu coba lagi.';
+            } else if (error && error.name === 'NotFoundError') {
+                message = 'Kamera tidak ditemukan pada perangkat.';
+            } else if (error && error.name === 'NotReadableError') {
+                message = 'Kamera sedang digunakan aplikasi lain.';
+            }
+
+            alert(message);
+        }
     }
 
     function requestMedianBarcodeScan(onBarcode) {
@@ -224,7 +466,7 @@
 
                 if (/cancel|dismiss|closed|back/i.test(message)) return;
 
-                showScanToast('Scanner gagal. Mencoba scanner kamera...', 'warning');
+                showScanToast('Membuka scanner kamera...', 'warning');
                 openBrowserBarcodeScanner(onBarcode);
             }
 
