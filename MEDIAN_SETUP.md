@@ -13,113 +13,100 @@ In Median App Studio:
 1. Open **Native Plugins**.
 2. Add **QR / Barcode Scanner**.
 3. Keep the scanner enabled for Android.
-4. The web app already contains `median-mobile.js` and is designed to call:
-
-```js
-median.barcode.scan()
-```
+4. The web app is designed to call `median.barcode.scan()`.
 
 Median's scanner returns `{ success, type, code, error }`.
 
-## 3. Add the bridge script in Median
+## 3. Barcode Custom JavaScript
 
-Because the existing project is a single-file HTML app, the safest deployment method is to load the mobile helper as Median Custom JavaScript rather than changing the production HTML bundle.
+In **Website Overrides → Custom JavaScript**, load the contents of `median-mobile.js` from this repository, or copy/paste the file into Median's Custom JavaScript editor.
 
-In **Website Overrides → Custom JavaScript**, load the content of `median-mobile.js` from this repository. If your Median plan supports a custom JS URL, use:
+The helper automatically adds **Scan** buttons beside barcode/SKU fields and a mobile **Scan Produk / Scan Barcode** action. Scanned values are dispatched as normal input/change/Enter events so the existing POS logic can process them.
 
-`https://hdrgcreativepartner-del.github.io/kasirapps/median-mobile.js`
+## 4. IMPORTANT — Bluetooth Print fix
 
-Otherwise copy/paste the file contents into the Custom JavaScript editor.
+The old `printBluetoothNota()` used `navigator.bluetooth`. That is a browser Web Bluetooth implementation and is the reason an Android WebView can show:
 
-The helper is safe in a normal browser and only uses native barcode functionality when `window.median.barcode.scan` is available.
+> Web Bluetooth tidak didukung pada browser ini.
 
-## 4. Barcode behaviour
+**Do not use Web Bluetooth for the Median APK.** Median's JavaScript Bridge is the correct web-to-native boundary, and Median supports custom/private native plugins for external hardware. citehttps://docs.median.co/docs/javascript-bridge
 
-The helper automatically detects visible inputs whose ID/name/placeholder/context contains terms such as:
+The repository now contains:
 
-- barcode
-- bar code
-- kode barang
-- kode produk
-- SKU
-- EAN
-- UPC
+- `median-universal-printer.js` — universal printer abstraction.
+- `median-printer-override.js` — replaces the old Web Bluetooth `BT Print` function with a Median native printer picker.
 
-It adds a **Scan** button beside those fields.
+Add **both** files to Median **Website Overrides → Custom JavaScript**, in this order:
 
-After scanning, the value is inserted into the field and `input`, `change`, and Enter keyboard events are dispatched. This allows the existing HDRG Kasir search/add logic to process the barcode without rewriting the POS data model.
+1. `median-mobile.js`
+2. `median-universal-printer.js`
+3. `median-printer-override.js`
 
-A floating **Scan Produk** / **Scan Barcode** button is also added on mobile screens.
+If your Median setup does not support loading a JS URL, copy/paste their contents into the Custom JavaScript configuration.
 
-## 5. Bluetooth thermal printer
+## 5. Native printer contract
 
-A normal Android WebView cannot directly access generic Bluetooth printers. Median's current documentation states that Bluetooth support in Android WebView is not sufficient for generic printer access; Bluetooth hardware is supported through vendor SDKs or custom native plugins.
-
-The repository therefore exposes this adapter:
+The native Median printer plugin should expose:
 
 ```js
-HDRGMobile.printReceipt(receipt)
-```
-
-When a Median custom printer plugin is installed, it can implement:
-
-```js
-window.median.printer.printReceipt(receipt)
-```
-
-The helper will call that native method automatically. Outside the native plugin it falls back to `window.print()`.
-
-### Recommended printer integration
-
-For a common 58mm/80mm Android thermal printer, ask Median for a **private/custom native Bluetooth printer plugin** for the exact printer brand/model or Android SDK. The native plugin should expose:
-
-```js
-median.printer.printReceipt({
-  width: 58,
-  storeName: 'HDRG Kasir',
-  transactionId: 'TRX-001',
-  items: [
-    { name: 'Kopi Susu', qty: 2, price: 10000, total: 20000 }
-  ],
-  subtotal: 20000,
-  discount: 0,
-  total: 20000,
-  paid: 50000,
-  change: 30000,
-  footer: 'Terima kasih'
+window.median.printer.listPrinters({
+  transports: ['bluetooth', 'ble', 'usb', 'lan', 'wifi', 'internal']
 })
+
+window.median.printer.connect(printer)
+window.median.printer.printReceipt(receipt)
+window.median.printer.disconnect()
 ```
 
-The native implementation should handle Bluetooth discovery/pairing, connection, ESC/POS formatting, printing, and reconnect/error handling.
+The web application sends one normalized receipt format regardless of printer brand or transport. The native layer is responsible for Bluetooth Classic/SPP, BLE, USB OTG, LAN/Wi-Fi, internal POS printers, ESC/POS commands, permissions, reconnects, and device-specific quirks.
 
-## 6. Build Android APK
+This is intentionally **brand-neutral**. The app does not hard-code Xprinter, EPPOS, Zjiang, Goojprt, or another manufacturer.
+
+Median documents that custom/private plugins can integrate external hardware such as Bluetooth devices. citehttps://docs.median.co/docs/native-plugins-overview
+
+## 6. Printer UI behaviour
+
+When the user taps **BT Print**:
+
+1. HDRG Kasir checks for `median.printer`.
+2. If available, it opens a **Pilih Printer** dialog.
+3. The native plugin searches Bluetooth/BLE/USB/LAN/Wi-Fi/internal printers.
+4. The user selects a printer.
+5. HDRG Kasir calls `connect()` and then `printReceipt()`.
+6. If the plugin is missing, the app shows a clear setup message instead of the Web Bluetooth error.
+
+## 7. Build / rebuild APK
+
+**Yes — after these Custom JavaScript and native-plugin changes, the APK must be rebuilt.** Median injects Custom JavaScript into the native app at load time, and the native printer capability must be included in the Android build. Median's build flow generates the Android build from the configured app. citehttps://docs.median.co/docs/custom-js
 
 In Median App Studio:
 
-1. Set the app name to **HDRG Kasir Apps**.
-2. Set the GitHub Pages URL above as the website URL.
-3. Add the **QR / Barcode Scanner** plugin.
-4. Add the Custom JavaScript helper.
-5. Configure Android app icon/splash screen.
-6. Use **Build & Deploy → Build All**.
-7. Install the generated Android build on a real Android phone and test barcode scanning.
+1. Confirm website URL is the latest GitHub Pages deployment.
+2. Enable **QR / Barcode Scanner**.
+3. Configure the **native/custom printer plugin**.
+4. Add the three Custom JavaScript files above.
+5. Configure Android permissions required by the printer plugin (Bluetooth/nearby devices, USB, and/or network as applicable).
+6. Save/publish the configuration.
+7. Run **Build & Deploy → Build All**.
+8. Install the new APK on the Android POS device.
 
-## 7. Test checklist
+## 8. Test checklist
 
-- [ ] Open login page.
-- [ ] Open inventory/product input.
-- [ ] Tap Scan beside barcode field.
-- [ ] Scan a Code 128 / EAN-13 product barcode.
-- [ ] Confirm barcode field is populated.
-- [ ] Confirm existing product-save logic stores the barcode.
-- [ ] Open sales/cashier page.
-- [ ] Tap Scan Produk.
-- [ ] Scan a registered product.
-- [ ] Confirm product is added to cart.
-- [ ] Scan the same product again and confirm quantity increases according to existing POS behaviour.
-- [ ] Test receipt preview/system print.
-- [ ] For Bluetooth printing, test only after the native printer plugin is installed and configured for the exact printer model.
+- [ ] Login works.
+- [ ] Scan barcode when adding/editing a product.
+- [ ] Barcode is saved to the product.
+- [ ] Scan barcode on the sales page.
+- [ ] Product is added to cart.
+- [ ] Scanning the same product again follows the POS quantity behaviour.
+- [ ] Open Nota Penjualan.
+- [ ] Tap **BT Print**.
+- [ ] Printer picker opens instead of a Web Bluetooth browser alert.
+- [ ] Bluetooth printer appears in the native printer list.
+- [ ] Connect succeeds.
+- [ ] Receipt prints.
+- [ ] Test another 58mm/80mm ESC/POS printer without changing the web POS code.
+- [ ] Test reconnect after turning the printer off/on.
 
-## Important
+## Important limitation
 
-The barcode scanner is ready at the web-code level, but the **Bluetooth printer cannot honestly be marked as implemented until a native Median printer plugin exists for the selected printer hardware**. Generic Web Bluetooth is not a reliable solution inside Android WebView.
+The web-side integration is now prepared to be brand/transport-neutral, but **a real Bluetooth print connection still requires a native Median printer plugin**. A JavaScript file alone cannot create a generic Android Bluetooth printer driver inside a WebView. Median explicitly supports custom/private native plugins for external hardware when a standard plugin does not cover the device. citehttps://docs.median.co/docs/native-plugins-overview
