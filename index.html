@@ -4,7 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>HDRG Kasir Apps</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    /*
+     * Median barcode bridge contract
+     * Configure the native Median plugin to expose window.HDRGBarcodeScanner.scan.
+     * It may either return a Promise/string/object, or call scan(onSuccess, onError).
+     */
+    function normalizeBarcode(value) {
+        return String(value == null ? '' : value).trim();
+    }
+
+    function barcodeFromNativeResult(result) {
+        if (typeof result === 'string' || typeof result === 'number') return normalizeBarcode(result);
+        if (!result || typeof result !== 'object') return '';
+        return normalizeBarcode(result.barcode || result.text || result.data || result.value ||
+            (result.result && (result.result.barcode || result.result.text || result.result.data)));
+    }
+
+    function getMedianBarcodeScanner() {
+        const candidates = [
+            window.HDRGBarcodeScanner,
+            window.MedianBarcodeScanner,
+            window.Median && window.Median.barcodeScanner,
+            window.median && window.median.barcodeScanner
+        ];
+        return candidates.find(scanner => scanner && typeof scanner.scan === 'function') || null;
+    }
+
+    function showBarcodeScannerSetupMessage() {
+        alert('Pemindai barcode native belum tersedia. Konfigurasikan plugin Barcode Scanner di Median agar menyediakan HDRGBarcodeScanner.scan(), lalu build APK baru. Pemindaian kamera browser tidak digunakan.');
+    }
+
+    function requestMedianBarcodeScan(onBarcode) {
+        const scanner = getMedianBarcodeScanner();
+        if (!scanner) {
+            showBarcodeScannerSetupMessage();
+            return;
+        }
+
+        let completed = false;
+        const finish = (result) => {
+            if (completed) return;
+            const barcode = barcodeFromNativeResult(result);
+            if (!barcode) {
+                completed = true;
+                alert('Barcode tidak terbaca. Coba pindai lagi.');
+                return;
+            }
+            completed = true;
+            onBarcode(barcode);
+        };
+        const fail = (error) => {
+            if (completed) return;
+            completed = true;
+            if (error && /cancel/i.test(String(error.message || error))) return;
+            alert('Pemindaian barcode gagal. Periksa izin kamera dan konfigurasi plugin Median.');
+        };
+
+        try {
+            const result = scanner.scan(finish, fail);
+            if (result && typeof result.then === 'function') result.then(finish).catch(fail);
+            else if (typeof result === 'string' || typeof result === 'number' ||
+                     (result && typeof result === 'object')) finish(result);
+        } catch (error) {
+            fail(error);
+        }
+    }
+
+    function findProductByBarcode(barcode) {
+        const normalized = normalizeBarcode(barcode);
+        return products.find(product => normalizeBarcode(product.barcode) === normalized) || null;
+    }
+
+    function scanBarcodeForPurchase() {
+        requestMedianBarcodeScan((barcode) => {
+            const barcodeInput = document.getElementById('purchaseBarcode');
+            if (barcodeInput) barcodeInput.value = barcode;
+            const product = findProductByBarcode(barcode);
+            if (product) {
+                selectProductSuggestion(product.name);
+                if (barcodeInput) barcodeInput.value = barcode;
+                alert('Produk ditemukan: ' + product.name + '. Data pembelian telah diisi.');
+            } else {
+                const nameInput = document.getElementById('purchaseProduct');
+                if (nameInput) nameInput.focus();
+                alert('Barcode ' + barcode + ' belum terdaftar. Isi nama dan data produk baru, lalu catat pembelian.');
+            }
+        });
+    }
+
+    function scanBarcodeForSale() {
+        requestMedianBarcodeScan((barcode) => {
+            const product = findProductByBarcode(barcode);
+            if (!product) {
+                alert('Produk dengan barcode ' + barcode + ' tidak ditemukan. Daftarkan barcode tersebut terlebih dahulu pada data produk.');
+                return;
+            }
+            const before = (cart.find(item => item.productId === product.id) || { qty: 0 }).qty;
+            addToCartById(product.id, 1);
+            const after = (cart.find(item => item.productId === product.id) || { qty: 0 }).qty;
+            if (after > before) {
+                const search = document.getElementById('searchProduct');
+                if (search) search.value = '';
+                alert(product.name + ' ditambahkan ke keranjang. Qty: ' + after);
+            }
+        });
+    }
+
+</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -566,6 +673,9 @@ input:focus,select:focus,textarea:focus{
                     <button data-type="finished"><i class="fas fa-box"></i> Produk Jadi</button>
                     <button data-type="processed"><i class="fas fa-utensils"></i> Produk Olahan</button>
                 </div>
+                <div class="flex" style="margin-bottom:10px;">
+                    <button type="button" class="btn btn-outline btn-block" onclick="scanBarcodeForSale()"><i class="fas fa-barcode"></i> Scan Produk</button>
+                </div>
                 <div class="autocomplete-container" style="margin-bottom:10px;">
                     <input type="text" id="searchProduct" placeholder="Cari nama / barcode..." oninput="searchAutocomplete(this.value)" style="width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.9rem; outline:none; background: var(--bg);">
                     <div class="autocomplete-list" id="autocompleteList"></div>
@@ -689,6 +799,10 @@ input:focus,select:focus,textarea:focus{
                     <button class="btn btn-outline btn-sm" onclick="openCategoryModal()"><i class="fas fa-tag" style="color: var(--primary) !important;"></i> Kategori</button>
                 </div>
                 <div style="margin-bottom:8px;">
+                    <div class="flex" style="margin-bottom:8px;">
+                        <input type="text" id="purchaseBarcode" placeholder="Barcode produk" style="flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);">
+                        <button type="button" class="btn btn-outline" onclick="scanBarcodeForPurchase()"><i class="fas fa-barcode"></i> Scan Barcode</button>
+                    </div>
                     <div class="suggest-container" style="position:relative;">
                         <input type="text" id="purchaseProduct" placeholder="Nama barang (Ketik untuk cari)" style="width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.85rem; background: var(--bg);" oninput="suggestProduct(this.value)">
                         <div class="suggest-list" id="productSuggestList" style="display:none; background:white; border:1.5px solid var(--border); border-radius:0 0 var(--radius-sm) var(--radius-sm); max-height:150px; overflow-y:auto; position:absolute; width:100%; z-index:10;"></div>
@@ -2786,7 +2900,10 @@ input:focus,select:focus,textarea:focus{
         let finalUnit = selUnit.value === 'lainnya' ? customUnit.value.trim() : selUnit.value;
         if (!finalUnit) finalUnit = 'pcs';
 
-        const existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
+        const barcode = normalizeBarcode(document.getElementById('purchaseBarcode')?.value);
+        const existing = barcode
+            ? products.find(p => normalizeBarcode(p.barcode) === barcode)
+            : products.find(p => p.name.toLowerCase() === name.toLowerCase());
 
         if (buyPrice > 0 && margin > 0) {
             sellPrice = buyPrice * (1 + margin / 100);
@@ -2804,13 +2921,14 @@ input:focus,select:focus,textarea:focus{
             existing.stok = Number(existing.stok || 0) + converted;
             existing.price = sellPrice > 0 ? sellPrice : existing.price;
             existing.category = category || existing.category;
+            existing.barcode = barcode || existing.barcode || '';
         } else {
-            products.push({ id: Date.now().toString(), name, barcode:'', category, type, unit:finalUnit, price:sellPrice>0?sellPrice:0, stok:type==='processed'?0:qty, recipe:[] });
+            products.push({ id: Date.now().toString(), name, barcode, category, type, unit:finalUnit, price:sellPrice>0?sellPrice:0, stok:type==='processed'?0:qty, recipe:[] });
         }
 
         purchases.push({ id: 'purchase_' + Date.now(), date:new Date().toISOString(), name, type, qty, unit:finalUnit, total:qty*buyPrice });
         DB.set('products', products); DB.set('purchases', purchases);
-        ['purchaseProduct','purchaseQty','purchasePrice','purchaseMargin','purchaseSellPrice','purchaseDiscount','purchaseUnit','purchaseUnitCustom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+        ['purchaseBarcode','purchaseProduct','purchaseQty','purchasePrice','purchaseMargin','purchaseSellPrice','purchaseDiscount','purchaseUnit','purchaseUnitCustom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
         document.getElementById('purchaseUnitCustom').style.display='none';
         updatePricePlaceholder();
         renderAll(); renderPurchaseHistoryList(); populateProductSelect();
