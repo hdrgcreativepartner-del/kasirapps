@@ -518,6 +518,34 @@
             const nameInput = document.getElementById('purchaseProduct');
             if (nameInput) nameInput.value = product.name;
 
+            // Sinkronkan seluruh detail produk hasil scan ke form pembelian.
+            const categoryInput = document.getElementById('purchaseCategory');
+            if (categoryInput && product.category) categoryInput.value = product.category;
+
+            const typeInput = document.getElementById('purchaseType');
+            if (typeInput && product.type) typeInput.value = product.type;
+
+            const unitInput = document.getElementById('purchaseUnit');
+            const customUnitInput = document.getElementById('purchaseUnitCustom');
+            if (unitInput) {
+                const productUnit = String(product.unit || 'pcs').trim().toLowerCase();
+                const optionExists = Array.from(unitInput.options).some(o => o.value === productUnit);
+                if (optionExists) {
+                    unitInput.value = productUnit;
+                    if (customUnitInput) {
+                        customUnitInput.value = '';
+                        customUnitInput.style.display = 'none';
+                    }
+                } else {
+                    unitInput.value = 'lainnya';
+                    if (customUnitInput) {
+                        customUnitInput.value = product.unit || 'pcs';
+                        customUnitInput.style.display = 'block';
+                    }
+                }
+                if (typeof updatePricePlaceholder === 'function') updatePricePlaceholder();
+            }
+
             const qtyInput = document.getElementById('purchaseQty');
             if (qtyInput) {
                 qtyInput.focus();
@@ -3403,55 +3431,189 @@ input:focus,select:focus,textarea:focus{
     }
 
     function addPurchase() {
-        if (currentUser.role !== 'owner') return;
-        const category = document.getElementById('purchaseCategory').value;
-        const name = document.getElementById('purchaseProduct').value.trim();
-        const qty = parseCleanNumber(document.getElementById('purchaseQty').value);
-        const buyPrice = parseCleanNumber(document.getElementById('purchasePrice').value) || 0;
-        const margin = parseCleanNumber(document.getElementById('purchaseMargin').value) || 0;
-        let sellPrice = parseCleanNumber(document.getElementById('purchaseSellPrice').value) || 0;
-        const discount = parseCleanNumber(document.getElementById('purchaseDiscount').value) || 0;
-        const type = document.getElementById('purchaseType').value;
-        if (!name || isNaN(qty) || qty <= 0) { alert('Nama dan jumlah wajib!'); return; }
-
-        const selUnit = document.getElementById('purchaseUnit');
-        const customUnit = document.getElementById('purchaseUnitCustom');
-        let finalUnit = selUnit.value === 'lainnya' ? customUnit.value.trim() : selUnit.value;
-        if (!finalUnit) finalUnit = 'pcs';
-
-        const barcode = normalizeBarcode(document.getElementById('purchaseBarcode')?.value);
-        const existing = barcode
-            ? products.find(p => normalizeBarcode(p.barcode) === barcode)
-            : products.find(p => p.name.toLowerCase() === name.toLowerCase());
-
-        if (buyPrice > 0 && margin > 0) {
-            sellPrice = buyPrice * (1 + margin / 100);
-            if (discount > 0 && discount <= 100) sellPrice *= (1 - discount / 100);
-            sellPrice = Math.round(sellPrice);
-        }
-
-        if (existing) {
-            if (existing.type === 'processed') { alert('Produk olahan tidak memiliki stok langsung.'); return; }
-            const converted = convertUnitQty(qty, finalUnit, existing.unit || finalUnit);
-            if (converted === null) {
-                alert(`Satuan pembelian ${finalUnit} tidak dapat dikonversi otomatis ke ${existing.unit || 'pcs'}. Gunakan satuan yang sama atau gram/ons/kg.`);
+        try {
+            if (!currentUser || currentUser.role !== 'owner') {
+                alert('Hanya Owner yang dapat mencatat pembelian.');
                 return;
             }
-            existing.stok = Number(existing.stok || 0) + converted;
-            existing.price = sellPrice > 0 ? sellPrice : existing.price;
-            existing.category = category || existing.category;
-            existing.barcode = barcode || existing.barcode || '';
-        } else {
-            products.push({ id: Date.now().toString(), name, barcode, category, type, unit:finalUnit, price:sellPrice>0?sellPrice:0, stok:type==='processed'?0:qty, recipe:[] });
-        }
 
-        purchases.push({ id: 'purchase_' + Date.now(), date:new Date().toISOString(), name, type, qty, unit:finalUnit, total:qty*buyPrice });
-        DB.set('products', products); DB.set('purchases', purchases);
-        ['purchaseBarcode','purchaseProduct','purchaseQty','purchasePrice','purchaseMargin','purchaseSellPrice','purchaseDiscount','purchaseUnit','purchaseUnitCustom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-        document.getElementById('purchaseUnitCustom').style.display='none';
-        updatePricePlaceholder();
-        renderAll(); renderPurchaseHistoryList(); populateProductSelect();
-        alert('Pembelian dicatat dan satuan disinkronkan.');
+            const categoryEl = document.getElementById('purchaseCategory');
+            const nameEl = document.getElementById('purchaseProduct');
+            const qtyEl = document.getElementById('purchaseQty');
+            const buyPriceEl = document.getElementById('purchasePrice');
+            const marginEl = document.getElementById('purchaseMargin');
+            const sellPriceEl = document.getElementById('purchaseSellPrice');
+            const discountEl = document.getElementById('purchaseDiscount');
+            const typeEl = document.getElementById('purchaseType');
+            const barcodeEl = document.getElementById('purchaseBarcode');
+            const unitEl = document.getElementById('purchaseUnit');
+            const customUnitEl = document.getElementById('purchaseUnitCustom');
+
+            if (!nameEl || !qtyEl || !buyPriceEl || !typeEl || !unitEl) {
+                alert('Form pembelian tidak lengkap. Silakan muat ulang halaman.');
+                return;
+            }
+
+            const category = categoryEl ? categoryEl.value : '';
+            const name = nameEl.value.trim();
+            const barcode = normalizeBarcode(barcodeEl ? barcodeEl.value : '');
+            const qty = Number(parseCleanNumber(qtyEl.value));
+            const buyPrice = Number(parseCleanNumber(buyPriceEl.value));
+            const margin = Number(marginEl ? parseCleanNumber(marginEl.value) : 0);
+            let sellPrice = Number(sellPriceEl ? parseCleanNumber(sellPriceEl.value) : 0);
+            const discount = Number(discountEl ? parseCleanNumber(discountEl.value) : 0);
+            const type = typeEl.value || 'raw';
+
+            if (!name) {
+                alert('Nama produk wajib diisi.');
+                nameEl.focus();
+                return;
+            }
+            if (!Number.isFinite(qty) || qty <= 0) {
+                alert('Jumlah pembelian wajib diisi dan harus lebih dari 0.');
+                qtyEl.focus();
+                return;
+            }
+            if (!Number.isFinite(buyPrice) || buyPrice < 0) {
+                alert('Harga beli tidak valid.');
+                buyPriceEl.focus();
+                return;
+            }
+            if (!Number.isFinite(margin) || margin < 0) {
+                alert('Persentase untung tidak valid.');
+                if (marginEl) marginEl.focus();
+                return;
+            }
+            if (!Number.isFinite(discount) || discount < 0 || discount > 100) {
+                alert('Diskon harus antara 0 sampai 100%.');
+                if (discountEl) discountEl.focus();
+                return;
+            }
+
+            let finalUnit = '';
+            if (unitEl.value === 'lainnya') {
+                finalUnit = customUnitEl ? customUnitEl.value.trim() : '';
+            } else {
+                finalUnit = unitEl.value;
+            }
+            if (!finalUnit) finalUnit = 'pcs';
+
+            // Prioritaskan barcode hasil scan. Jika barcode cocok dengan produk,
+            // gunakan produk tersebut agar stok tidak masuk ke produk yang salah.
+            let existing = null;
+            if (barcode) {
+                existing = products.find(p => normalizeBarcode(p.barcode) === barcode) || null;
+            }
+
+            // Jika barcode kosong / tidak ditemukan, cari berdasarkan nama.
+            if (!existing) {
+                existing = products.find(p =>
+                    String(p.name || '').trim().toLowerCase() === name.toLowerCase()
+                ) || null;
+            }
+
+            // Jika barcode diisi tetapi tidak terdaftar, jangan membuat produk baru
+            // secara diam-diam karena dapat menghasilkan stok ganda/salah.
+            if (barcode && !products.some(p => normalizeBarcode(p.barcode) === barcode)) {
+                const nameMatch = products.find(p =>
+                    String(p.name || '').trim().toLowerCase() === name.toLowerCase()
+                );
+                if (!nameMatch) {
+                    alert('Barcode belum terdaftar. Tambahkan barcode ke produk terlebih dahulu melalui Data Produk.');
+                    return;
+                }
+                existing = nameMatch;
+            }
+
+            // Jika produk ditemukan melalui barcode tetapi nama form berbeda,
+            // sinkronkan nama dengan data produk hasil scan.
+            const finalName = existing ? existing.name : name;
+            const finalType = existing ? (existing.type || type) : type;
+
+            if (existing && existing.type === 'processed') {
+                alert('Produk olahan tidak memiliki stok langsung.');
+                return;
+            }
+
+            // Satuan mengikuti produk yang ditemukan. Ini mencegah error ketika
+            // scanner mengisi produk tetapi satuan form masih kosong/berbeda.
+            if (existing) {
+                finalUnit = existing.unit || finalUnit;
+            }
+
+            if (buyPrice > 0 && margin > 0) {
+                sellPrice = buyPrice * (1 + margin / 100);
+                if (discount > 0) sellPrice *= (1 - discount / 100);
+                sellPrice = Math.round(sellPrice);
+            }
+
+            if (existing) {
+                const productUnit = existing.unit || finalUnit;
+                const converted = convertUnitQty(qty, finalUnit, productUnit);
+
+                if (converted === null) {
+                    alert(`Satuan pembelian ${finalUnit} tidak dapat dikonversi ke ${productUnit}. Gunakan satuan yang sama atau gram/ons/kg.`);
+                    return;
+                }
+
+                existing.stok = Number(existing.stok || 0) + converted;
+                if (sellPrice > 0) existing.price = sellPrice;
+                if (category) existing.category = category;
+                if (barcode) existing.barcode = barcode;
+            } else {
+                products.push({
+                    id: 'product_' + Date.now(),
+                    name: finalName,
+                    barcode: barcode,
+                    category: category,
+                    type: finalType,
+                    unit: finalUnit,
+                    price: sellPrice > 0 ? sellPrice : 0,
+                    stok: finalType === 'processed' ? 0 : qty,
+                    recipe: []
+                });
+            }
+
+            purchases.push({
+                id: 'purchase_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+                date: new Date().toISOString(),
+                name: finalName,
+                barcode: barcode,
+                type: finalType,
+                qty: qty,
+                unit: finalUnit,
+                buyPrice: buyPrice,
+                total: qty * buyPrice
+            });
+
+            DB.set('products', products);
+            DB.set('purchases', purchases);
+
+            [
+                'purchaseBarcode', 'purchaseProduct', 'purchaseQty', 'purchasePrice',
+                'purchaseMargin', 'purchaseSellPrice', 'purchaseDiscount'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+
+            if (unitEl) unitEl.value = '';
+            if (customUnitEl) {
+                customUnitEl.value = '';
+                customUnitEl.style.display = 'none';
+            }
+
+            updatePricePlaceholder();
+            renderAll();
+            renderPurchaseHistoryList();
+            populateProductSelect();
+
+            showScanToast('✓ Pembelian berhasil dicatat', 'success');
+            alert(`Pembelian ${finalName} berhasil dicatat. Stok +${qty} ${finalUnit}.`);
+        } catch (error) {
+            console.error('addPurchase error:', error);
+            alert('Pembelian gagal dicatat karena terjadi error. Silakan cek Console untuk detail error.');
+        }
     }
 
     function autoCalculateSellPrice() {
